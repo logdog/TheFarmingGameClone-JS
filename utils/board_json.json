@@ -1,0 +1,27 @@
+{
+    "schema": {
+        "fields": [
+            {
+                "name": "index",
+                "type": "integer"
+            },
+            {
+                "name": "Date",
+                "type": "string"
+            },
+            {
+                "name": "Harvest",
+                "type": "string"
+            },
+            {
+                "name": "Text",
+                "type": "string"
+            }
+        ],
+        "primaryKey": [
+            "index"
+        ],
+        "pandas_version": "1.4.0"
+    },
+    "data": 
+}

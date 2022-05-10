@@ -1,0 +1,247 @@
+[
+    {
+        "Date": "CHRISTMAS VACTACTION",
+        "Harvest": null,
+        "Text": "COLLECT $1000 Christmas bonus. Collect years wage of $5000 as you pass."
+    },
+    {
+        "Date": "Jan 1",
+        "Harvest": null,
+        "Text": "Pay 10% interest on Bank Notes on hand."
+    },
+    {
+        "Date": "Jan 2",
+        "Harvest": null,
+        "Text": "Hibernate. Draw OTB"
+    },
+    {
+        "Date": "Jan 3",
+        "Harvest": null,
+        "Text": "Bitter cold spell. PAY $500 if you owns cows."
+    },
+    {
+        "Date": "Jan 4",
+        "Harvest": null,
+        "Text": "Beautiful Days! Double all your Hay Harvests this year."
+    },
+    {
+        "Date": "Feb 1",
+        "Harvest": null,
+        "Text": "Warm snap, you're in the field 2 weeks early. COLLECT $1000"
+    },
+    {
+        "Date": "Feb 2",
+        "Harvest": null,
+        "Text": "Stuck in a muddy corral. Draw Farmer's Fate"
+    },
+    {
+        "Date": "Feb 3",
+        "Harvest": null,
+        "Text": "Ground thaws. Start plowing early. Go directly to Spring Planting."
+    },
+    {
+        "Date": "Feb 4",
+        "Harvest": null,
+        "Text": "Rainy day. Draw OTB"
+    },
+    {
+        "Date": "Mar 1",
+        "Harvest": null,
+        "Text": "Becomes obvious your wheat has winter killed. PAY $2000 to replant."
+    },
+    {
+        "Date": "Mar 2",
+        "Harvest": null,
+        "Text": "Start plowing late. Pay $500"
+    },
+    {
+        "Date": "Mar 3",
+        "Harvest": null,
+        "Text": "Hurt your back. Go back to second week of January."
+    },
+    {
+        "Date": "Mar 4",
+        "Harvest": null,
+        "Text": "Frost forces you to heat fruit. PAY $2000 if you own fruit."
+    },
+    {
+        "Date": "Apr 1",
+        "Harvest": null,
+        "Text": "Done plowing. Take a day off. Draw OTB"
+    },
+    {
+        "Date": "SPRING PLANTING",
+        "Harvest": null,
+        "Text": "Plant corn on time. Double Corn yield this year."
+    },
+    {
+        "Date": "Apr 3",
+        "Harvest": null,
+        "Text": "More rain. Field work shut down. Pay $500"
+    },
+    {
+        "Date": "Apr 4",
+        "Harvest": null,
+        "Text": "Equipment breakdown. Pay $1000"
+    },
+    {
+        "Date": "May 1",
+        "Harvest": null,
+        "Text": "The whole Valley is grean. Collect $500"
+    },
+    {
+        "Date": "May 2",
+        "Harvest": null,
+        "Text": "Windstorm makes you replant corn. Pay $500"
+    },
+    {
+        "Date": "May 3",
+        "Harvest": "1st Hay Cutting",
+        "Text": "Cut your hay just right. Collect $1000 bonus."
+    },
+    {
+        "Date": "May 4",
+        "Harvest": "1st Hay Cutting",
+        "Text": "Memorial Day weekend. Draw OTB"
+    },
+    {
+        "Date": "June 1",
+        "Harvest": "1st Hay Cutting",
+        "Text": "Rain storm ruins unbaled hay. Cut your harvest check in half."
+    },
+    {
+        "Date": "June 2",
+        "Harvest": "1st Hay Cutting",
+        "Text": "Good growing weather. Collect $500 bonus"
+    },
+    {
+        "Date": "June 3",
+        "Harvest": "Cherry Harvest",
+        "Text": "Rain splits your cherries. Cut your harvest check in half."
+    },
+    {
+        "Date": "June 4",
+        "Harvest": "Cherry Harvest",
+        "Text": "Dust storm. Draw Farmer's fate."
+    },
+    {
+        "Date": "INDEPENDENCE DAY BASH",
+        "Harvest": "Cherry Harvest",
+        "Text": "Party!"
+    },
+    {
+        "Date": "July 1",
+        "Harvest": "2nd Hay Cutting",
+        "Text": "Good weather for your second cutting of Hay. Double Hay harvest check."
+    },
+    {
+        "Date": "July 2",
+        "Harvest": "2nd Hay Cutting",
+        "Text": "Hot! Wish you were in the mountains. Draw OTB"
+    },
+    {
+        "Date": "July 3",
+        "Harvest": "2nd Hay Cutting",
+        "Text": "It's a cooker! 114 deggrees in the shape. Wipe your brow and go to Harvest Moon after getting Hay check."
+    },
+    {
+        "Date": "July 4",
+        "Harvest": "Wheat Harvest",
+        "Text": "85 degrees, wheat heads filling out beautifully. Add $50 per acre to your harvest check."
+    },
+    {
+        "Date": "Aug 1",
+        "Harvest": "Wheat Harvest",
+        "Text": "You're right on time and farming like a pro. Go to the fourth week of February. Collect your years wage of $5000"
+    },
+    {
+        "Date": "Aug 2",
+        "Harvest": "Wheat Harvest",
+        "Text": "Storm clouds brewing. Collect $1000, if you have a Harvester."
+    },
+    {
+        "Date": "Aug 3",
+        "Harvest": "Wheat Harvest",
+        "Text": "Finish wheat harvest with no break downs. Collect $500"
+    },
+    {
+        "Date": "Aug 4",
+        "Harvest": "Wheat Harvest",
+        "Text": "Rain sprouts unharvested wheat. Cut price $50 per acre on harvest check."
+    },
+    {
+        "Date": "Sep 1",
+        "Harvest": "3rd Hay Cutting",
+        "Text": "Tractor owners: bale Hay, then go to third week of November. Collect your $1000 there, then harvest your Fruit."
+    },
+    {
+        "Date": "Sep 2",
+        "Harvest": "3rd Hay Cutting",
+        "Text": "Sunny skies at the County Fair. Draw OTB"
+    },
+    {
+        "Date": "HARVEST MOON",
+        "Harvest": "Livestock Sales",
+        "Text": "smiles at you. Collect $500"
+    },
+    {
+        "Date": "Sep 3",
+        "Harvest": "Livestock Sales",
+        "Text": "Market collapses. Cut livestock check in half."
+    },
+    {
+        "Date": "Sep 4",
+        "Harvest": "Livestock Sales",
+        "Text": "Codling Moth damage to apples lowers fruit grade. Pay $2000 if you have fruit."
+    },
+    {
+        "Date": "Oct 1",
+        "Harvest": "Livestock Sales",
+        "Text": "Indian Summer. Collect $500"
+    },
+    {
+        "Date": "Oct 2",
+        "Harvest": "4th Hay Cutting",
+        "Text": "Good Pheasant Hunting. Draw Farmers Fate"
+    },
+    {
+        "Date": "Oct 3",
+        "Harvest": "4th Hay Cutting",
+        "Text": "Park your baler for the Winter. Draw OTB"
+    },
+    {
+        "Date": "Oct 4",
+        "Harvest": "Apple Harvest",
+        "Text": "Annual Deer Hunt. Draw Farmers Fate"
+    },
+    {
+        "Date": "Nov 1",
+        "Harvest": "Apple Harvest",
+        "Text": "Irrigation Season over. Draw OTB"
+    },
+    {
+        "Date": "Nov 2",
+        "Harvest": "Apple Harvest",
+        "Text": "Good weather, harvest winding up. Collect $500"
+    },
+    {
+        "Date": "Nov 3",
+        "Harvest": "Apple Harvest",
+        "Text": "Good weather holding. Collect $1000"
+    },
+    {
+        "Date": "Nov 4",
+        "Harvest": "Corn Harvest",
+        "Text": "Early freeze kills fruit buds. Pay $1000 if you have Fruit."
+    },
+    {
+        "Date": "Dec 1",
+        "Harvest": "Corn Harvest",
+        "Text": "Cold and dry, perfect Field Corn harvesting. Collect $500"
+    },
+    {
+        "Date": "Dec 2",
+        "Harvest": "Corn Harvest",
+        "Text": "First snow. Draw Farmer's Fate."
+    }
+]
