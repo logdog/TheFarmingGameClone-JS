@@ -89,7 +89,7 @@ h1 {
 /* Game play begins Here */
 #game-wrapper {
     display: flex;
-    justify-content: center;
+    justify-content: left;
 }
 
 
@@ -97,7 +97,7 @@ h1 {
     display: block;
     flex-direction: column;
     text-align: center;
-    width: 90vw;
+    width: 60vw;
     height: 90vh;
     border: 1vw solid black;
 }
@@ -108,6 +108,7 @@ h1 {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .cell {
@@ -115,6 +116,7 @@ h1 {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 #row-1 {
@@ -171,46 +173,42 @@ h1 {
 
 
 /* Coloring for Harvest */
-.First-Hay-Cutting {
+.First-Hay-Cutting > :first-child {
     background-color: lightgreen;
 }
 
-.Second-Hay-Cutting {
+.Second-Hay-Cutting > :first-child{
     background-color: lightgreen;
 }
 
-.Third-Hay-Cutting {
+.Third-Hay-Cutting > :first-child{
     background-color: lightgreen;
 }
 
-.Fourth-Hay-Cutting {
+.Fourth-Hay-Cutting > :first-child{
     background-color: lightgreen;
 }
 
-.Cherry-Harvest {
+.Cherry-Harvest > :first-child{
     background-color: red;
 }
 
-.Apple-Harvest {
-    background-color: red;
+.Apple-Harvest > :first-child{
+    background-color: crimson;
 }
 
-.Wheat-Harvest {
-    background-color: yellow;
+.Wheat-Harvest > :first-child{
+    background-color: gold;
     /* border-bottom: 1vw solid yellow; */
 }
 
-.Corn-Harvest {
+.Corn-Harvest > :first-child{
     background-color: yellow;
 }
 
-.Livestock-Sales {
-    background-color: rgba(152, 100, 43, 0.846);
+.Livestock-Sales > :first-child{
+    background-color: rgba(211, 139, 61, 0.846);
 }
-
-
-
-
 
 
 #row-2 > #column-right {
@@ -219,7 +217,9 @@ h1 {
 }
 
 canvas {
-    background-image: url('https://i.ebayimg.com/images/g/vbAAAOSwKgthufU-/s-l1600.jpg');
+    background-image: url('board.jpg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
 }
 
 .date {
@@ -228,26 +228,49 @@ canvas {
 }
 
 .description {
-    font-size: 0.5vw;
+    font-size: 0.45vw;
 }
 
 .players-on-me {
     display: flex;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
 }
 
 .player {
     background-color: pink;
     border-radius: 50%;
-    width: 0.7vw;
-    height: 0.7vw;
+    border: 1px solid black;
+    width: 1vw;
+    height: 1vw;
 }
 
-.player.blue {
-    background-color: blue;
+.player.Blue {
+    background-color: rgba(0,0,255,0.5);
 }
 
-.player.yellow {
-    background-color: yellow;
+.player.Green {
+    background-color: rgba(0,255,0,0.5);
+}
+
+.player.Yellow {
+    background-color: rgba(255,255,0,0.5);
+}
+
+.player.Brown {
+    background-color: rgba(121, 76, 28, 0.5);
+}
+
+.player.White {
+    background-color: rgba(200,200,200,0.5);
+}
+
+.player.Black {
+    background-color: rgba(20,20,20,0.5);
 }

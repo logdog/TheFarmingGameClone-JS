@@ -4,9 +4,9 @@ function createCell(cell) {
     text = cell["Text"];
     harvest = cell["Harvest"];
     return `<div class="cell ${harvest}" id="cell-${id}">
-    <span class="date">${date}</span>
-    <span class="description">${text}</span>
-    <div class="players-on-me"></div>
+        <span class="date">${date}</span>
+        <span class="description">${text}</span>
+        <div class="players-on-me"></div>
     </div>`;
 }
     
@@ -44,7 +44,7 @@ function boardTemplate() {
         master_str += createCell(data[id]);
     }
     master_str += endDiv();
-    master_str += '<canvas></canvas><div id="column-right" class="side-row">'
+    master_str += '<canvas id="canvas"></canvas><div id="column-right" class="side-row">'
 
     for (let id=15; id < 25; id++) {
         master_str += createCell(data[id]);
@@ -218,7 +218,7 @@ data = [
     },
     {
         "index": 25,
-        "Date": "INDEPENDENCE DAY BASH",
+        "Date": "JULY 4TH BASH",
         "Harvest": "Cherry-Harvest",
         "Text": "Party!"
     },
