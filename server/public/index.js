@@ -5,16 +5,14 @@ $(document).ready(function() {
 });
 
 
-
-
-const whoAmI = 0;
-
 const state = {
+    turn: 0,
     players: [
         {
             "Name": "Wapato Willie",
             "Color": "Yellow",
             "Position": 0,
+            "NetWorth": 40000,
             "Cash": 5000,
             "Debt": 5000,
             "Hay": {
@@ -34,6 +32,7 @@ const state = {
                 "Rattlesnake": 0,
                 "Toppenish": 0,
                 "Cascades": 0,
+                "Total": 20,
             },
             "Tractors": 0,
             "Harvesters": 0,
@@ -44,6 +43,7 @@ const state = {
             "Name": "Toppenish Tom",
             "Color": "Green",
             "Position": 0,
+            "NetWorth": 40000,
             "Cash": 2500,
             "Debt": 12000,
             "Hay": {
@@ -63,6 +63,7 @@ const state = {
                 "Rattlesnake": 30,
                 "Toppenish": 50,
                 "Cascades": 0,
+                "Total": 90,
             },
             "Tractors": 1,
             "Harvesters": 1,
@@ -73,6 +74,7 @@ const state = {
             "Name": "Roza Ray",
             "Color": "Brown",
             "Position": 35,
+            "NetWorth": 40000,
             "Cash": 6900,
             "Debt": 12000,
             "Hay": {
@@ -92,6 +94,7 @@ const state = {
                 "Rattlesnake": 0,
                 "Toppenish": 0,
                 "Cascades": 40,
+                "Total": 70,
             },
             "Tractors": 0,
             "Harvesters": 1,
@@ -101,6 +104,7 @@ const state = {
         {
             "Name": "Harrah Harry",
             "Color": "Black",
+            "NetWorth": 40000,
             "Position": 35,
             "Cash": 12300,
             "Debt": 20000,
@@ -121,6 +125,7 @@ const state = {
                 "Rattlesnake": 0,
                 "Toppenish": 0,
                 "Cascades": 40,
+                "Total": 70,
             },
             "Tractors": 0,
             "Harvesters": 1,
@@ -131,6 +136,7 @@ const state = {
             "Name": "Sunnyside Sidney",
             "Color": "White",
             "Position": 23,
+            "NetWorth": 40000,
             "Cash": 12300,
             "Debt": 20000,
             "Hay": {
@@ -150,6 +156,7 @@ const state = {
                 "Rattlesnake": 0,
                 "Toppenish": 0,
                 "Cascades": 40,
+                "Total": 70,
             },
             "Tractors": 0,
             "Harvesters": 1,
@@ -160,6 +167,7 @@ const state = {
             "Name": "Satus Sam",
             "Color": "Blue",
             "Position": 17,
+            "NetWorth": 40000,
             "Cash": 12300,
             "Debt": 20000,
             "Hay": {
@@ -179,6 +187,7 @@ const state = {
                 "Rattlesnake": 0,
                 "Toppenish": 0,
                 "Cascades": 40,
+                "Total": 70,
             },
             "Tractors": 0,
             "Harvesters": 1,
@@ -188,6 +197,18 @@ const state = {
 
     ]
 };
+
+function createPlayerTotal(player) {
+    return `<label>${player.Name}</label>
+    <label>Net Worth: $${player.NetWorth}</label>
+    <label>Cash: $${player.Cash}</label>
+    <label>Debt: $${player.Debt}</label>
+    <label>Hay: ${player.Hay.Acres} Acres</label>
+    <label>Grain: ${player.Grain.Acres} Acres (Double Corn)</label>
+    <label>Cows: ${player.Livestock.Total}</label>
+    <label>Tractors: ${player.Tractors}</label>
+    <label>Harvesters: ${player.Harvesters}</label>`
+}
 
 const screen1 = document.getElementById('screen-1');
 const newGameButton = document.getElementById('new-game-btn');
@@ -211,7 +232,7 @@ socket.on('tooManyPlayers', handletooManyPlayers);
 lastState = null;
 
 // player 1
-var myPlayerID = 1;
+var myPlayerID = 0;
 
 function keyDown(e) {
     console.log('key down', e.key)
@@ -225,7 +246,8 @@ function keyClick() {
 
 function paintGame(state) {
 
-    console.log('hi')
+    // player totals
+    $("#player-totals").append(createPlayerTotal(state.players[myPlayerID]));
 
     let canvas = document.getElementById('canvas');
     let ctx = canvas.getContext('2d');
