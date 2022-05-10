@@ -1,0 +1,253 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    align-content: center;
+}
+
+h1 {
+    text-align: center;
+}
+
+
+#room-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+#screen-1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#new-game-btn {
+    width: 100%;
+    color: white;
+    background-color: green;
+    
+    font-size: 100%;
+    border-radius: 3%;
+}
+
+#enter-code-div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#enter-code-input {
+    size: 10;
+    font-size: 2.5vh;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+}
+
+#enter-code-input.error {
+    color: red;
+}
+
+#go-btn {
+    margin-left: 0.3vh;
+    height: 100%;
+    font-size: 100%;
+    color: white;
+    background-color: green;
+}
+
+#screen-2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#screen-2 > span {
+    text-align: center;
+    font-size: 2.5vh;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+#screen-2-code {
+    letter-spacing: 0.1em;
+    font-weight: 800;
+}
+
+/* Get rid of text selection */
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}
+
+
+/* Game play begins Here */
+#game-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+
+#game-board {
+    display: block;
+    flex-direction: column;
+    text-align: center;
+    width: 90vw;
+    height: 90vh;
+    border: 1vw solid black;
+}
+
+.cell-corner {
+    width: 10%;
+    border: 1px solid black;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.cell {
+    border: 1px solid black;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+#row-1 {
+    display: flex;
+    justify-content: row;
+    width: 100%;
+    height: 10%;
+}
+
+#row-2 {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 80%;
+}
+
+#row-2 > .side-row {
+    width: 10%;
+}
+
+#row-2 > canvas {
+    width: 80%;
+    height: 100%;
+}
+
+#row-2 > #column-left {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+#row-2 > #column-right {
+    display: flex;
+    flex-direction: column;
+}
+
+#row-3 {
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    height: 10%;
+}
+
+#row-1 > .cell {
+    flex: 1 1 0;
+}
+
+#row-2 > * > .cell {
+    flex: 1 1 0;
+}
+
+#row-3 > .cell {
+    flex: 1 1 0;
+}
+
+
+/* Coloring for Harvest */
+.First-Hay-Cutting {
+    background-color: lightgreen;
+}
+
+.Second-Hay-Cutting {
+    background-color: lightgreen;
+}
+
+.Third-Hay-Cutting {
+    background-color: lightgreen;
+}
+
+.Fourth-Hay-Cutting {
+    background-color: lightgreen;
+}
+
+.Cherry-Harvest {
+    background-color: red;
+}
+
+.Apple-Harvest {
+    background-color: red;
+}
+
+.Wheat-Harvest {
+    background-color: yellow;
+    /* border-bottom: 1vw solid yellow; */
+}
+
+.Corn-Harvest {
+    background-color: yellow;
+}
+
+.Livestock-Sales {
+    background-color: rgba(152, 100, 43, 0.846);
+}
+
+
+
+
+
+
+#row-2 > #column-right {
+    display: flex;
+    flex-direction: column;
+}
+
+canvas {
+    background-image: url('https://i.ebayimg.com/images/g/vbAAAOSwKgthufU-/s-l1600.jpg');
+}
+
+.date {
+    font-size: small;
+    font-weight: 500;
+}
+
+.description {
+    font-size: 0.5vw;
+}
+
+.players-on-me {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.player {
+    background-color: pink;
+    border-radius: 50%;
+    width: 0.7vw;
+    height: 0.7vw;
+}
+
+.player.blue {
+    background-color: blue;
+}
+
+.player.yellow {
+    background-color: yellow;
+}

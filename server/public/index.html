@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>The Farming Game</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+
+    <div id="room-wrapper" style="display: none">
+
+        <h1>The Farming Game!</h1>
+        <h2 style="display: none" id="whoAmI"></h2>
+
+        <div id="screen-1" style="display: none">
+            <button id="new-game-btn">New Game</button>
+            <span>or</span>
+            <div id="enter-code-div">
+                <input id="enter-code-input" placeholder="Enter Room Code">
+                <button id="go-btn">GO</button>
+            </div>
+
+        </div>
+
+        <div id="screen-2" style="display: none">
+            <span id="screen-2-message">
+                Send room code to your friend!
+            </span>
+            <span id="screen-2-code">
+                547
+            </span>
+        </div>
+
+    </div>
+
+    <div id="game-wrapper" style="display: block">
+        <div id="game-board">
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"
+        integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H"
+        crossorigin="anonymous"></script>
+    <script src="template.js"></script>
+    <script src="index.js"></script>
+
+</body>
+
+</html>
