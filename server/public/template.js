@@ -1,3 +1,5 @@
+
+// DRAW THE GAME BOARD
 function createCell(cell) {
     id = cell["index"];
     date = cell["Date"];
@@ -361,3 +363,5 @@ data = [
         "Text": "First snow. Draw Farmer's Fate."
     }
 ]
+
+// DRAW THE SECOND SCREEN

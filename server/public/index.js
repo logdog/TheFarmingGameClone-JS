@@ -1,30 +1,33 @@
 $(document).ready(function() {
     console.log("document ready");
     $("#game-board").html(boardTemplate());
-
-    
-    // SOCKET IO connections
-    const socket = io('http://localhost:3000');
-    socket.on('init', handleInit);
-    socket.on('gameCode', handleGameCode);
-    socket.on('gameState', handleGameState);
-    socket.on('gameOver', handleGameOver);
-    socket.on('unknownGame', handleunknownGame);
-    socket.on('tooManyPlayers', handletooManyPlayers);
-
-
     init();
 });
 
+// SOCKET IO connections
+const socket = io('http://localhost:3000');
+socket.on('init', handleInit);
+socket.on('roomCode', handleRoomCode);
+socket.on('gameState', handleGameState);
+socket.on('gameOver', handleGameOver);
+socket.on('unknownGame', handleunknownGame);
+socket.on('tooManyPlayers', handletooManyPlayers);
+socket.on('morePlayersJoined', handleMorePlayersJoined);
+
+socket.on('takenAvatars', handleTakenAvatars);
 
 // SET UP THE ROOM
-const screen1 = document.getElementById('screen-1');
-const newGameButton = document.getElementById('new-game-btn');
-const enterCodeInput = document.getElementById('enter-code-input');
-const goButton = document.getElementById('go-btn');
-const screen2 = document.getElementById('screen-2');
-const screen2Code = document.getElementById('screen-2-code');
-const gameWrapper = document.getElementById('game-wrapper');
+const screen1 =$('#screen-1');
+const newGameButton = $('#new-game-btn');
+const enterCodeInput = $('#enter-code-input');
+const goButton = $('#go-btn');
+const screen2 = $('#screen-2');
+const screen2Code = $('#screen-2-code');
+const gameWrapper = $('#game-wrapper');
+const screen3 = $('#screen-3');
+
+// CHOOSE YOUR CHARACTER
+const startGameButton = $('#Btn-Start-Game');
 
 // SHOP BUTTONS
 const buyHayButton = $('#Btn-Hay');
@@ -244,8 +247,7 @@ function createPlayerTotal(player) {
     <label>Harvesters: ${player.Harvesters}</label>`
 }
 
-
-// player 1
+// tells us who we are
 let myPlayerID = null;
 
 function keyDown(e) {
@@ -259,6 +261,10 @@ function keyClick() {
 }
 
 function paintGame(state) {
+
+    if (myPlayerID === null) {
+        return;
+    }
     
     // if game is playing
     console.log(state);
@@ -287,69 +293,132 @@ function paintGame(state) {
 function initShopButtons() {
     buyHayButton.click(function() {
         console.log('Buy Hay');
-        socket.emit('buyHay', myPlayerID);
+        socket.emit('buyHay');
     });
 
     buyGrainButton.click(function() {
         console.log('Buy Grain');
-        socket.emit('buyGrain', myPlayerID);
+        socket.emit('buyGrain');
     });
 
     buyCowsButton.click(function() {
         console.log('Buy Cows');
-        socket.emit('buyCows', myPlayerID);
+        socket.emit('buyCows');
     });
 
     buyTractorButton.click(function() {
         console.log('Buy Tractor');
-        socket.emit('buyTractor', myPlayerID);
+        socket.emit('buyTractor');
     });
 
     buyHarvesterButton.click(function() {
         console.log('Buy Harvester');
-        socket.emit('buyHarvester', myPlayerID);
+        socket.emit('buyHarvester');
     });
 
     buyAhtanumRidgeButton.click(function () {
         console.log('Buy AhtanumRidge');
-        socket.emit('buyAhtanumRidge', myPlayerID);
+        socket.emit('buyAhtanumRidge');
     });
 
     buyRattlesnakeRidgeButton.click(function () {
         console.log('Buy RattlesnakeRidge');
-        socket.emit('buyRattlesnakeRidge', myPlayerID);
+        socket.emit('buyRattlesnakeRidge');
     });
 
     buyCascadesButton.click(function () {
         console.log('Buy buyCascadesButton');
-        socket.emit('buyCascades', myPlayerID);
+        socket.emit('buyCascades');
     });
 
     buyToppenishRidgeButton.click(function () {
         console.log('Buy buyToppenishRidge');
-        socket.emit('buyToppenishRidge', myPlayerID);
+        socket.emit('buyToppenishRidge');
+    });
+}
+
+function initAvatarSelection() {
+
+    // tell the server what's up
+
+    for(let i=0; i<6;i++) {
+        $(`#avatar${i}`).click(function() {
+            socket.emit('avatarSelection', i);
+        });
+    }
+
+    startGameButton.click(function() {
+        socket.emit('startGame');
     });
 }
 
 function init() {
 
+    screen2.css('display', 'none');
+    screen3.css('display', 'none');
+
     initShopButtons();
+    initAvatarSelection();
 
+    // create new game
+    newGameButton.click(function() {
+        socket.emit('newGame');
+        console.log('newGame');
+    });
 
-    // initially hide the screen
-    // newGameButton.addEventListener('click', () => {
-    //     socket.emit('newGame');
-    // });
-
-    // goButton.addEventListener('click', () => {
-    //     var code = enterCodeInput.value;
-    //     socket.emit('joinGame', code);
-    // });
+    goButton.click(function() {
+        var code = enterCodeInput.val();
+        console.log('sending', code)
+        socket.emit('joinGame', code);
+        screen2Code.html(code);
+    });
 
     // playAgainButton.addEventListener('click', () => {
     //     socket.emit('playAgain');
     // });
     paintGame(state);
+}
+
+function handleRoomCode(msg) {
+    console.log('handle create room')
+    console.log(msg)
+
+    // turn off the first screen and show the room code
+    screen1.css('display', 'none');
+    screen2Code.html(msg);
+    screen2.css('display', 'flex');
+    screen3.css('display', 'flex');
+}
+
+function handleInit(number) {
+    console.log('handleInit')
+    myPlayerID = number;
+}
+
+function handleMorePlayersJoined(numPlayers) {
+    console.log('morePlayersJoined')
+    console.log(numPlayers)
+
+    screen1.css('display', 'none');
+    screen2.css('display', 'flex');
+    screen3.css('display', 'flex');
+}
+
+function handleTakenAvatars(avatars) {   
+    console.log('ids')
+    console.log(avatars)
+
+    $(`.avatarProfile`).removeClass('mySelection');
+    $(`.avatarProfile`).removeClass('otherSelection');
+
+    for (const playerID in avatars) {
+        console.log(playerID, avatars[playerID])
+        if (playerID == myPlayerID) {
+            $(`#avatar${avatars[playerID]}`).addClass('mySelection');
+        } else {
+            $(`#avatar${avatars[playerID]}`).addClass('otherSelection');
+        }
+    }
 }
 
 function handleGameState(gameState) {
@@ -377,21 +446,6 @@ function handleunknownGame(msg) {
     console.log('invalid room')
     console.log(msg);
     enterCodeInput.style.color = 'red';
-}
-
-function handleGameCode(msg) {
-    console.log('handle create room')
-    console.log(msg)
-
-    // turn off the first screen and show the room code
-    screen1.style.display = 'none';
-    screen2Code.innerHTML = msg;
-    screen2.style.display = 'flex';
-}
-
-function handleInit(number) {
-    console.log('handleInit')
-    myPlayerID = number;
 }
 
 function handletooManyPlayers(msg) {

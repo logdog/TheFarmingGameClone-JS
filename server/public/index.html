@@ -22,20 +22,61 @@
             </div>
         </div>
 
-        <div id="screen-2" style="display: none">
+        <div id="screen-2" style="display: none;">
             <span id="screen-2-message">
                 Send room code to your friend!
             </span>
-            <span id="screen-2-code">
-                547
-            </span>
+            <span id="screen-2-code"></span>
         </div>
 
+        <div id="screen-3" style="display: none;">
+            <span id="screen-3-message">
+                Choose your avatar!
+            </span>
+            <div class="avatarChoiceContainer">
+                <div class="avatarChoice">
+                    <div class="avatarProfileWrapper">
+                        <div class="avatarProfile" id="avatar0"></div>
+                    </div>
+                    <div>Wapato Willie</div>
+                </div>
+                <div class="avatarChoice">
+                    <div class="avatarProfileWrapper">
+                        <div class="avatarProfile" id="avatar1"></div>
+                    </div>
+                    <span>Toppenish Tom</span>
+                </div>
+                <div class="avatarChoice">
+                    <div class="avatarProfileWrapper">
+                        <div class="avatarProfile" id="avatar2"></div>
+                    </div>
+                    <span>Roza Ray</span>
+                </div>
+                <div class="avatarChoice">
+                    <div class="avatarProfileWrapper">
+                        <div class="avatarProfile" id="avatar3"></div>
+                    </div>
+                    <span>Harrah Harry</span>
+                </div>
+                <div class="avatarChoice">
+                    <div class="avatarProfileWrapper">
+                        <div class="avatarProfile" id="avatar4"></div>
+                    </div>
+                    <span>Sunnyside Sidney</span>
+                </div>
+                <div class="avatarChoice">
+                    <div class="avatarProfileWrapper">
+                        <div class="avatarProfile" id="avatar5"></div>
+                    </div>
+                    <span>Satus Sam</span>
+                </div>
+            </div>
+            <button id="Btn-Start-Game">Start the Game!</button>
+        </div>
     </div>
 
     <div id="game-wrapper" style="display: none;">
-        <div id="game-board">
-        </div>
+        <div id="game-board"></div>
         <div id="controls-wrapper" style="display: flex; flex-direction: column;">
             <div id="player-totals" style="display: flex; flex-direction: column; border: 3px solid black; margin: 10px;"></div>
             <div id="shop" style="border: 3px solid green; margin: 10px;">
@@ -58,8 +99,7 @@
                     <button id="Btn-Toppenish-Ridge"><span>Toppenish Ridge<br>50 Cows<br>$50000</span></button>
                 </div>
             </div>
-            <div id="roll-dice-div">
-            </div>
+            <div id="roll-dice-div"></div>
 
             <div id="payout-table" style="font-size: 0.5vw;">
                 <table><tr><td></td><td></td><td></td><td>HAY</td><td></td><td></td><td></td><td></td><td></td><td></td><td>FRUIT</td><td></td><td></td><td></td><td></td></tr><tr><td>DICE</td><td>10 Acres</td><td>20 Acres</td><td>30 Acres</td><td>40 Acres</td><td>50 Acres</td><td>60 Acres</td><td></td><td>DICE</td><td>5 Acres</td><td>10 Acres</td><td>15 Acres</td><td>20 Acres</td><td></td><td></td></tr><tr><td>1</td><td>400</td><td>800</td><td>1200</td><td>1600</td><td>2000</td><td>2400</td><td></td><td>1</td><td>2000</td><td>4000</td><td>6000</td><td>8000</td><td></td><td></td></tr><tr><td>2</td><td>600</td><td>1200</td><td>1800</td><td>2400</td><td>3000</td><td>3600</td><td></td><td>2</td><td>3500</td><td>7000</td><td>10500</td><td>14000</td><td></td><td></td></tr><tr><td>3</td><td>1000</td><td>2000</td><td>3000</td><td>4000</td><td>5000</td><td>6000</td><td></td><td>3</td><td>6000</td><td>12000</td><td>18000</td><td>24000</td><td></td><td></td></tr><tr><td>4</td><td>1500</td><td>3000</td><td>4500</td><td>6000</td><td>7500</td><td>9000</td><td></td><td>4</td><td>9000</td><td>18000</td><td>27000</td><td>36000</td><td></td><td></td></tr><tr><td>5</td><td>2200</td><td>4400</td><td>6600</td><td>8800</td><td>11000</td><td>13200</td><td></td><td>5</td><td>13000</td><td>26000</td><td>39000</td><td>52000</td><td></td><td></td></tr><tr><td>6</td><td>3000</td><td>6000</td><td>9000</td><td>12000</td><td>15000</td><td>18000</td><td></td><td>6</td><td>17500</td><td>35000</td><td>52500</td><td>70000</td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td>GRAIN</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>LIVESTOCK</td><td></td><td></td><td></td></tr><tr><td>DICE</td><td>10 Acres</td><td>20 Acres</td><td>30 Acres</td><td>40 Acres</td><td>50 Acres</td><td>60 Acres</td><td></td><td>DICE</td><td>10 Acres</td><td>20 Acres</td><td>30 Acres</td><td>40 Acres</td><td>50 Acres</td><td>60 Acres</td></tr><tr><td>1</td><td>800</td><td>1500</td><td>2300</td><td>3000</td><td>3800</td><td>4500</td><td></td><td>1</td><td>1400</td><td>2800</td><td>4200</td><td>5600</td><td>7000</td><td>8400</td></tr><tr><td>2</td><td>1500</td><td>3000</td><td>4500</td><td>6000</td><td>7500</td><td>9000</td><td></td><td>2</td><td>2000</td><td>4000</td><td>6000</td><td>8000</td><td>10000</td><td>12000</td></tr><tr><td>3</td><td>2500</td><td>5000</td><td>7500</td><td>10000</td><td>12500</td><td>15000</td><td></td><td>3</td><td>2800</td><td>5600</td><td>8400</td><td>11200</td><td>14000</td><td>16800</td></tr><tr><td>4</td><td>3800</td><td>7500</td><td>11300</td><td>15000</td><td>18800</td><td>31500</td><td></td><td>4</td><td>3800</td><td>7600</td><td>11400</td><td>15200</td><td>19000</td><td>22800</td></tr><tr><td>5</td><td>5300</td><td>10500</td><td>15800</td><td>21000</td><td>26300</td><td>31500</td><td></td><td>5</td><td>5000</td><td>10000</td><td>15000</td><td>20000</td><td>25000</td><td>30000</td></tr><tr><td>6</td><td>7000</td><td>14000</td><td>21000</td><td>28000</td><td>35000</td><td>42000</td><td></td><td>6</td><td>7500</td><td>15000</td><td>22500</td><td>30000</td><td>37500</td><td>45000</td></tr></table>

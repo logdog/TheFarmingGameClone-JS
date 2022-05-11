@@ -20,33 +20,62 @@ module.exports = {
     newGame,
 }
 
-
-function createGameState() {
-    let w = words[Math.floor(Math.random()*words.length)].toUpperCase();
+function createPlayer(name, color) {
     return {
-        correctWord: w,
-        guessedWord: '_'.repeat(w.length),
-        player1: {
-            guesses: [],
-            mistakes: 0,
-            name: 'Player 1',
-            color: 'orange',
-            wins: 0,
-            losses: 0,
-            id: ''
+        "Name": name,
+        "Color": color,
+        "Position": 0,
+        "NetWorth": 40000,
+        "Cash": 5000,
+        "Debt": 5000,
+        "Hay": {
+            "Acres": 10,
+            "DoubleHay": false,
         },
-        player2: {
-            guesses: [],
-            mistakes: 0,
-            name: 'Player 2',
-            color: 'blue',
-            wins: 0,
-            losses: 0,
-            id: ''
+        "Grain" : {
+            "Acres": 10,
+            "DoubleCorn": false,
         },
-        turn: 1,
-        previousWords: [],
-        started: false,
+        "Fruit" : {
+            "Acres": 0,
+        },
+        "Livestock" : {
+            "Farm": 0,
+            "Ahtanum": 0,
+            "Rattlesnake": 0,
+            "Toppenish": 0,
+            "Cascades": 0,
+            "Total": 0,
+        },
+        "Tractors": 0,
+        "Harvesters": 0,
+        "OTB": [],
+        "Fate": [],
+    };
+}
+
+const avatarNames = [
+    "Wapato Willie",
+    "Toppenish Tom",
+    "Roza Ray",
+    "Harrah Harry",
+    "Sunnyside Sidney",
+    "Satus Sam",
+];
+
+const avatarColors = [
+    "Yellow",
+    "Green",
+    "Brown",
+    "Black",
+    "White",
+    "Blue",
+];
+
+function createGameState(avatarIDs) {
+    return {
+        turn: 0,
+        players: avatarIDs.map(id => createPlayer(avatarNames[id], avatarColors[id])),
     };
 }
 

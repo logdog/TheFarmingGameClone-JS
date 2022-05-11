@@ -24,34 +24,64 @@ server.listen(3000, () => {
 });
 
 
-const state = {};
+// room code: game state
+const states = {};
+
+// room code: {player id: avatar id}
+const avatars = {};
+
+// client id: room code
 const clientRooms = {};
+
+// room code: array(client ids)
+const roomClientIDs = {};
+
+// client id: player id
+const playerIDs = {};
+
+// array of room codes
+const roomCodes = [];
 
 io.on('connection', client => {
 
     client.on('newGame', handleNewGame);
     client.on('joinGame', handleJoinGame);
+    client.on('avatarSelection', handleAvatarSelection);
     client.on('keyDown', handleKeyDown);
     client.on('playAgain', handlePlayAgain);
 
     function handleNewGame() {
         console.log('handleNewGame()')
-        let gameCode = makeid(5);
-        clientRooms[client.id] = gameCode;
-        client.emit('gameCode', gameCode);
+        
+        // generate a unique room code
+        let roomCode = null;
+        do {
+            roomCode = makeid(5);
+        }
+        while (roomCodes.includes(roomCode));
+        roomCodes.push(roomCode);
 
-        state[gameCode] = createGameState();
-        client.join(gameCode);
-        state[gameCode].player1.id = client.id;
-        client.emit('init', 1);
+        // add client to a room
+        client.join(roomCode);
+        clientRooms[client.id] = roomCode;
+        roomClientIDs[roomCode] = [client.id];
+        avatars[roomCode] = {};
 
-        console.log(clientRooms);
+        // send client the room code
+        client.emit('roomCode', roomCode);
+
+        // tell client who they are
+        client.emit('init', 0);
+        playerIDs[client.id] = 0;
+
+
+        console.log('created a new room:', roomCode);
     }
 
-    function handleJoinGame(gameCode) {
-        console.log(gameCode)
-        console.log('handleJoinGame()')
-        const connectedPlayersInRoom = io.sockets.adapter.rooms.get(gameCode);
+    function handleJoinGame(roomCode) {
+        
+        console.log('handleJoinGame()', roomCode)
+        const connectedPlayersInRoom = io.sockets.adapter.rooms.get(roomCode);
 
         let numClients = 0;
         if (connectedPlayersInRoom) {
@@ -62,104 +92,123 @@ io.on('connection', client => {
             console.log('unknownGame')
             client.emit('unknownGame');
             return;
-        } 
-        else if (numClients > 1) {
+        }
+        else if (numClients >= 6) {
             console.log('tooManyPlayers')
             client.emit('tooManyPlayers');
             return;
         }
-        else if (numClients == 1) {
-            console.log('one player in the room. add a second.')
-            clientRooms[client.id] = gameCode;
-            client.join(gameCode);
-            state[gameCode].player2.id = client.id;
-            client.emit('init', 2);
+        else {
+            console.log('Add you to the room')
 
-            startGame(gameCode);
+            client.join(roomCode);
+            clientRooms[client.id] = roomCode;
+            roomClientIDs[roomCode].push(client.id);
+            playerIDs[client.id] = roomClientIDs[roomCode].length-1;
+
+            client.emit('init', playerIDs[client.id]);
+            client.emit('takenAvatars', avatars[roomCode]);
+            io.to(roomCode).emit('morePlayersJoined', playerIDs[client.id].length);
         }
+    }
+
+    function handleAvatarSelection(avatarID) {
+        console.log('handleAvatarSelection', avatarID)
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+
+        console.log(playerID)
+
+        // if the avatar is not taken yet
+        if (!Object.values(avatars[roomCode]).includes(avatarID)) {
+            avatars[roomCode][playerID] = avatarID;
+        }
+
+        // return a dictionary of which player has which avatars
+        io.to(roomCode).emit('takenAvatars', avatars[roomCode]);
     }
 
     function handleKeyDown(keyCode) {
         console.log('handleKeyDown()')
 
-        var gameCode = clientRooms[client.id];
+        var roomCode = clientRooms[client.id];
 
-        if (!gameCode) {
+        if (!roomCode) {
             return;
         }
 
-        if (!state[gameCode].started) {
+        if (!state[roomCode].started) {
             return;
         }
 
-        updateGame(keyCode, gameCode);
+        updateGame(keyCode, roomCode);
     }
 
     function handlePlayAgain() {
         console.log('playAgain()')
 
         console.log('1()')
-        var gameCode = clientRooms[client.id];
-        if (!gameCode) {
+        var roomCode = clientRooms[client.id];
+        if (!roomCode) {
             return;
         }
 
         console.log('2()')
-        if (state[gameCode].started) {
+        if (state[roomCode].started) {
             return;
         }
 
         console.log('newGame()')
-        state[gameCode] = newGame(state[gameCode]);
-        state[gameCode].started = true;
-        io.to(gameCode).emit('gameState', JSON.stringify(state[gameCode]));
+        state[roomCode] = newGame(state[roomCode]);
+        state[roomCode].started = true;
+        io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
     }
 
-    function startGame(gameCode) {
+    function startGame(roomCode) {
         console.log('startGame()')
-        state[gameCode].started = true;
-        io.to(gameCode).emit('gameState', JSON.stringify(state[gameCode]));
+        state[roomCode].started = true;
+        io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
     }
 
-    function updateGame(keyCode, gameCode) {
+    function updateGame(keyCode, roomCode) {
         console.log('updateGame()')
 
-        if(client.id !== state[gameCode].player1.id && client.id !== state[gameCode].player2.id) {
+        if(client.id !== state[roomCode].player1.id && client.id !== state[roomCode].player2.id) {
             return;
         }
 
-        if(client.id === state[gameCode].player1.id && state[gameCode].turn !== 1) {
+        if(client.id === state[roomCode].player1.id && state[roomCode].turn !== 1) {
             return;
         }
-        else if (client.id === state[gameCode].player2.id && state[gameCode].turn !== 2) {
+        else if (client.id === state[roomCode].player2.id && state[roomCode].turn !== 2) {
             return;
         }
 
         // game logic
-        state[gameCode] = processGuess(keyCode, state[gameCode]);
+        state[roomCode] = processGuess(keyCode, state[roomCode]);
 
-        if (checkWordIsCorrect(state[gameCode])) {
-            state[gameCode] = updateCorrectWord(state[gameCode]);
+        if (checkWordIsCorrect(state[roomCode])) {
+            state[roomCode] = updateCorrectWord(state[roomCode]);
         }
 
-        io.to(gameCode).emit('gameState', JSON.stringify(state[gameCode]));
+        io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
 
-        var winner = checkWinner(state[gameCode]);
+        var winner = checkWinner(state[roomCode]);
         if (winner !== 0) {
-            io.to(gameCode).emit('gameOver', winner);
+            io.to(roomCode).emit('gameOver', winner);
 
-            state[gameCode].started = false; // no more key-downs
+            state[roomCode].started = false; // no more key-downs
             if (winner === 1) {
-                state[gameCode].player1.wins++;
-                state[gameCode].player2.losses++;
+                state[roomCode].player1.wins++;
+                state[roomCode].player2.losses++;
             }
             else if (winner === 2) {
-                state[gameCode].player2.wins++;
-                state[gameCode].player1.losses++;
+                state[roomCode].player2.wins++;
+                state[roomCode].player1.losses++;
             }
 
-            state[gameCode].previousWords.push(state[gameCode].correctWord);
-            io.to(gameCode).emit('gameState', JSON.stringify(state[gameCode]));
+            state[roomCode].previousWords.push(state[roomCode].correctWord);
+            io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
         }
         
     }
