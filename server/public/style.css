@@ -13,7 +13,8 @@ h1 {
 
 #room-wrapper {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 #screen-1 {

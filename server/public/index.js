@@ -1,8 +1,41 @@
 $(document).ready(function() {
     console.log("document ready");
     $("#game-board").html(boardTemplate());
+
+    
+    // SOCKET IO connections
+    const socket = io('http://localhost:3000');
+    socket.on('init', handleInit);
+    socket.on('gameCode', handleGameCode);
+    socket.on('gameState', handleGameState);
+    socket.on('gameOver', handleGameOver);
+    socket.on('unknownGame', handleunknownGame);
+    socket.on('tooManyPlayers', handletooManyPlayers);
+
+
     init();
 });
+
+
+// SET UP THE ROOM
+const screen1 = document.getElementById('screen-1');
+const newGameButton = document.getElementById('new-game-btn');
+const enterCodeInput = document.getElementById('enter-code-input');
+const goButton = document.getElementById('go-btn');
+const screen2 = document.getElementById('screen-2');
+const screen2Code = document.getElementById('screen-2-code');
+const gameWrapper = document.getElementById('game-wrapper');
+
+// SHOP BUTTONS
+const buyHayButton = $('#Btn-Hay');
+const buyGrainButton = $('#Btn-Grain');
+const buyCowsButton = $('#Btn-Cows')
+const buyTractorButton = $('#Btn-Tractor');
+const buyHarvesterButton = $('#Btn-Harvester');
+const buyAhtanumRidgeButton = $('#Btn-Ahtanum-Ridge');
+const buyRattlesnakeRidgeButton = $('#Btn-Rattlesnake-Ridge');
+const buyCascadesButton = $('#Btn-Cascades');
+const buyToppenishRidgeButton = $('#Btn-Toppenish-Ridge');
 
 
 const state = {
@@ -198,6 +231,7 @@ const state = {
     ]
 };
 
+
 function createPlayerTotal(player) {
     return `<label>${player.Name}</label>
     <label>Net Worth: $${player.NetWorth}</label>
@@ -210,29 +244,9 @@ function createPlayerTotal(player) {
     <label>Harvesters: ${player.Harvesters}</label>`
 }
 
-const screen1 = document.getElementById('screen-1');
-const newGameButton = document.getElementById('new-game-btn');
-const enterCodeInput = document.getElementById('enter-code-input');
-const goButton = document.getElementById('go-btn');
-const screen2 = document.getElementById('screen-2');
-const screen2Code = document.getElementById('screen-2-code');
-const gameWrapper = document.getElementById('game-wrapper');
-
-
-const socket = io('http://localhost:3000');
-
-socket.on('init', handleInit);
-socket.on('gameCode', handleGameCode);
-socket.on('gameState', handleGameState);
-socket.on('gameOver', handleGameOver);
-
-socket.on('unknownGame', handleunknownGame);
-socket.on('tooManyPlayers', handletooManyPlayers);
-
-lastState = null;
 
 // player 1
-var myPlayerID = 0;
+let myPlayerID = null;
 
 function keyDown(e) {
     console.log('key down', e.key)
@@ -245,24 +259,82 @@ function keyClick() {
 }
 
 function paintGame(state) {
-
-    // player totals
-    $("#player-totals").append(createPlayerTotal(state.players[myPlayerID]));
-
-    let canvas = document.getElementById('canvas');
-    let ctx = canvas.getContext('2d');
-
+    
     // if game is playing
     console.log(state);
 
+    // get the canvas and context
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
 
+    // player totals
+    $("#player-totals").empty();
+    $("#player-totals").append(createPlayerTotal(state.players[myPlayerID]));
+
+    // roll the dice button
+    $("#roll-dice-div").empty();
+    if (state.turn === myPlayerID) {
+        $("#roll-dice-div").append( `<button>Roll the Dice!</button>` );
+    }
+
+    // draw the game tokens on the board
     $(".player").remove();
     for (let player of state.players) {
         $(`#cell-${player.Position} > .players-on-me`).append(`<div class="player ${player.Color}" title="${player.Name}"></div>`);
     }
 }
 
+function initShopButtons() {
+    buyHayButton.click(function() {
+        console.log('Buy Hay');
+        socket.emit('buyHay', myPlayerID);
+    });
+
+    buyGrainButton.click(function() {
+        console.log('Buy Grain');
+        socket.emit('buyGrain', myPlayerID);
+    });
+
+    buyCowsButton.click(function() {
+        console.log('Buy Cows');
+        socket.emit('buyCows', myPlayerID);
+    });
+
+    buyTractorButton.click(function() {
+        console.log('Buy Tractor');
+        socket.emit('buyTractor', myPlayerID);
+    });
+
+    buyHarvesterButton.click(function() {
+        console.log('Buy Harvester');
+        socket.emit('buyHarvester', myPlayerID);
+    });
+
+    buyAhtanumRidgeButton.click(function () {
+        console.log('Buy AhtanumRidge');
+        socket.emit('buyAhtanumRidge', myPlayerID);
+    });
+
+    buyRattlesnakeRidgeButton.click(function () {
+        console.log('Buy RattlesnakeRidge');
+        socket.emit('buyRattlesnakeRidge', myPlayerID);
+    });
+
+    buyCascadesButton.click(function () {
+        console.log('Buy buyCascadesButton');
+        socket.emit('buyCascades', myPlayerID);
+    });
+
+    buyToppenishRidgeButton.click(function () {
+        console.log('Buy buyToppenishRidge');
+        socket.emit('buyToppenishRidge', myPlayerID);
+    });
+}
+
 function init() {
+
+    initShopButtons();
+
 
     // initially hide the screen
     // newGameButton.addEventListener('click', () => {
