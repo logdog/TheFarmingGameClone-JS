@@ -1,4 +1,4 @@
-const { createGameState, processGuess, checkWordIsCorrect,  updateCorrectWord, checkWinner, newGame} = require('./game');
+const { createGameState, movePlayer } = require('./game');
 const { makeid } = require('./utils');
 
 const express = require('express');
@@ -47,7 +47,8 @@ io.on('connection', client => {
     client.on('newGame', handleNewGame);
     client.on('joinGame', handleJoinGame);
     client.on('avatarSelection', handleAvatarSelection);
-    client.on('keyDown', handleKeyDown);
+    client.on('startGame', handleStartGame);
+    client.on('rollDice', handleRollDice);
     client.on('playAgain', handlePlayAgain);
 
     function handleNewGame() {
@@ -108,7 +109,7 @@ io.on('connection', client => {
 
             client.emit('init', playerIDs[client.id]);
             client.emit('takenAvatars', avatars[roomCode]);
-            io.to(roomCode).emit('morePlayersJoined', playerIDs[client.id].length);
+            io.to(roomCode).emit('morePlayersJoined', roomClientIDs[roomCode].length);
         }
     }
 
@@ -117,7 +118,7 @@ io.on('connection', client => {
         let roomCode = clientRooms[client.id];
         let playerID = playerIDs[client.id];
 
-        console.log(playerID)
+        console.log(playerID);
 
         // if the avatar is not taken yet
         if (!Object.values(avatars[roomCode]).includes(avatarID)) {
@@ -125,7 +126,43 @@ io.on('connection', client => {
         }
 
         // return a dictionary of which player has which avatars
+        console.log(avatars[roomCode]);
         io.to(roomCode).emit('takenAvatars', avatars[roomCode]);
+    }
+
+    function handleStartGame() {
+        console.log('handleStartGame()')
+
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+
+        // check that each player has an avatar
+        if (Object.keys(avatars[roomCode]).length !== Object.keys(roomClientIDs[roomCode]).length) {
+            console.log('not enough players have chosen their avatar!')
+            return;
+        }
+        
+        // initialize the game
+        states[roomCode] = createGameState(Object.values(avatars[roomCode]));
+        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+    }
+
+    function handleRollDice() {
+        console.log('handleRollDice()')
+
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+
+        // check that it is the correct player's turn
+        if (states[roomCode].turn !== playerID) {
+            return;
+        }
+
+        let diceValue = Math.floor(Math.random()*6)+1;
+        io.to(roomCode).emit('rollDiceAnimation', diceValue);
+
+        movePlayer(states[roomCode], diceValue);
+        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
     function handleKeyDown(keyCode) {
@@ -164,11 +201,7 @@ io.on('connection', client => {
         io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
     }
 
-    function startGame(roomCode) {
-        console.log('startGame()')
-        state[roomCode].started = true;
-        io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
-    }
+    
 
     function updateGame(keyCode, roomCode) {
         console.log('updateGame()')

@@ -15,6 +15,10 @@ socket.on('tooManyPlayers', handletooManyPlayers);
 socket.on('morePlayersJoined', handleMorePlayersJoined);
 
 socket.on('takenAvatars', handleTakenAvatars);
+socket.on('rollDiceAnimation', handleRollDiceAnimation);
+socket.on('drawOTB', handleDrawOTB);
+socket.on('drawFarmersFate', handleDrawFarmersFate);
+socket.on('drawOperatingExpense', handleDrawOperatingExpense);
 
 // SET UP THE ROOM
 const screen1 =$('#screen-1');
@@ -249,6 +253,9 @@ function createPlayerTotal(player) {
 
 // tells us who we are
 let myPlayerID = null;
+let numPlayersReady = null;
+let totalPlayers = 1;
+let lastState = null;
 
 function keyDown(e) {
     console.log('key down', e.key)
@@ -262,12 +269,19 @@ function keyClick() {
 
 function paintGame(state) {
 
+    console.log('pait')
     if (myPlayerID === null) {
         return;
     }
+
+    screen1.css('display', 'none');
+    screen2.css('display', 'none');
+    screen3.css('display', 'none');
+    gameWrapper.css('display', 'flex');
     
     // if game is playing
     console.log(state);
+    console.log('pait')
 
     // get the canvas and context
     let canvas = document.getElementById('canvas');
@@ -280,7 +294,10 @@ function paintGame(state) {
     // roll the dice button
     $("#roll-dice-div").empty();
     if (state.turn === myPlayerID) {
-        $("#roll-dice-div").append( `<button>Roll the Dice!</button>` );
+        $("#roll-dice-div").append( `<button id="roll-dice-btn">Roll the Dice!</button>` );
+        $('#roll-dice-btn').click(function() {
+            socket.emit('rollDice');
+        })
     }
 
     // draw the game tokens on the board
@@ -379,6 +396,15 @@ function init() {
     paintGame(state);
 }
 
+function updateStartButton() {
+    $('#num-players-ready').html(`${numPlayersReady}/${totalPlayers} Players Ready!`);
+    if (numPlayersReady == totalPlayers) {
+        startGameButton.css('display', 'block');
+    } else {
+        startGameButton.css('display', 'none');
+    }
+}
+
 function handleRoomCode(msg) {
     console.log('handle create room')
     console.log(msg)
@@ -399,35 +425,40 @@ function handleMorePlayersJoined(numPlayers) {
     console.log('morePlayersJoined')
     console.log(numPlayers)
 
+    totalPlayers = numPlayers;
+
     screen1.css('display', 'none');
     screen2.css('display', 'flex');
     screen3.css('display', 'flex');
+
+    updateStartButton();
 }
 
 function handleTakenAvatars(avatars) {   
-    console.log('ids')
-    console.log(avatars)
-
     $(`.avatarProfile`).removeClass('mySelection');
     $(`.avatarProfile`).removeClass('otherSelection');
 
     for (const playerID in avatars) {
-        console.log(playerID, avatars[playerID])
         if (playerID == myPlayerID) {
             $(`#avatar${avatars[playerID]}`).addClass('mySelection');
         } else {
             $(`#avatar${avatars[playerID]}`).addClass('otherSelection');
         }
     }
+
+    numPlayersReady = Object.keys(avatars).length;
+    numPlayersReady = numPlayersReady !== null ? numPlayersReady : 0;
+    updateStartButton();
 }
 
 function handleGameState(gameState) {
+
     console.log(gameState)
     gameState = JSON.parse(gameState);
     requestAnimationFrame(() => {
         paintGame(gameState);
         lastState = gameState;
-        // console.log(gameState);
+        console.log(gameState);
     });
 }
 
@@ -451,4 +482,20 @@ function handleunknownGame(msg) {
 function handletooManyPlayers(msg) {
     console.log('handletooManyPlayers()')
     console.log(msg)
+}
+
+function handleRollDiceAnimation(diceValue) {
+    console.log('Dice Value: ', diceValue)
+}
+
+function handleDrawOTB(otb) {
+    alert(otb);
+}
+
+function handleDrawFarmersFate(card) {
+    alert(card);
+}
+
+function handleDrawOperatingExpense(card) {
+    alert(card);
 }

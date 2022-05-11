@@ -304,12 +304,6 @@ h1 {
     background-color: rgba(211, 139, 61, 0.846);
 }
 
-
-#row-2 > #column-right {
-    display: flex;
-    flex-direction: column;
-}
-
 canvas {
     background-image: url('board2.jpg');
     background-size: 100% 100%;
@@ -317,7 +311,7 @@ canvas {
 }
 
 .date {
-    font-size: small;
+    font-size: x-small;
     font-weight: 500;
 }
 
@@ -367,4 +361,14 @@ canvas {
 
 .player.Black {
     background-color: rgba(20,20,20,0.5);
+}
+
+
+/* dice */
+#dice-wrapper {
+    position: absolute;
+    top: 44%;
+    left: 30%;
+    width: 100px;
+    height: 100px;
 }

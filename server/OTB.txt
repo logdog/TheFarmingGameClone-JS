@@ -1,0 +1,10 @@
+NEIGHBOR SELLS OUT. 10 acres Hay at $2000 per acre. Total $20000
+NEIGHBOR SELLS OUT. 10 acres Grain at $2000 per acre. Total $20000
+LIVESTOCK AUCTION. 10 cows at $500 each. Total $5000
+NEIGHBOR GOES BROKE. 5 acres Fruit at $5000 per acre. Total $25000
+EQUIPMENT SALE HARVESTER. Total $10000
+EQUIPMENT SALE TRACTOR. Total $10000
+Lease Ahtanum Ridge for lifetime at $10000 and buy 20 cows at $500 each. Total $20000
+Lease Rattlesnake Ridge for lifetime at $15000 and buy 30 cows at $500 each. Total $30000
+Lease Cascade Range for lifetime at $20000 and buy 40 cows at $500 each. Total $40000
+Lease Toppenish Ridge for lifetime at $25000 and buy 50 cows at $500 each. Total $50000
