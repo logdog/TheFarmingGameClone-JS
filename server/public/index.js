@@ -67,6 +67,8 @@ let numPlayersReady = null;
 let totalPlayers = 1;
 let lastState = null;
 
+let shiftKeyDown = false;
+
 function keyDown(e) {
     console.log('key down', e.key)
     socket.emit('keyDown', e.key)
@@ -212,6 +214,18 @@ function init() {
         screen2Code.html(code);
     });
 
+    $(document).on('keydown', function(e) {
+        if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
+            shiftKeyDown = true;
+        }
+    });
+
+    $(document).on('keyup', function(e) {
+        if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
+            shiftKeyDown = false;
+        }
+    });
+
     // playAgainButton.addEventListener('click', () => {
     //     socket.emit('playAgain');
     // });
@@ -316,7 +330,12 @@ function handleDrawOTB(card) {
 
     // functional close button
     $('.close-btn').click(function() {
-        $(this).parent().remove();
+        if (shiftKeyDown) {
+            $('#card-container').empty();
+        }
+        else {
+            $(this).parent().remove();
+        }
     });
 
 }
@@ -327,7 +346,12 @@ function handleDrawFarmersFate(card) {
 
     // functional close button
     $('.close-btn').click(function() {
-        $(this).parent().remove();
+        if (shiftKeyDown) {
+            $('#card-container').empty();
+        }
+        else {
+            $(this).parent().remove();
+        }
     });
 }
 
@@ -337,6 +361,11 @@ function handleDrawOperatingExpense(card) {
 
     // functional close button
     $('.close-btn').click(function() {
-        $(this).parent().remove();
+        if (shiftKeyDown) {
+            $('#card-container').empty();
+        }
+        else {
+            $(this).parent().remove();
+        }
     });
 }

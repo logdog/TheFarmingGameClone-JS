@@ -370,7 +370,7 @@ gameBoardSquares = [
 
 function createOTBCard(text) {
     return `<div class="card OTBCard">
-        <span class="close-btn">&times</span>
+        <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> O.T.B. </span>
         <span> ${text}</span>
     </div>`;
@@ -378,7 +378,7 @@ function createOTBCard(text) {
 
 function createFarmersFateCard(text) {
     return `<div class="card FarmersFateCard">
-        <span class="close-btn">&times</span>
+        <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> Farmers Fate </span>
         <span> ${text}</span>
     </div>`;
@@ -386,7 +386,7 @@ function createFarmersFateCard(text) {
 
 function createOperatingExpenseCard(text) {
     return `<div class="card OperatingExpenseCard">
-        <span class="close-btn">&times</span>
+        <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> Farmers Fate </span>
         <span> ${text}</span>
     </div>`;
