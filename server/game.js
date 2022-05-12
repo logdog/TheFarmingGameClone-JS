@@ -15,8 +15,7 @@ console.log(OperatingExpenseCards)
 
 const DRAW_NOTHING = 0;
 const DRAW_OTB = 1;
-const DRAW_OPERATING_EXPENSE = 2;
-const DRAW_FARMERS_FATE = 3;
+const DRAW_FARMERS_FATE = 2;
 
 module.exports = {
     createGameState,
@@ -28,10 +27,12 @@ module.exports = {
     payAmount,
     drawOTB,
     drawFarmersFate,
+    drawOperatingExpense,
     calculateNetWorth,
+    shouldPlayerHarvest,
+    performHarvest,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
-    DRAW_OPERATING_EXPENSE
 }
 
 function createPlayer(name, color) {
@@ -112,9 +113,7 @@ const avatarColors = [
     "Blue",
 ];
 
-function isHarvestSquare(position) {
-    return position >= 19 && position <= 48;
-}
+
 
 const MAX_POSITION = 48;
 const MAX_DEBT = 50000;
@@ -148,6 +147,26 @@ function checkNewYear(state, positionalDiceValue) {
         state.players[state.turn].Hay.DoubleHay = false;
         state.players[state.turn].Grain.DoubleCorn = false;
 
+        state.players[state.turn].CompletedHarvests = {
+            "1stHay": false,
+            "2ndHay": false,
+            "3rdHay": false,
+            "4thHay": false,
+            "Wheat": false,
+            "Corn": false,
+            "Cherry": false,
+            "Apple": false,
+            "Livestock": false,
+        }
+
+        // TODO: remove IRS card, other Farmers Fate end of the year cards
+        // and put it back into the deck
+        const fate = state.players[state.turn].Fate;
+        for(let fateCard of fate) {
+            state.FarmersFateDeck[fateCard]++;
+        }
+        state.players[state.turn].Fate = [];
+
         return true;
     }
     return false;
@@ -159,10 +178,10 @@ function movePlayer(state, diceValue) {
     state.players[state.turn].Position %= (MAX_POSITION+1);
 
     if (isHarvestSquare(state.players[state.turn].Position)) {
-        state.players[state.turn].shouldHarvest = true;
+        state.shouldHarvest = true;
     }
 
-    state.players[state.turn].shouldMove = false;
+    state.shouldMove = false;
 }
 
 function payAmount(state, amount) {
@@ -307,24 +326,34 @@ function drawOTB(state) {
 }
 
 function drawFarmersFate(state) {
-    let i = drawRandomCardFromDeck(state.FarmersFateDeck);
+    let id = drawRandomCardFromDeck(state.FarmersFateDeck);
 
     // if the draw stack is empty, reshuffle
-    if (i === -1) {
+    if (id === -1) {
         state.FarmersFateDeck = createFarmersFateDeck();
-        i = drawRandomCardFromDeck(state.FarmersFateDeck);
+        id = drawRandomCardFromDeck(state.FarmersFateDeck);
     }
 
-    state.FarmersFateDeck[i]--;
-    state.players[state.turn].Fate.push(i);
-    return FarmersFateCards[i];
+    state.FarmersFateDeck[id]--;
+    state.players[state.turn].Fate.push(id);
+    return FarmersFateCards[id];
 }
 
 function drawOperatingExpense(state) {
-    const i = drawRandomCardFromDeck(state.OperatingExpenseDeck);
-    state.OperatingExpenseDeck[i]--;
+    const id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
 
-    switch(i) {
+    // if the draw stack is empty, reshuffle
+    if (id === -1) {
+        state.OperatingExpenseDeck = createOperatingExpenseDeck();
+        id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
+    }
+
+    state.OperatingExpenseDeck[id]--;
+    return [OperatingExpenseCards[id], operatingExpenseCosts(id)];
+}
+
+function operatingExpenseCosts(id) {
+    switch(id) {
         case 0: return -0.1*state.players[state.turn].Debt; // pay 10% interest
         case 1: return -3000; 
         case 2: return -500;
@@ -337,7 +366,11 @@ function drawOperatingExpense(state) {
         case 9: return state.players[state.turn].Tractors == 0 ? -2000 : 0; // pay 2000 no tractor
         case 10: return -100*state.players[state.turn].Grain.Acres; // pay $100 per grain acre
         case 11: return -500;
-        // TODO
+        case 12: return -3000;
+        case 13: return -100*(state.players[state.turn].Hay.Acres + state.players[state.turn].Grain.Acres + state.players[state.turn].Fruit.Acres);
+        case 14: return -1500;
+        case 15: return -100*state.players[state.turn].Livestock.Total;
+        default: return 0;
     }
 }
 
@@ -360,4 +393,170 @@ function calculateNetWorth(state, playerID) {
     netWorth += state.players[playerID].Cash;
     netWorth -= state.players[playerID].Debt;
     state.players[playerID].NetWorth = netWorth;
+}
+
+function shouldPlayerHarvest(state) {
+    const position = state.players[state.turn].Position;
+    const completedHarvests = state.players[state.turn].CompletedHarvests;
+    const typeOfHarvest = typeOfHarvestSquare(position);
+
+    let hasThisAsset = false;
+    if (typeOfHarvest === 'Livestock') {
+        hasThisAsset = state.players[state.turn].Livestock.Total > 0;
+    }
+    else if (typeOfHarvest === '1stHay' || typeOfHarvest === '2ndHay' ||
+    typeOfHarvest === '3rdHay' || typeOfHarvest === '4thHay') {
+        hasThisAsset = state.players[state.turn].Hay.Acres > 0;
+    }
+    else if (typeOfHarvest === 'Corn' || typeOfHarvest === 'Wheat') {
+        hasThisAsset = state.players[state.turn].Grain.Acres > 0;
+    }
+    else if (typeOfHarvest === 'Apple' || typeOfHarvest === 'Cherry') {
+        hasThisAsset = state.players[state.turn].Fruit.Acres > 0;
+    }
+
+    return isHarvestSquare(position) && hasThisAsset &&
+        completedHarvests[typeOfHarvestSquare(position)] == false;
+}
+
+function isHarvestSquare(position) {
+    return position >= 19 && position <= 48;
+}
+
+
+// what kind of harvest?
+function typeOfHarvestSquare(position) {
+    if (position >= 19 && position <= 22) {
+        return '1stHay';
+    }
+    if (position >= 23 && position <= 25) {
+        return 'Cherry';
+    }
+    if (position >= 26 && position <= 28) {
+        return '2ndHay';
+    }
+    if (position >= 29 && position <= 33) {
+        return 'Wheat';
+    }
+    if (position >= 34 && position <= 35) {
+        return '3rdHay';
+    }
+    if (position >= 36 && position <= 39) {
+        return 'Livestock';
+    }
+    if (position >= 40 && position <= 41) {
+        return '4thHay';
+    }
+    if (position >= 42 && position <= 45) {
+        return 'Apple';
+    }
+    if (position >= 46 && position <= 48) {
+        return 'Corn';
+    }
+    return null;
+}
+
+function calculateHayHarvest(acerage, diceRoll) {
+    const payoutPerAcre = [40,60,100,150,220,300];
+    return acerage * payoutPerAcre[diceRoll-1];
+}
+
+function calculateGrainHarvest(acerage, diceRoll) {
+    const payoutPerAcre = [80,150,250,375,525,700];
+    let payout = acerage * payoutPerAcre[diceRoll-1];
+    if (diceRoll == 4 || diceRoll == 5) {
+        if (acerage % 20 !== 0) {
+            // 10 acres, 30 acres, 50 acres, etc...
+            payout += 50;
+        }
+    }
+    return payout;
+}
+
+function calculateFruitHarvest(acerage, diceRoll) {
+    const payoutPerAcre = [400,700,1200,1800,2600,3500];
+    return acerage * payoutPerAcre[diceRoll-1];
+}
+
+function calculateLivestockHarvest(heads, diceRoll) {
+    const payoutPerHead = [140,200,280,380,500,750];
+    return heads * payoutPerHead[diceRoll-1];
+}
+
+
+function performHarvest(state, diceValue) {
+    const playerID = state.turn;
+    const position = state.players[playerID].Position;
+    const doubleHay = state.players[playerID].Hay.DoubleHay;
+    const doubleCorn = state.players[playerID].Grain.DoubleCorn;
+
+    if(!shouldPlayerHarvest(state)) {
+        return 0;
+    }
+    
+    const typeOfHarvest = typeOfHarvestSquare(position);
+    let payout = 0;
+
+    if (typeOfHarvest === '1stHay' || typeOfHarvest === '2ndHay' || 
+        typeOfHarvest === '3rdHay' || typeOfHarvest === '4thHay') {
+        payout = calculateHayHarvest(state.players[playerID].Hay.Acres, diceValue);
+
+        if (doubleHay) {
+            payout *= 2;
+        }
+
+        switch(position) {
+            case 21: payout /= 2; break;
+            case 26: payout *= 2; break;
+            default: break;
+        }
+    }
+    else if (typeOfHarvest === 'Cherry') {
+        payout = calculateFruitHarvest(state.players[playerID].Fruit.Acres, diceValue);
+
+        if (position === 23) {
+            payout /= 2;
+        }
+    }
+    else if (typeOfHarvest === 'Apple') {
+        payout = calculateFruitHarvest(state.players[playerID].Fruit.Acres, diceValue);
+    }
+    else if (typeOfHarvest === 'Wheat') {
+        payout = calculateGrainHarvest(state.players[playerID].Grain.Acres, diceValue);
+
+        // half the wheat harvest
+        if (state.players[playerID].Fate.includes(9)) {
+            payout /= 2;
+        }
+
+        if (position === 29) {
+            payout += 50*state.players[playerID].Grain.Acres;
+        }
+        else if (position === 33) {
+            payout -= 50*state.players[playerID].Grain.Acres;
+        }
+    }
+    else if (typeOfHarvest === 'Corn') {
+        payout = calculateGrainHarvest(state.players[playerID].Grain.Acres, diceValue);
+    }
+    else if (typeOfHarvest === 'Livestock') {
+        payout = calculateLivestockHarvest(state.players[playerID].Livestock.Total, diceValue);
+
+        if (position === 37) {
+            payout /= 2;
+        }
+    }
+
+    // IRS garnishes wages
+    if (state.players[playerID].Fate.includes(4)) {
+        payout = 0;
+    }
+
+    // pay the player
+    state.players[playerID].Cash += payout;
+    calculateNetWorth(state, playerID);
+
+    // record that the Harvest was performed
+    state.shouldHarvest = false;
+    state.players[playerID].CompletedHarvests[typeOfHarvest] = true;
 }

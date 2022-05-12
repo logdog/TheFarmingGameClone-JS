@@ -16,6 +16,7 @@ socket.on('morePlayersJoined', handleMorePlayersJoined);
 
 socket.on('takenAvatars', handleTakenAvatars);
 socket.on('rollPositionDiceAnimation', handleRollPositionDiceAnimation);
+socket.on('rollHarvestDiceAnimation', handleRollHarvestDiceAnimation);
 socket.on('drawOTB', handleDrawOTB);
 socket.on('drawFarmersFate', handleDrawFarmersFate);
 socket.on('drawOperatingExpense', handleDrawOperatingExpense);
@@ -94,7 +95,7 @@ function paintGame(state) {
     //$('#game-board').css('border-color', state.players[myPlayerID].Color);
     
     // if game is playing
-    console.log(state);
+    console.log('paintGame()');
 
     // player totals
     $("#player-totals").empty();
@@ -103,6 +104,7 @@ function paintGame(state) {
     // roll the dice button
     $("#roll-dice-div").empty();
     if (state.turn === myPlayerID && state.shouldMove) {
+        
         $("#roll-dice-div").append( `<button id="roll-dice-btn">Roll for Position!</button>` );
         $('#roll-dice-btn').click(function() {
             socket.emit('rollPositionDice');
@@ -116,7 +118,7 @@ function paintGame(state) {
             $(this).remove();
         });
     }
-    else {
+    else if (state.turn === myPlayerID){
         $("#roll-dice-div").append( `<button id="roll-dice-btn">End Your Turn</button>` );
         $('#roll-dice-btn').click(function() {
             socket.emit('endTurn');
@@ -324,6 +326,9 @@ function handleRollPositionDiceAnimation(diceValue) {
     console.log('Dice Value: ', diceValue)
 }
 
+function handleRollHarvestDiceAnimation(diceValue) {
+    console.log('Dice Value: ', diceValue)
+}
 function handleDrawOTB(card) {
     $('#card-container').append(createOTBCard(card));
     $('#card-container').children().last().css('border-color', lastState.players[lastState.turn].Color);

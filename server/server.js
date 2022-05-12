@@ -8,7 +8,10 @@ const {
     payAmount,
     drawOTB, 
     drawFarmersFate,
+    drawOperatingExpense,
     calculateNetWorth,
+    shouldPlayerHarvest,
+    performHarvest,
     DRAW_OTB, 
     DRAW_FARMERS_FATE, 
 } = require('./game');
@@ -179,9 +182,13 @@ io.on('connection', client => {
 
         // roll the positional dice
         let positionalDiceValue = Math.floor(Math.random()*6)+1;
-        io.to(roomCode).emit('rollDicePositionAnimation', positionalDiceValue);
+        io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
 
+        console.log(states[roomCode])
         movePlayer(states[roomCode], positionalDiceValue);
+        console.log('move()')
+        console.log(states[roomCode])
+        
         const cardDrawType = checkPositionForDrawingCard(states[roomCode]);
 
 
@@ -207,6 +214,7 @@ io.on('connection', client => {
 
         // is this a new year?
         if (checkNewYear(states[roomCode], positionalDiceValue)) {
+            console.log("happy new year")
             client.emit('happyNewYear'); // an animation later?
             io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
         }
@@ -229,14 +237,64 @@ io.on('connection', client => {
         // calculate net worth
         calculateNetWorth(states[roomCode], states[roomCode].turn);
 
+        // does the player need to harvest?
+        states[roomCode].shouldHarvest = shouldPlayerHarvest(states[roomCode]);
+
         io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
     function handleRollHarvestDice() {
+        console.log('handleRollPositionDice()')
 
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+
+        if (!states[roomCode]) {
+            return;
+        }
+
+        // check that it is the correct player's turn, and they should move
+        if (states[roomCode].turn !== playerID || !states[roomCode].shouldHarvest) {
+            return;
+        }
+
+        // roll the harvest dice
+        let harvestDiceValue = Math.floor(Math.random()*6)+1;
+        io.to(roomCode).emit('rollHarvestDiceAnimation', harvestDiceValue);
+        
+        // harvest 
+        const harvestCode = performHarvest(states[roomCode], harvestDiceValue);
+        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+
+        // draw operating expense card
+        const [cardText, charge] = drawOperatingExpense(states[roomCode]);
+        payAmount(states[roomCode], -charge);
+        
+        io.to(roomCode).emit('drawOperatingExpense', cardText);
+        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
     function handleEndTurn() {
+        console.log('handleEndTurn()');
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+
+        if (!states[roomCode]) {
+            return;
+        }
+
+        // check that it is the correct player's turn, and they should move
+        if (states[roomCode].turn !== playerID || states[roomCode].shouldMove || states[roomCode].shouldHarvest) {
+            return;
+        }
+
+        console.log('done')
+
+        states[roomCode].turn++;
+        states[roomCode].turn %= states[roomCode].players.length;
+        states[roomCode].shouldMove = true;
+        states[roomCode].shouldHarvest = false;
+        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
 
     }
 

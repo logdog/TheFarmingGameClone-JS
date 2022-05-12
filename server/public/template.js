@@ -387,7 +387,7 @@ function createFarmersFateCard(text) {
 function createOperatingExpenseCard(text) {
     return `<div class="card OperatingExpenseCard">
         <span class="close-btn" title="shift-click to close all cards">&times</span>
-        <span> Farmers Fate </span>
+        <span> Operating Expense </span>
         <span> ${text}</span>
     </div>`;
 }
