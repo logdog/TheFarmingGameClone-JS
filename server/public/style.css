@@ -193,7 +193,9 @@ h1 {
     text-align: center;
     width: 60vw;
     height: 90vh;
-    border: 1vw solid black;
+    border-width: 1vw;
+    border-style: solid;
+    border-color: black;
 }
 
 .cell-corner {
@@ -399,7 +401,8 @@ h1 {
 .card:last-child {
     size: 100% 100%;
 
-    border: 5px solid black;
+    border-width: 5px;
+    border-style: solid;
 
     display: grid;
     grid-template-columns: [col1] 20px [col2] auto [col3] 20px [col4];
@@ -415,12 +418,13 @@ h1 {
     transition: 0.2s;
 }
 
+/* x button */
 .card > span:first-child:hover {
     background-color: gray;
     cursor: pointer;
 }
 
-
+/* title */
 .card > span:nth-child(2) {
     grid-column-start: col2;
     grid-column-end: col3;
@@ -430,6 +434,7 @@ h1 {
     font-weight: 500;
 }
 
+/* description */
 .card > span:last-child {
     grid-column-start: col1;
     grid-column-end: col4;

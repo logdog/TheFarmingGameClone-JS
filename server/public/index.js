@@ -87,6 +87,9 @@ function paintGame(state) {
     screen2.css('display', 'none');
     screen3.css('display', 'none');
     gameWrapper.css('display', 'flex');
+
+    // color the game board
+    //$('#game-board').css('border-color', state.players[myPlayerID].Color);
     
     // if game is playing
     console.log(state);
@@ -309,7 +312,7 @@ function handleRollPositionDiceAnimation(diceValue) {
 
 function handleDrawOTB(card) {
     $('#card-container').append(createOTBCard(card));
-    $('#card-container').last().css('border-color', lastState.players[lastState.turn].Color);
+    $('#card-container').children().last().css('border-color', lastState.players[lastState.turn].Color);
 
     // functional close button
     $('.close-btn').click(function() {
@@ -320,7 +323,7 @@ function handleDrawOTB(card) {
 
 function handleDrawFarmersFate(card) {
     $('#card-container').append(createFarmersFateCard(card));
-    $('#card-container').last().css('border-color', lastState.players[lastState.turn].Color);
+    $('#card-container').children().last().css('border-color', lastState.players[lastState.turn].Color);
 
     // functional close button
     $('.close-btn').click(function() {
@@ -330,7 +333,7 @@ function handleDrawFarmersFate(card) {
 
 function handleDrawOperatingExpense(card) {
     $('#card-container').append(createOperatingExpenseCard(card));
-    $('#card-container').last().css('border-color', lastState.players[lastState.turn].Color);
+    $('#card-container').children().last().css('border-color', lastState.players[lastState.turn].Color);
 
     // functional close button
     $('.close-btn').click(function() {
