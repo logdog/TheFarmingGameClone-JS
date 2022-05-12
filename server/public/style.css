@@ -231,9 +231,14 @@ h1 {
     width: 10%;
 }
 
-#row-2 > canvas {
+#board-image {
     width: 80%;
     height: 100%;
+    
+    background-image: url('board2.jpg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+
 }
 
 #row-2 > #column-left {
@@ -304,12 +309,6 @@ h1 {
     background-color: rgba(211, 139, 61, 0.846);
 }
 
-canvas {
-    background-image: url('board2.jpg');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-}
-
 .date {
     font-size: x-small;
     font-weight: 500;
@@ -371,4 +370,71 @@ canvas {
     left: 30%;
     width: 100px;
     height: 100px;
+}
+
+#card-container {
+    position: relative;
+    top: 30%;
+    left: 30%;
+    width: 40%;
+    height: 40%;
+}
+
+.card.OTBCard{
+    background-color: lightblue;
+}
+
+.card.FarmersFateCard{
+    background-color: lightpink;
+}
+
+.card.OperatingExpenseCard {
+    background-color: lightgoldenrodyellow;
+}
+
+.card {
+    display: none;
+}
+
+.card:last-child {
+    size: 100% 100%;
+
+    border: 5px solid black;
+
+    display: grid;
+    grid-template-columns: [col1] 20px [col2] auto [col3] 20px [col4];
+    grid-template-rows: [row1] 20px [row2] auto [row3];
+}
+
+.card > span:first-child {
+    grid-column-start: col3;
+    grid-column-end: col4;
+    grid-row-start: row1;
+    grid-row-end: row2;
+    background-color: lightgray;
+    transition: 0.2s;
+}
+
+.card > span:first-child:hover {
+    background-color: gray;
+    cursor: pointer;
+}
+
+
+.card > span:nth-child(2) {
+    grid-column-start: col2;
+    grid-column-end: col3;
+    grid-row-start: row1;
+    grid-row-end: row2;
+
+    font-weight: 500;
+}
+
+.card > span:last-child {
+    grid-column-start: col1;
+    grid-column-end: col4;
+    grid-row-start: row2;
+    grid-row-end: row3;
+    
+    font-weight: 200;
 }

@@ -15,7 +15,7 @@ socket.on('tooManyPlayers', handletooManyPlayers);
 socket.on('morePlayersJoined', handleMorePlayersJoined);
 
 socket.on('takenAvatars', handleTakenAvatars);
-socket.on('rollDiceAnimation', handleRollDiceAnimation);
+socket.on('rollPositionDiceAnimation', handleRollPositionDiceAnimation);
 socket.on('drawOTB', handleDrawOTB);
 socket.on('drawFarmersFate', handleDrawFarmersFate);
 socket.on('drawOperatingExpense', handleDrawOperatingExpense);
@@ -45,207 +45,17 @@ const buyCascadesButton = $('#Btn-Cascades');
 const buyToppenishRidgeButton = $('#Btn-Toppenish-Ridge');
 
 
-const state = {
-    turn: 0,
-    players: [
-        {
-            "Name": "Wapato Willie",
-            "Color": "Yellow",
-            "Position": 0,
-            "NetWorth": 40000,
-            "Cash": 5000,
-            "Debt": 5000,
-            "Hay": {
-                "Acres": 10,
-                "DoubleHay": false,
-            },
-            "Grain" : {
-                "Acres": 10,
-                "DoubleCorn": false,
-            },
-            "Fruit" : {
-                "Acres": 5,
-            },
-            "Livestock" : {
-                "Farm": 20,
-                "Ahtanum": 0,
-                "Rattlesnake": 0,
-                "Toppenish": 0,
-                "Cascades": 0,
-                "Total": 20,
-            },
-            "Tractors": 0,
-            "Harvesters": 0,
-            "OTB": [],
-            "Fate": [],
-        },
-        {
-            "Name": "Toppenish Tom",
-            "Color": "Green",
-            "Position": 0,
-            "NetWorth": 40000,
-            "Cash": 2500,
-            "Debt": 12000,
-            "Hay": {
-                "Acres": 40,
-                "DoubleHay": true,
-            },
-            "Grain" : {
-                "Acres": 10,
-                "DoubleCorn": false,
-            },
-            "Fruit" : {
-                "Acres": 5,
-            },
-            "Livestock" : {
-                "Farm": 10,
-                "Ahtanum": 0,
-                "Rattlesnake": 30,
-                "Toppenish": 50,
-                "Cascades": 0,
-                "Total": 90,
-            },
-            "Tractors": 1,
-            "Harvesters": 1,
-            "OTB": [],
-            "Fate": [],
-        },
-        {
-            "Name": "Roza Ray",
-            "Color": "Brown",
-            "Position": 35,
-            "NetWorth": 40000,
-            "Cash": 6900,
-            "Debt": 12000,
-            "Hay": {
-                "Acres": 20,
-                "DoubleHay": false,
-            },
-            "Grain" : {
-                "Acres": 10,
-                "DoubleCorn": true,
-            },
-            "Fruit" : {
-                "Acres": 15,
-            },
-            "Livestock" : {
-                "Farm": 30,
-                "Ahtanum": 0,
-                "Rattlesnake": 0,
-                "Toppenish": 0,
-                "Cascades": 40,
-                "Total": 70,
-            },
-            "Tractors": 0,
-            "Harvesters": 1,
-            "OTB": [],
-            "Fate": [],
-        },
-        {
-            "Name": "Harrah Harry",
-            "Color": "Black",
-            "NetWorth": 40000,
-            "Position": 35,
-            "Cash": 12300,
-            "Debt": 20000,
-            "Hay": {
-                "Acres": 20,
-                "DoubleHay": false,
-            },
-            "Grain" : {
-                "Acres": 10,
-                "DoubleCorn": true,
-            },
-            "Fruit" : {
-                "Acres": 15,
-            },
-            "Livestock" : {
-                "Farm": 30,
-                "Ahtanum": 0,
-                "Rattlesnake": 0,
-                "Toppenish": 0,
-                "Cascades": 40,
-                "Total": 70,
-            },
-            "Tractors": 0,
-            "Harvesters": 1,
-            "OTB": [],
-            "Fate": [],
-        },
-        {
-            "Name": "Sunnyside Sidney",
-            "Color": "White",
-            "Position": 23,
-            "NetWorth": 40000,
-            "Cash": 12300,
-            "Debt": 20000,
-            "Hay": {
-                "Acres": 20,
-                "DoubleHay": false,
-            },
-            "Grain" : {
-                "Acres": 10,
-                "DoubleCorn": true,
-            },
-            "Fruit" : {
-                "Acres": 15,
-            },
-            "Livestock" : {
-                "Farm": 30,
-                "Ahtanum": 0,
-                "Rattlesnake": 0,
-                "Toppenish": 0,
-                "Cascades": 40,
-                "Total": 70,
-            },
-            "Tractors": 0,
-            "Harvesters": 1,
-            "OTB": [],
-            "Fate": [],
-        },
-        {
-            "Name": "Satus Sam",
-            "Color": "Blue",
-            "Position": 17,
-            "NetWorth": 40000,
-            "Cash": 12300,
-            "Debt": 20000,
-            "Hay": {
-                "Acres": 20,
-                "DoubleHay": false,
-            },
-            "Grain" : {
-                "Acres": 10,
-                "DoubleCorn": true,
-            },
-            "Fruit" : {
-                "Acres": 15,
-            },
-            "Livestock" : {
-                "Farm": 30,
-                "Ahtanum": 0,
-                "Rattlesnake": 0,
-                "Toppenish": 0,
-                "Cascades": 40,
-                "Total": 70,
-            },
-            "Tractors": 0,
-            "Harvesters": 1,
-            "OTB": [],
-            "Fate": [],
-        }
-
-    ]
-};
-
-
 function createPlayerTotal(player) {
+
+    const doubleCornText = player.Grain.DoubleCorn ? " (Double Corn)" : "";
+    const doubleHayText = player.Hay.DoubleHay ? " (Double Hay)" : "";
+
     return `<label>${player.Name}</label>
     <label>Net Worth: $${player.NetWorth}</label>
     <label>Cash: $${player.Cash}</label>
     <label>Debt: $${player.Debt}</label>
-    <label>Hay: ${player.Hay.Acres} Acres</label>
-    <label>Grain: ${player.Grain.Acres} Acres (Double Corn)</label>
+    <label>Hay: ${player.Hay.Acres} Acres${doubleHayText}</label>
+    <label>Grain: ${player.Grain.Acres} Acres${doubleCornText}</label>
     <label>Cows: ${player.Livestock.Total}</label>
     <label>Tractors: ${player.Tractors}</label>
     <label>Harvesters: ${player.Harvesters}</label>`
@@ -269,7 +79,6 @@ function keyClick() {
 
 function paintGame(state) {
 
-    console.log('pait')
     if (myPlayerID === null) {
         return;
     }
@@ -281,11 +90,6 @@ function paintGame(state) {
     
     // if game is playing
     console.log(state);
-    console.log('pait')
-
-    // get the canvas and context
-    let canvas = document.getElementById('canvas');
-    let ctx = canvas.getContext('2d');
 
     // player totals
     $("#player-totals").empty();
@@ -293,11 +97,26 @@ function paintGame(state) {
 
     // roll the dice button
     $("#roll-dice-div").empty();
-    if (state.turn === myPlayerID) {
-        $("#roll-dice-div").append( `<button id="roll-dice-btn">Roll the Dice!</button>` );
+    if (state.turn === myPlayerID && state.shouldMove) {
+        $("#roll-dice-div").append( `<button id="roll-dice-btn">Roll for Position!</button>` );
         $('#roll-dice-btn').click(function() {
-            socket.emit('rollDice');
-        })
+            socket.emit('rollPositionDice');
+            $(this).remove();
+        });
+    }
+    else if (state.turn === myPlayerID && state.shouldHarvest) {
+        $("#roll-dice-div").append( `<button id="roll-dice-btn">Roll for Harvest!</button>` );
+        $('#roll-dice-btn').click(function() {
+            socket.emit('rollHarvestDice');
+            $(this).remove();
+        });
+    }
+    else {
+        $("#roll-dice-div").append( `<button id="roll-dice-btn">End Your Turn</button>` );
+        $('#roll-dice-btn').click(function() {
+            socket.emit('endTurn');
+            $(this).remove();
+        });
     }
 
     // draw the game tokens on the board
@@ -484,18 +303,37 @@ function handletooManyPlayers(msg) {
     console.log(msg)
 }
 
-function handleRollDiceAnimation(diceValue) {
+function handleRollPositionDiceAnimation(diceValue) {
     console.log('Dice Value: ', diceValue)
 }
 
-function handleDrawOTB(otb) {
-    alert(otb);
+function handleDrawOTB(card) {
+    $('#card-container').append(createOTBCard(card));
+    $('#card-container').last().css('border-color', lastState.players[lastState.turn].Color);
+
+    // functional close button
+    $('.close-btn').click(function() {
+        $(this).parent().remove();
+    });
+
 }
 
 function handleDrawFarmersFate(card) {
-    alert(card);
+    $('#card-container').append(createFarmersFateCard(card));
+    $('#card-container').last().css('border-color', lastState.players[lastState.turn].Color);
+
+    // functional close button
+    $('.close-btn').click(function() {
+        $(this).parent().remove();
+    });
 }
 
 function handleDrawOperatingExpense(card) {
-    alert(card);
+    $('#card-container').append(createOperatingExpenseCard(card));
+    $('#card-container').last().css('border-color', lastState.players[lastState.turn].Color);
+
+    // functional close button
+    $('.close-btn').click(function() {
+        $(this).parent().remove();
+    });
 }

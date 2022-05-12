@@ -33,41 +33,45 @@ function boardTemplate() {
 
     // create row one
     master_str += '<div id="row-1" class="top-row">';
-    master_str += createCellCorner(data[0]);
+    master_str += createCellCorner(gameBoardSquares[0]);
     for (let id=1; id < 14; id++) {
-        master_str += createCell(data[id]);
+        master_str += createCell(gameBoardSquares[id]);
     }
-    master_str += createCellCorner(data[14]);
+    master_str += createCellCorner(gameBoardSquares[14]);
     master_str += endDiv();
 
     // create row 2
     master_str += '<div id="row-2"> <div id="column-left" class="side-row">'
     for (let id=37; id < 49; id++) {
-        master_str += createCell(data[id]);
+        master_str += createCell(gameBoardSquares[id]);
     }
     master_str += endDiv();
-    master_str += '<canvas id="canvas"></canvas><div id="column-right" class="side-row">'
+    master_str += `<div id="board-image">
+        <div id="dice-wrapper"></div>
+        <div id="card-container"></div>
+    </div>
+    <div id="column-right" class="side-row">`
 
     for (let id=15; id < 25; id++) {
-        master_str += createCell(data[id]);
+        master_str += createCell(gameBoardSquares[id]);
     }
     master_str += endDiv();
     master_str += endDiv();
 
     // create row 3
     master_str += '<div id="row-3" class="top-row">'
-    master_str += createCellCorner(data[25])
+    master_str += createCellCorner(gameBoardSquares[25])
     for (let id=26; id < 36; id++) {
-        master_str += createCell(data[id]);
+        master_str += createCell(gameBoardSquares[id]);
     }
-    master_str += createCellCorner(data[36])
+    master_str += createCellCorner(gameBoardSquares[36])
     master_str += endDiv();
 
     return master_str;
 }
 
 
-data = [
+gameBoardSquares = [
     {
         "index": 0,
         "Date": "CHRISTMAS VACTACTION",
@@ -362,6 +366,28 @@ data = [
         "Harvest": "Corn-Harvest",
         "Text": "First snow. Draw Farmer's Fate."
     }
-]
+];
 
-// DRAW THE SECOND SCREEN
+function createOTBCard(text) {
+    return `<div class="card OTBCard">
+        <span class="close-btn">&times</span>
+        <span> O.T.B. </span>
+        <span> ${text}</span>
+    </div>`;
+}
+
+function createFarmersFateCard(text) {
+    return `<div class="card FarmersFateCard">
+        <span class="close-btn">&times</span>
+        <span> Farmers Fate </span>
+        <span> ${text}</span>
+    </div>`;
+}
+
+function createOperatingExpenseCard(text) {
+    return `<div class="card OperatingExpenseCard">
+        <span class="close-btn">&times</span>
+        <span> Farmers Fate </span>
+        <span> ${text}</span>
+    </div>`;
+}

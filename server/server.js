@@ -1,4 +1,18 @@
-const { createGameState, movePlayer } = require('./game');
+const { 
+    createGameState, 
+    movePlayer, 
+    checkPositionForDrawingCard,
+    checkPositionForBalances,
+    checkNewYear,
+    collectAmount,
+    payAmount,
+    drawOTB, 
+    drawFarmersFate,
+    calculateNetWorth,
+    DRAW_OTB, 
+    DRAW_FARMERS_FATE, 
+} = require('./game');
+
 const { makeid } = require('./utils');
 
 const express = require('express');
@@ -48,8 +62,9 @@ io.on('connection', client => {
     client.on('joinGame', handleJoinGame);
     client.on('avatarSelection', handleAvatarSelection);
     client.on('startGame', handleStartGame);
-    client.on('rollDice', handleRollDice);
-    client.on('playAgain', handlePlayAgain);
+    client.on('rollPositionDice', handleRollPositionDice);
+    client.on('rollHarvestDice', handleRollHarvestDice);
+    client.on('endTurn', handleEndTurn);
 
     function handleNewGame() {
         console.log('handleNewGame()')
@@ -147,104 +162,82 @@ io.on('connection', client => {
         io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
-    function handleRollDice() {
-        console.log('handleRollDice()')
+    function handleRollPositionDice() {
+        console.log('handleRollPositionDice()')
 
         let roomCode = clientRooms[client.id];
         let playerID = playerIDs[client.id];
 
-        // check that it is the correct player's turn
-        if (states[roomCode].turn !== playerID) {
+        if (!states[roomCode]) {
             return;
         }
 
-        let diceValue = Math.floor(Math.random()*6)+1;
-        io.to(roomCode).emit('rollDiceAnimation', diceValue);
+        // check that it is the correct player's turn, and they should move
+        if (states[roomCode].turn !== playerID || !states[roomCode].shouldMove) {
+            return;
+        }
 
-        movePlayer(states[roomCode], diceValue);
+        // roll the positional dice
+        let positionalDiceValue = Math.floor(Math.random()*6)+1;
+        io.to(roomCode).emit('rollDicePositionAnimation', positionalDiceValue);
+
+        movePlayer(states[roomCode], positionalDiceValue);
+        const cardDrawType = checkPositionForDrawingCard(states[roomCode]);
+
+
+        switch(cardDrawType) {
+            case DRAW_OTB: {
+                const cardText = drawOTB(states[roomCode]);
+
+                // the deck could be empty
+                if (cardText !== null) {
+                    io.to(roomCode).emit('drawOTB', cardText);
+                }
+                break;
+            }
+            case DRAW_FARMERS_FATE: {
+                // the deck cannot be empty
+                const cardText = drawFarmersFate(states[roomCode]);
+                io.to(roomCode).emit('drawFarmersFate', cardText);
+                break;
+            }
+        }
+
+        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+
+        // is this a new year?
+        if (checkNewYear(states[roomCode], positionalDiceValue)) {
+            client.emit('happyNewYear'); // an animation later?
+            io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+        }
+
+        // collect money or pay up
+        const moneyToCollect = checkPositionForBalances(states[roomCode]);
+        console.log('moneyToCollect', moneyToCollect);
+        if (moneyToCollect > 0) {
+            collectAmount(states[roomCode], moneyToCollect);
+        }
+        else {
+            const paymentCode = payAmount(states[roomCode], -moneyToCollect);
+
+            switch(paymentCode) {
+                case 3: break; // requires player to sell their assets
+                case 4: break; // player is bankrupt... game over?
+            }
+        }
+
+        // calculate net worth
+        calculateNetWorth(states[roomCode], states[roomCode].turn);
+
         io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
-    function handleKeyDown(keyCode) {
-        console.log('handleKeyDown()')
+    function handleRollHarvestDice() {
 
-        var roomCode = clientRooms[client.id];
-
-        if (!roomCode) {
-            return;
-        }
-
-        if (!state[roomCode].started) {
-            return;
-        }
-
-        updateGame(keyCode, roomCode);
     }
 
-    function handlePlayAgain() {
-        console.log('playAgain()')
+    function handleEndTurn() {
 
-        console.log('1()')
-        var roomCode = clientRooms[client.id];
-        if (!roomCode) {
-            return;
-        }
-
-        console.log('2()')
-        if (state[roomCode].started) {
-            return;
-        }
-
-        console.log('newGame()')
-        state[roomCode] = newGame(state[roomCode]);
-        state[roomCode].started = true;
-        io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
     }
-
-    
-
-    function updateGame(keyCode, roomCode) {
-        console.log('updateGame()')
-
-        if(client.id !== state[roomCode].player1.id && client.id !== state[roomCode].player2.id) {
-            return;
-        }
-
-        if(client.id === state[roomCode].player1.id && state[roomCode].turn !== 1) {
-            return;
-        }
-        else if (client.id === state[roomCode].player2.id && state[roomCode].turn !== 2) {
-            return;
-        }
-
-        // game logic
-        state[roomCode] = processGuess(keyCode, state[roomCode]);
-
-        if (checkWordIsCorrect(state[roomCode])) {
-            state[roomCode] = updateCorrectWord(state[roomCode]);
-        }
-
-        io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
-
-        var winner = checkWinner(state[roomCode]);
-        if (winner !== 0) {
-            io.to(roomCode).emit('gameOver', winner);
-
-            state[roomCode].started = false; // no more key-downs
-            if (winner === 1) {
-                state[roomCode].player1.wins++;
-                state[roomCode].player2.losses++;
-            }
-            else if (winner === 2) {
-                state[roomCode].player2.wins++;
-                state[roomCode].player1.losses++;
-            }
-
-            state[roomCode].previousWords.push(state[roomCode].correctWord);
-            io.to(roomCode).emit('gameState', JSON.stringify(state[roomCode]));
-        }
-        
-    }
-
 
 });

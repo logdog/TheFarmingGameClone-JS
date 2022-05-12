@@ -21,6 +21,14 @@ const DRAW_FARMERS_FATE = 3;
 module.exports = {
     createGameState,
     movePlayer,
+    checkPositionForDrawingCard,
+    checkPositionForBalances,
+    checkNewYear,
+    collectAmount,
+    payAmount,
+    drawOTB,
+    drawFarmersFate,
+    calculateNetWorth,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
     DRAW_OPERATING_EXPENSE
@@ -122,7 +130,8 @@ const HARVESTER_VALUE = 10000;
 function createGameState(avatarIDs) {
     return {
         turn: Math.floor(Math.random() * avatarIDs.length),
-        hasRolledForPosition: false,
+        shouldMove: true,
+        shouldHarvest: false,
         OTBDeck: createOTBDeck(),
         FarmersFateDeck: createFarmersFateDeck(),
         OperatingExpenseDeck: createOperatingExpenseDeck(),
@@ -130,26 +139,30 @@ function createGameState(avatarIDs) {
     };
 }
 
-function movePlayer(state, diceValue) {
-
-    const prevPosition = state.players[state.turn].Position;
-
-    state.hasRolledForPosition = true;
-    state.players[state.turn].Position += diceValue;
-    state.players[state.turn].Position %= MAX_POSITION;
+function checkNewYear(state, positionalDiceValue) {
 
     // new year, get $5000
-    if (prevPosition > state.players[state.turn].Position) {
+    if (state.players[state.turn].Position >= 0 && state.players[state.turn].Position - positionalDiceValue < 0) {
         state.players[state.turn].Cash += 5000;
         state.players[state.turn].Year++;
         state.players[state.turn].Hay.DoubleHay = false;
         state.players[state.turn].Grain.DoubleCorn = false;
+
+        return true;
+    }
+    return false;
+}
+
+function movePlayer(state, diceValue) {
+
+    state.players[state.turn].Position += diceValue;
+    state.players[state.turn].Position %= (MAX_POSITION+1);
+
+    if (isHarvestSquare(state.players[state.turn].Position)) {
+        state.players[state.turn].shouldHarvest = true;
     }
 
-    positionAction(state);
-    calculateNetWorth(state, state.turn);
-
-    // harvest
+    state.players[state.turn].shouldMove = false;
 }
 
 function payAmount(state, amount) {
@@ -157,7 +170,7 @@ function payAmount(state, amount) {
     // pay the amount
     if (state.players[state.turn].Cash >= amount) {
         state.players[state.turn].Cash -= amount;
-        return;
+        return 0;
     }
 
     // can we borrow the entire loan from the bank? (Cannot take out more than $50k)
@@ -165,7 +178,7 @@ function payAmount(state, amount) {
 
     if (projectedLoanBalance <= MAX_DEBT) {
         state.players[state.turn].Debt  = projectedLoanBalance;
-        return;
+        return 1;
     }
 
     let amountOverMaxDebt = projectedLoanBalance - 50000;
@@ -174,16 +187,17 @@ function payAmount(state, amount) {
     if (state.players[state.turn].Cash >= amountOverMaxDebt) {
         state.players[state.turn].Cash -= amountOverMaxDebt;
         state.players[state.turn].Debt = MAX_DEBT;
-        return;
+        return 2;
     }
 
     // do we have enough in assets?
     if (amountOverMaxDebt < state.players[state.turn].Cash + calculateAssets(state, state.turn)/2) {
         // TODO: begin to sell assets
-    } 
+        return 3;
+    }
 
     // bankrupt
-    return -1;
+    return 4;
 }
 
 function collectAmount(state, amount) {
@@ -221,12 +235,12 @@ function checkPositionForBalances(state) {
         case 0: return 1000;
         case 1: return -0.1*state.players[state.turn].Debt; // pay 10% interest
         case 3: return state.players[state.turn].Livestock > 0 ? -500 : 0; // pay $500 if you have cows
-        case 5: return -1000;
+        case 5: return 1000;
         case 9: return state.players[state.turn].Grain.Acres > 0 ? -2000 : 0; // pay $2000 if you have wheat
         case 10: return -500;
         case 12: return state.players[state.turn].Fruit.Acres > 0 ? -2000 : 0; // pay $2000 if you own fruit
         case 15: return -500;
-        case 16: return -100;
+        case 16: return -1000;
         case 17: return 500;
         case 18: return -500;
 
@@ -271,8 +285,10 @@ function drawRandomCardFromDeck(deck) {
 
     const val = Math.floor(Math.random()*total + 1);
 
+    let accumulated = 0;
     for(let i=0; i<deck.length; i++) {
-        if (val < deck[i]) {
+        accumulated += deck[i];
+        if (val < accumulated) {
             return i;
         }
     }
@@ -280,10 +296,48 @@ function drawRandomCardFromDeck(deck) {
 
 function drawOTB(state) {
     const i = drawRandomCardFromDeck(state.OTBDeck);
-    state.OTBDeck[i]--;
 
-    switch (i) {
-        
+    if (i === -1) {
+        return null;
+    }
+
+    state.OTBDeck[i]--;
+    state.players[state.turn].OTB.push(i);
+    return OTBCards[i];
+}
+
+function drawFarmersFate(state) {
+    let i = drawRandomCardFromDeck(state.FarmersFateDeck);
+
+    // if the draw stack is empty, reshuffle
+    if (i === -1) {
+        state.FarmersFateDeck = createFarmersFateDeck();
+        i = drawRandomCardFromDeck(state.FarmersFateDeck);
+    }
+
+    state.FarmersFateDeck[i]--;
+    state.players[state.turn].Fate.push(i);
+    return FarmersFateCards[i];
+}
+
+function drawOperatingExpense(state) {
+    const i = drawRandomCardFromDeck(state.OperatingExpenseDeck);
+    state.OperatingExpenseDeck[i]--;
+
+    switch(i) {
+        case 0: return -0.1*state.players[state.turn].Debt; // pay 10% interest
+        case 1: return -3000; 
+        case 2: return -500;
+        case 3: return -1000;
+        case 4: return -500;
+        case 5: return state.players[state.turn].Harvesters == 0 ? -2000 : 0; // pay 2000 no harvester
+        case 6: return -500;
+        case 7: return -1000;
+        case 8: return -100*state.players[state.turn].Fruit.Acres; // pay $100 per fruit acre
+        case 9: return state.players[state.turn].Tractors == 0 ? -2000 : 0; // pay 2000 no tractor
+        case 10: return -100*state.players[state.turn].Grain.Acres; // pay $100 per grain acre
+        case 11: return -500;
+        // TODO
     }
 }
 
@@ -303,7 +357,6 @@ function calculateAssets(state, playerID) {
 // calculate the net worth for the current player
 function calculateNetWorth(state, playerID) {
     let netWorth = calculateAssets(state, playerID);
-    
     netWorth += state.players[playerID].Cash;
     netWorth -= state.players[playerID].Debt;
     state.players[playerID].NetWorth = netWorth;
