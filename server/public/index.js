@@ -96,10 +96,21 @@ function paintGame(state) {
     
     // if game is playing
     console.log('paintGame()');
+    console.log(state)
+    const myColor = state.players[myPlayerID].Color;
 
     // player totals
     $("#player-totals").empty();
     $("#player-totals").append(createPlayerTotal(state.players[myPlayerID]));
+
+    // make the dice my color
+    // $('.pip').css('background-color', myColor);
+    // if (myColor === 'White') {
+    //     $('.face').css('background-color', 'gray');
+    // }
+    // else {
+    //     $('.face').css('background-color', 'White');
+    // }
 
     // roll the dice button
     $("#roll-dice-div").empty();
@@ -203,6 +214,8 @@ function init() {
     initShopButtons();
     initAvatarSelection();
 
+    $("#position-dice-container").html(createDice());
+
     // create new game
     newGameButton.click(function() {
         socket.emit('newGame');
@@ -227,11 +240,6 @@ function init() {
             shiftKeyDown = false;
         }
     });
-
-    // playAgainButton.addEventListener('click', () => {
-    //     socket.emit('playAgain');
-    // });
-    paintGame(state);
 }
 
 function updateStartButton() {
@@ -324,6 +332,17 @@ function handletooManyPlayers(msg) {
 
 function handleRollPositionDiceAnimation(diceValue) {
     console.log('Dice Value: ', diceValue)
+    // go back to (0,0) then transform
+    const diceContainer = $('#position-dice-container');
+    const oldClass = diceContainer.attr('class');
+    $('#position-dice-container').removeClass();
+
+    if (oldClass.slice(-1) === 'a') {
+        $('#position-dice-container').addClass(`show-${diceValue}b`);
+    }
+    else {
+        $('#position-dice-container').addClass(`show-${diceValue}a`);
+    }
 }
 
 function handleRollHarvestDiceAnimation(diceValue) {

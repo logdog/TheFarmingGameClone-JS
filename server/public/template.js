@@ -47,7 +47,10 @@ function boardTemplate() {
     }
     master_str += endDiv();
     master_str += `<div id="board-image">
-        <div id="dice-wrapper"></div>
+        <div id="dice-container">
+            <div id="position-dice-container" class="show-0"></div>
+            <div id="harvest-dice-container"></div>
+        </div>
         <div id="card-container"></div>
     </div>
     <div id="column-right" class="side-row">`
@@ -389,5 +392,41 @@ function createOperatingExpenseCard(text) {
         <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> Operating Expense </span>
         <span> ${text}</span>
+    </div>`;
+}
+
+function createDice() {
+    return `<div class="face front">
+        <div class="pip pip-5"></div>
+    </div>
+    <div class="face back">
+        <div class="pip pip-1"></div>
+        <div class="pip pip-3"></div>
+        <div class="pip pip-4"></div>
+        <div class="pip pip-6"></div>
+        <div class="pip pip-7"></div>
+        <div class="pip pip-9"></div>
+    </div>
+    <div class="face right">
+        <div class="pip pip-1"></div>
+        <div class="pip pip-5"></div>
+        <div class="pip pip-9"></div>
+    </div>
+    <div class="face left">
+        <div class="pip pip-1"></div>
+        <div class="pip pip-3"></div>
+        <div class="pip pip-7"></div>
+        <div class="pip pip-9"></div>
+    </div>
+    <div class="face top">
+    <div class="pip pip-1"></div>
+    <div class="pip pip-3"></div>
+    <div class="pip pip-5"></div>
+    <div class="pip pip-7"></div>
+    <div class="pip pip-9"></div>
+    </div>
+    <div class="face bottom">
+        <div class="pip pip-1"></div>
+        <div class="pip pip-9"></div>
     </div>`;
 }

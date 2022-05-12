@@ -349,10 +349,10 @@ function drawOperatingExpense(state) {
     }
 
     state.OperatingExpenseDeck[id]--;
-    return [OperatingExpenseCards[id], operatingExpenseCosts(id)];
+    return [OperatingExpenseCards[id], operatingExpenseCosts(state, id)];
 }
 
-function operatingExpenseCosts(id) {
+function operatingExpenseCosts(state, id) {
     switch(id) {
         case 0: return -0.1*state.players[state.turn].Debt; // pay 10% interest
         case 1: return -3000; 

@@ -2,7 +2,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     align-content: center;
 }
 
@@ -27,7 +27,7 @@ h1 {
     width: 100%;
     color: white;
     background-color: green;
-    
+
     font-size: 100%;
     border-radius: 3%;
 }
@@ -64,7 +64,7 @@ h1 {
     justify-content: center;
 }
 
-#screen-2 > span {
+#screen-2>span {
     text-align: center;
     font-size: 2.5vh;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
@@ -77,12 +77,18 @@ h1 {
 
 /* Get rid of text selection */
 .noselect {
-    -webkit-touch-callout: none; /* iOS Safari */
-      -webkit-user-select: none; /* Safari */
-       -khtml-user-select: none; /* Konqueror HTML */
-         -moz-user-select: none; /* Old versions of Firefox */
-          -ms-user-select: none; /* Internet Explorer/Edge */
-              user-select: none; /* Non-prefixed version, currently
+    -webkit-touch-callout: none;
+    /* iOS Safari */
+    -webkit-user-select: none;
+    /* Safari */
+    -khtml-user-select: none;
+    /* Konqueror HTML */
+    -moz-user-select: none;
+    /* Old versions of Firefox */
+    -ms-user-select: none;
+    /* Internet Explorer/Edge */
+    user-select: none;
+    /* Non-prefixed version, currently
                                     supported by Chrome, Edge, Opera and Firefox */
 }
 
@@ -229,26 +235,16 @@ h1 {
     height: 80%;
 }
 
-#row-2 > .side-row {
+#row-2>.side-row {
     width: 10%;
 }
 
-#board-image {
-    width: 80%;
-    height: 100%;
-    
-    background-image: url('board2.jpg');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-
-}
-
-#row-2 > #column-left {
+#row-2>#column-left {
     display: flex;
     flex-direction: column-reverse;
 }
 
-#row-2 > #column-right {
+#row-2>#column-right {
     display: flex;
     flex-direction: column;
 }
@@ -260,54 +256,53 @@ h1 {
     height: 10%;
 }
 
-#row-1 > .cell {
+#row-1>.cell {
     flex: 1 1 0;
 }
 
-#row-2 > * > .cell {
+#row-2>*>.cell {
     flex: 1 1 0;
 }
 
-#row-3 > .cell {
+#row-3>.cell {
     flex: 1 1 0;
 }
-
 
 /* Coloring for Harvest */
-.First-Hay-Cutting > :first-child {
+.First-Hay-Cutting> :first-child {
     background-color: lightgreen;
 }
 
-.Second-Hay-Cutting > :first-child{
+.Second-Hay-Cutting> :first-child {
     background-color: lightgreen;
 }
 
-.Third-Hay-Cutting > :first-child{
+.Third-Hay-Cutting> :first-child {
     background-color: lightgreen;
 }
 
-.Fourth-Hay-Cutting > :first-child{
+.Fourth-Hay-Cutting> :first-child {
     background-color: lightgreen;
 }
 
-.Cherry-Harvest > :first-child{
+.Cherry-Harvest> :first-child {
     background-color: red;
 }
 
-.Apple-Harvest > :first-child{
+.Apple-Harvest> :first-child {
     background-color: crimson;
 }
 
-.Wheat-Harvest > :first-child{
+.Wheat-Harvest> :first-child {
     background-color: gold;
     /* border-bottom: 1vw solid yellow; */
 }
 
-.Corn-Harvest > :first-child{
+.Corn-Harvest> :first-child {
     background-color: yellow;
 }
 
-.Livestock-Sales > :first-child{
+.Livestock-Sales> :first-child {
     background-color: rgba(211, 139, 61, 0.846);
 }
 
@@ -341,15 +336,15 @@ h1 {
 }
 
 .player.Blue {
-    background-color: rgba(0,0,255,0.5);
+    background-color: rgba(0, 0, 255, 0.5);
 }
 
 .player.Green {
-    background-color: rgba(0,255,0,0.5);
+    background-color: rgba(0, 255, 0, 0.5);
 }
 
 .player.Yellow {
-    background-color: rgba(255,255,0,0.5);
+    background-color: rgba(255, 255, 0, 0.5);
 }
 
 .player.Brown {
@@ -357,36 +352,41 @@ h1 {
 }
 
 .player.White {
-    background-color: rgba(200,200,200,0.5);
+    background-color: rgba(200, 200, 200, 0.5);
 }
 
 .player.Black {
-    background-color: rgba(20,20,20,0.5);
+    background-color: rgba(20, 20, 20, 0.5);
 }
 
+/* board-image, cards, dice */
 
-/* dice */
-#dice-wrapper {
-    position: absolute;
-    top: 44%;
-    left: 30%;
-    width: 100px;
-    height: 100px;
+#board-image {
+    width: 80%;
+    height: 100%;
+
+    background-image: url('board2.jpg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+
+    display: grid;
+    grid-template-columns: [col1] 25% [col2] auto [col3] 25% [col4];
+    grid-template-rows: [row1] 33% [row2] auto [row3] 33% [row4];
 }
+
 
 #card-container {
-    position: relative;
-    top: 30%;
-    left: 30%;
-    width: 40%;
-    height: 40%;
+    grid-column-start: col2;
+    grid-column-end: col3;
+    grid-row-start: row2;
+    grid-row-end: row3;
 }
 
-.card.OTBCard{
+.card.OTBCard {
     background-color: lightblue;
 }
 
-.card.FarmersFateCard{
+.card.FarmersFateCard {
     background-color: lightpink;
 }
 
@@ -409,7 +409,7 @@ h1 {
     grid-template-rows: [row1] 20px [row2] auto [row3];
 }
 
-.card > span:first-child {
+.card>span:first-child {
     grid-column-start: col3;
     grid-column-end: col4;
     grid-row-start: row1;
@@ -419,13 +419,13 @@ h1 {
 }
 
 /* x button */
-.card > span:first-child:hover {
+.card>span:first-child:hover {
     background-color: gray;
     cursor: pointer;
 }
 
 /* title */
-.card > span:nth-child(2) {
+.card>span:nth-child(2) {
     grid-column-start: col2;
     grid-column-end: col3;
     grid-row-start: row1;
@@ -435,11 +435,172 @@ h1 {
 }
 
 /* description */
-.card > span:last-child {
+.card>span:last-child {
     grid-column-start: col1;
     grid-column-end: col4;
     grid-row-start: row2;
     grid-row-end: row3;
-    
+
     font-weight: 200;
+}
+
+/* Dice */
+
+#dice-container {
+    grid-column-start: col2;
+    grid-column-end: col3;
+    grid-row-start: row3;
+    grid-row-end: row4;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#position-dice-container {
+
+    width: 100px;
+    height: 100px;
+
+    transform-style: preserve-3d;
+    transition: transform 1s;
+}
+
+.face {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    font-size: 60px;
+    background-color: white;
+    border: 1px solid black;
+}
+
+/* create the dice */
+.front {
+    transform: translateZ(50px);
+}
+
+.back {
+    transform: rotateY(180deg) translateZ(50px);
+}
+
+.right {
+    transform: rotateY(90deg) translateZ(50px);
+}
+
+.left {
+    transform: rotateY(-90deg) translateZ(50px);
+}
+
+.top {
+    transform: rotateX(90deg) translateZ(50px);
+}
+
+.bottom {
+    transform: rotateX(-90deg) translateZ(50px);
+}
+
+/* draw pips */
+.pip {
+    position: fixed;
+    background-color: red;
+    border-radius: 50%;
+    width: 20%;
+    height: 20%;
+    transform: translate(-50%, -50%);
+}
+
+.pip-1 {
+    top: 20%;
+    left: 20%;
+}
+
+.pip-2 {
+    top: 20%;
+    left: 50%;
+}
+
+.pip-3 {
+    top: 20%;
+    left: 80%;
+}
+
+.pip-4 {
+    top: 50%;
+    left: 20%;
+}
+
+.pip-5 {
+    top: 50%;
+    left: 50%;
+}
+
+.pip-6 {
+    top: 50%;
+    left: 80%;
+}
+
+.pip-7 {
+    top: 80%;
+    left: 20%;
+}
+
+.pip-8 {
+    top: 80%;
+    left: 50%;
+}
+
+.pip-9 {
+    top: 80%;
+    left: 80%;
+}
+
+/* Add this property to rotate the dice (from a 1 originally) */
+.show-1a {
+    transform: rotateX(720deg) rotateZ(-720deg);
+}
+
+.show-2a {
+    transform: rotateX(450deg) rotateZ(720deg);
+}
+
+.show-3a {
+    transform: rotateY(-450deg) rotateZ(-1440deg);
+}
+
+.show-4a {
+    transform: rotateY(810deg) rotateZ(1440deg);
+}
+
+.show-5a {
+    transform: rotateX(-810deg) rotateZ(-1080deg);
+}
+
+.show-6a {
+    transform: rotateX(-900deg) rotateZ(1080deg);
+}
+
+/* in case we are already in show a */
+.show-1b {
+    transform: rotateX(-720deg) rotateZ(1800deg);
+}
+
+.show-2b {
+    transform: rotateX(-630deg) rotateZ(-1800deg);
+}
+
+.show-3b {
+    transform: rotateY(630deg) rotateZ(2160deg);
+}
+
+.show-4b {
+    transform: rotateY(-990deg) rotateZ(-2160deg);
+}
+
+.show-5b {
+    transform: rotateX(990deg) rotateZ(2520deg);
+}
+
+.show-6b {
+    transform: rotateX(540deg) rotateZ(-2520deg);
 }
