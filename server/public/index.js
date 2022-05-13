@@ -45,6 +45,7 @@ const buyAhtanumRidgeButton = $('#Btn-Ahtanum-Ridge');
 const buyRattlesnakeRidgeButton = $('#Btn-Rattlesnake-Ridge');
 const buyCascadesButton = $('#Btn-Cascades');
 const buyToppenishRidgeButton = $('#Btn-Toppenish-Ridge');
+const paybackDebtButton = $('#Btn-Payback-Debt');
 
 
 function createPlayerTotal(player) {
@@ -198,6 +199,11 @@ function initShopButtons() {
     buyToppenishRidgeButton.click(function () {
         console.log('Buy buyToppenishRidge');
         socket.emit('buy', 'ToppenishRidge', downPaymentInput.val());
+    });
+
+    paybackDebtButton.click(function () {
+        console.log('payback debt');
+        socket.emit('paybackDebt', downPaymentInput.val());
     });
 }
 
