@@ -555,52 +555,52 @@ h1 {
     left: 80%;
 }
 
-/* Add this property to rotate the dice (from a 1 originally) */
+/* Add this property to rotate the dice */
 .show-1a {
-    transform: rotateX(720deg) rotateZ(-720deg);
+    transform: rotateX(10turn) rotateY(10turn) rotateZ(10turn);
 }
 
 .show-2a {
-    transform: rotateX(450deg) rotateZ(720deg);
+    transform: rotateX(10.25turn) rotateY(10turn) rotateZ(10turn);
 }
 
 .show-3a {
-    transform: rotateY(-450deg) rotateZ(-1440deg);
+    transform: rotateX(10turn) rotateY(9.75turn) rotateZ(10turn);
 }
 
 .show-4a {
-    transform: rotateY(810deg) rotateZ(1440deg);
+    transform: rotateX(10turn) rotateY(10.25turn) rotateZ(10turn);
 }
 
 .show-5a {
-    transform: rotateX(-810deg) rotateZ(-1080deg);
+    transform: rotateX(9.75turn) rotateY(10turn) rotateZ(10turn);
 }
 
 .show-6a {
-    transform: rotateX(-900deg) rotateZ(1080deg);
+    transform: rotateX(10.5turn) rotateY(10turn) rotateZ(10turn);
 }
 
-/* in case we are already in show a */
+/* show a -> show b -> show a ... to keep good rotations */
 .show-1b {
-    transform: rotateX(-720deg) rotateZ(1800deg);
+    transform: rotateX(-10turn) rotateY(-10turn) rotateZ(-10turn);
 }
 
 .show-2b {
-    transform: rotateX(-630deg) rotateZ(-1800deg);
+    transform: rotateX(-9.75turn) rotateY(-10turn) rotateZ(-10turn);
 }
 
 .show-3b {
-    transform: rotateY(630deg) rotateZ(2160deg);
+    transform: rotateX(-10turn) rotateY(-10.25turn) rotateZ(-10turn);
 }
 
 .show-4b {
-    transform: rotateY(-990deg) rotateZ(-2160deg);
+    transform: rotateX(-10turn) rotateY(-9.75turn) rotateZ(-10turn);
 }
 
 .show-5b {
-    transform: rotateX(990deg) rotateZ(2520deg);
+    transform: rotateX(-10.25turn) rotateY(-10turn) rotateZ(-10turn);
 }
 
 .show-6b {
-    transform: rotateX(540deg) rotateZ(-2520deg);
+    transform: rotateX(-10.5turn) rotateY(-10turn) rotateZ(-10turn);
 }
