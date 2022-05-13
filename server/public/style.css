@@ -1,3 +1,12 @@
+/* colors */
+
+:root {
+    --nationalBlue: #255A87;
+    --cornGold: #F6C915;
+}
+
+
+
 body {
     display: flex;
     flex-direction: column;
@@ -182,7 +191,6 @@ h1 {
     border-color: blue;
     background-image: url('icons/sam.png');
 }
-
 
 
 
@@ -476,6 +484,10 @@ h1 {
 #harvest-dice-container > .face {
     background-color: gold;
 }
+
+/* #harvest-dice-container > * > .pip {
+    background-color: var(--cornGold);
+} */
 
 /* create the dice */
 .front {
