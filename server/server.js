@@ -12,6 +12,7 @@ const {
     calculateNetWorth,
     shouldPlayerHarvest,
     performHarvest,
+    performBuy,
     DRAW_OTB, 
     DRAW_FARMERS_FATE, 
 } = require('./game');
@@ -69,6 +70,9 @@ io.on('connection', client => {
     client.on('rollPositionDice', handleRollPositionDice);
     client.on('rollHarvestDice', handleRollHarvestDice);
     client.on('endTurn', handleEndTurn);
+
+    client.on('buy', handleBuy);
+
 
     function handleNewGame() {
         console.log('handleNewGame()')
@@ -304,7 +308,25 @@ io.on('connection', client => {
         states[roomCode].shouldMove = true;
         states[roomCode].shouldHarvest = false;
         io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+    }
 
+    function handleBuy(item, downPayment) {
+        console.log('handleBuy()');
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+
+        if (!states[roomCode]) {
+            return;
+        }
+
+        // can only buy on your turn
+        if (states[roomCode].turn !== playerID) {
+            return;
+        }
+
+        const buyCode = performBuy(states[roomCode], item, downPayment);
+        // TODO: handle invalid buys
+        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
 });

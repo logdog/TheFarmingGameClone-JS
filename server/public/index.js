@@ -38,6 +38,7 @@ const startGameButton = $('#Btn-Start-Game');
 const buyHayButton = $('#Btn-Hay');
 const buyGrainButton = $('#Btn-Grain');
 const buyCowsButton = $('#Btn-Cows')
+const buyFruitButton = $('#Btn-Fruit');
 const buyTractorButton = $('#Btn-Tractor');
 const buyHarvesterButton = $('#Btn-Harvester');
 const buyAhtanumRidgeButton = $('#Btn-Ahtanum-Ridge');
@@ -57,6 +58,7 @@ function createPlayerTotal(player) {
     <label>Debt: $${player.Debt}</label>
     <label>Hay: ${player.Hay.Acres} Acres${doubleHayText}</label>
     <label>Grain: ${player.Grain.Acres} Acres${doubleCornText}</label>
+    <label>Fruit: ${player.Fruit.Acres} Acre</label>
     <label>Cows: ${player.Livestock.Total}</label>
     <label>Tractors: ${player.Tractors}</label>
     <label>Harvesters: ${player.Harvesters}</label>`
@@ -145,49 +147,57 @@ function paintGame(state) {
 }
 
 function initShopButtons() {
+
+    const downPaymentInput = $('#down-payment');
+
     buyHayButton.click(function() {
         console.log('Buy Hay');
-        socket.emit('buyHay');
+        socket.emit('buy', 'Hay', downPaymentInput.val());
     });
 
     buyGrainButton.click(function() {
         console.log('Buy Grain');
-        socket.emit('buyGrain');
+        socket.emit('buy', 'Grain', downPaymentInput.val());
     });
 
     buyCowsButton.click(function() {
         console.log('Buy Cows');
-        socket.emit('buyCows');
+        socket.emit('buy', 'Cows', downPaymentInput.val());
+    });
+
+    buyFruitButton.click(function() {
+        console.log('Buy Cows');
+        socket.emit('buy', 'Fruit', downPaymentInput.val());
     });
 
     buyTractorButton.click(function() {
         console.log('Buy Tractor');
-        socket.emit('buyTractor');
+        socket.emit('buy', 'Tractor', downPaymentInput.val());
     });
 
     buyHarvesterButton.click(function() {
         console.log('Buy Harvester');
-        socket.emit('buyHarvester');
+        socket.emit('buy', 'Harvester', downPaymentInput.val());
     });
 
     buyAhtanumRidgeButton.click(function () {
         console.log('Buy AhtanumRidge');
-        socket.emit('buyAhtanumRidge');
+        socket.emit('buy', 'AhtanumRidge', downPaymentInput.val());
     });
 
     buyRattlesnakeRidgeButton.click(function () {
         console.log('Buy RattlesnakeRidge');
-        socket.emit('buyRattlesnakeRidge');
+        socket.emit('buy', 'RattlesnakeRidge', downPaymentInput.val());
     });
 
     buyCascadesButton.click(function () {
         console.log('Buy buyCascadesButton');
-        socket.emit('buyCascades');
+        socket.emit('buy', 'Cascades', downPaymentInput.val());
     });
 
     buyToppenishRidgeButton.click(function () {
         console.log('Buy buyToppenishRidge');
-        socket.emit('buyToppenishRidge');
+        socket.emit('buy', 'ToppenishRidge', downPaymentInput.val());
     });
 }
 

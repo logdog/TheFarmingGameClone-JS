@@ -31,6 +31,7 @@ module.exports = {
     calculateNetWorth,
     shouldPlayerHarvest,
     performHarvest,
+    performBuy,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
 }
@@ -57,15 +58,26 @@ function createPlayer(name, color) {
         },
         "Livestock" : {
             "Farm": 0,
-            "Ahtanum": 0,
-            "Rattlesnake": 0,
-            "Toppenish": 0,
+            "AhtanumRidge": 0,
+            "RattlesnakeRidge": 0,
             "Cascades": 0,
+            "ToppenishRidge": 0,
             "Total": 0,
         },
         "Tractors": 0,
         "Harvesters": 0,
-        "OTB": [],
+        "OTB": {
+            'Hay': 1,
+            'Grain': 1,
+            'Cows': 1,
+            'Fruit': 1,
+            'Tractor': 1,
+            'Harvester': 1,
+            'AhtanumRidge': 1,
+            'RattlesnakeRidge': 1,
+            'Cascades': 1,
+            'ToppenishRidge': 1,
+        },
         "Fate": [],
         "CompletedHarvests": {
             "1stHay": false,
@@ -126,6 +138,100 @@ const FRUIT_VALUE_PER_ACRE = 5000;
 const TRACTOR_VALUE = 10000;
 const HARVESTER_VALUE = 10000;
 
+const PURCHASE_PRICES = {
+    'Hay': 20000,
+    'Grain': 20000,
+    'Cows': 5000,
+    'Fruit': 25000,
+    'Tractor': 10000,
+    'Harvester': 10000,
+    'AhtanumRidge': 20000,
+    'RattlesnakeRidge': 30000,
+    'Cascades': 40000,
+    'ToppenishRidge': 50000,
+}
+
+const OTB_ITEM_MAP = ['Hay', 'Grain', 'Cows', 'Fruit', 'Tractor', 'Harvester',
+    'AhtanumRidge', 'RattlesnakeRidge', 'Cascades', 'ToppenishRidge'];
+
+function performBuy(state, item, downPayment) {
+
+    const player = state.players[state.turn];
+    console.log('buy');
+    
+    // invalid item
+    if (!item in PURCHASE_PRICES) {
+        return 0;
+    }
+
+    console.log('1');
+
+    // insufficient funds
+    if (player.Cash < downPayment) {
+        return 0;
+    }
+
+    console.log('2');
+
+    // did not put 20% down
+    const itemPrice = PURCHASE_PRICES[item];
+    const minimumDownPayment = 0.2*itemPrice;
+    if (downPayment < minimumDownPayment) {
+        return 0;
+    }
+
+    console.log('3');
+
+    // too much debt
+    let loanAmount = itemPrice - downPayment;
+    if (loanAmount + player.Debt > MAX_DEBT) {
+        return 0;
+    }
+
+    console.log('4');
+
+    // don't have the OTB
+    if (!player.OTB[item]) {
+        return 0;
+    }
+
+    console.log('5');
+
+    // if the player tries to pay too much
+    if (downPayment > itemPrice) {
+        downPayment = itemPrice;
+        loanAmount = 0;
+    }
+
+    // make the purchase
+    player.Cash -= downPayment;
+    player.Debt += loanAmount;
+    player.OTB[item]--;
+    
+    switch(item) {
+        /* basic items */
+        case 'Hay': player.Hay.Acres += 10; break;
+        case 'Grain': player.Grain.Acres += 10; break;
+        case 'Fruit': player.Fruit.Acres += 5; break;
+        case 'Tractor': player.Tractors++; break;
+        case 'Harvester': player.Harvester++; break;
+
+        /* livestock */
+        case 'Cows': player.Livestock.Farm += 10; player.Livestock.Total += 10; break;
+        case 'AhtanumRidge': player.Livestock.AhtanumRidge += 20; player.Livestock.Total += 20; break;
+        case 'RattlesnakeRidge': player.Livestock.RattlesnakeRidge += 30; player.Livestock.Total += 30; break;
+        case 'Cascades': player.Livestock.Cascades += 40; player.Livestock.Total += 40; break;
+        case 'ToppenishRidge': player.Livestock.ToppenishRidge += 50; player.Livestock.Total += 50; break;
+
+        default: break;
+    }
+
+    // update player net worth
+    calculateNetWorth(state, state.turn);
+    
+    return 1;
+}
+
 function createGameState(avatarIDs) {
     return {
         turn: Math.floor(Math.random() * avatarIDs.length),
@@ -139,6 +245,8 @@ function createGameState(avatarIDs) {
 }
 
 function checkNewYear(state, positionalDiceValue) {
+
+    const player = state.players[state.turn];
 
     // new year, get $5000
     if (state.players[state.turn].Position >= 0 && state.players[state.turn].Position - positionalDiceValue < 0) {
@@ -193,14 +301,14 @@ function payAmount(state, amount) {
     }
 
     // can we borrow the entire loan from the bank? (Cannot take out more than $50k)
-    let projectedLoanBalance = state.players[state.turn].Debt + OVERDRAFT_FEE + amount;
+    let projectedDebt = state.players[state.turn].Debt + OVERDRAFT_FEE + amount;
 
-    if (projectedLoanBalance <= MAX_DEBT) {
-        state.players[state.turn].Debt  = projectedLoanBalance;
+    if (projectedDebt <= MAX_DEBT) {
+        state.players[state.turn].Debt  = projectedDebt;
         return 1;
     }
 
-    let amountOverMaxDebt = projectedLoanBalance - 50000;
+    let amountOverMaxDebt = projectedDebt - 50000;
 
     // can we max out our debt and pay the remaining balance?
     if (state.players[state.turn].Cash >= amountOverMaxDebt) {
@@ -321,7 +429,7 @@ function drawOTB(state) {
     }
 
     state.OTBDeck[i]--;
-    state.players[state.turn].OTB.push(i);
+    state.players[state.turn].OTB[OTB_ITEM_MAP[i]]++;
     return OTBCards[i];
 }
 
