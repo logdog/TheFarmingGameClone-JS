@@ -215,6 +215,7 @@ function init() {
     initAvatarSelection();
 
     $("#position-dice-container").html(createDice());
+    $("#harvest-dice-container").html(createDice());
 
     // create new game
     newGameButton.click(function() {
@@ -331,22 +332,31 @@ function handletooManyPlayers(msg) {
 }
 
 function handleRollPositionDiceAnimation(diceValue) {
-    console.log('Dice Value: ', diceValue)
-    // go back to (0,0) then transform
+   
     const diceContainer = $('#position-dice-container');
     const oldClass = diceContainer.attr('class');
-    $('#position-dice-container').removeClass();
+    diceContainer.removeClass();
 
-    if (oldClass.slice(-1) === 'a') {
-        $('#position-dice-container').addClass(`show-${diceValue}b`);
+    if (oldClass && oldClass.slice(-1) === 'a') {
+        diceContainer.addClass(`show-${diceValue}b`);
     }
     else {
-        $('#position-dice-container').addClass(`show-${diceValue}a`);
+        diceContainer.addClass(`show-${diceValue}a`);
     }
 }
 
 function handleRollHarvestDiceAnimation(diceValue) {
-    console.log('Dice Value: ', diceValue)
+
+    const diceContainer = $('#harvest-dice-container');
+    const oldClass = diceContainer.attr('class');
+    diceContainer.removeClass();
+
+    if (oldClass && oldClass.slice(-1) === 'a') {
+        diceContainer.addClass(`show-${diceValue}b`);
+    }
+    else {
+        diceContainer.addClass(`show-${diceValue}a`);
+    }
 }
 function handleDrawOTB(card) {
     $('#card-container').append(createOTBCard(card));

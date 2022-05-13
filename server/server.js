@@ -65,6 +65,7 @@ io.on('connection', client => {
     client.on('joinGame', handleJoinGame);
     client.on('avatarSelection', handleAvatarSelection);
     client.on('startGame', handleStartGame);
+
     client.on('rollPositionDice', handleRollPositionDice);
     client.on('rollHarvestDice', handleRollHarvestDice);
     client.on('endTurn', handleEndTurn);
@@ -184,68 +185,73 @@ io.on('connection', client => {
         let positionalDiceValue = Math.floor(Math.random()*6)+1;
         io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
 
-        console.log(states[roomCode])
-        movePlayer(states[roomCode], positionalDiceValue);
-        console.log('move()')
-        console.log(states[roomCode])
-        
-        const cardDrawType = checkPositionForDrawingCard(states[roomCode]);
+        // wait 1 second before revealing the answer
+        setTimeout(finishRollPositionDice, 1000);
+        function finishRollPositionDice() {
 
+            console.log(states[roomCode])
+            movePlayer(states[roomCode], positionalDiceValue);
+            console.log('move()')
+            console.log(states[roomCode])
+            
+            const cardDrawType = checkPositionForDrawingCard(states[roomCode]);
+            
 
-        switch(cardDrawType) {
-            case DRAW_OTB: {
-                const cardText = drawOTB(states[roomCode]);
-
-                // the deck could be empty
-                if (cardText !== null) {
-                    io.to(roomCode).emit('drawOTB', cardText);
+            switch(cardDrawType) {
+                case DRAW_OTB: {
+                    const cardText = drawOTB(states[roomCode]);
+                    
+                    // the deck could be empty
+                    if (cardText !== null) {
+                        io.to(roomCode).emit('drawOTB', cardText);
+                    }
+                    break;
                 }
-                break;
+                case DRAW_FARMERS_FATE: {
+                    // the deck cannot be empty
+                    const cardText = drawFarmersFate(states[roomCode]);
+                    io.to(roomCode).emit('drawFarmersFate', cardText);
+                    break;
+                }
             }
-            case DRAW_FARMERS_FATE: {
-                // the deck cannot be empty
-                const cardText = drawFarmersFate(states[roomCode]);
-                io.to(roomCode).emit('drawFarmersFate', cardText);
-                break;
+            
+            io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+            
+            // is this a new year?
+            if (checkNewYear(states[roomCode], positionalDiceValue)) {
+                console.log("happy new year")
+                client.emit('happyNewYear'); // an animation later?
+                io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
             }
-        }
+            
+            // collect money or pay up
+            const moneyToCollect = checkPositionForBalances(states[roomCode]);
+            console.log('moneyToCollect', moneyToCollect);
+            if (moneyToCollect > 0) {
+                collectAmount(states[roomCode], moneyToCollect);
+            }
+            else {
+                const paymentCode = payAmount(states[roomCode], -moneyToCollect);
 
-        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
-
-        // is this a new year?
-        if (checkNewYear(states[roomCode], positionalDiceValue)) {
-            console.log("happy new year")
-            client.emit('happyNewYear'); // an animation later?
+                switch(paymentCode) {
+                    case 3: break; // requires player to sell their assets
+                    case 4: break; // player is bankrupt... game over?
+                }
+            }
+            
+            // calculate net worth
+            calculateNetWorth(states[roomCode], states[roomCode].turn);
+            
+            // does the player need to harvest?
+            states[roomCode].shouldHarvest = shouldPlayerHarvest(states[roomCode]);
+            
             io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
         }
-
-        // collect money or pay up
-        const moneyToCollect = checkPositionForBalances(states[roomCode]);
-        console.log('moneyToCollect', moneyToCollect);
-        if (moneyToCollect > 0) {
-            collectAmount(states[roomCode], moneyToCollect);
-        }
-        else {
-            const paymentCode = payAmount(states[roomCode], -moneyToCollect);
-
-            switch(paymentCode) {
-                case 3: break; // requires player to sell their assets
-                case 4: break; // player is bankrupt... game over?
-            }
-        }
-
-        // calculate net worth
-        calculateNetWorth(states[roomCode], states[roomCode].turn);
-
-        // does the player need to harvest?
-        states[roomCode].shouldHarvest = shouldPlayerHarvest(states[roomCode]);
-
-        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
     function handleRollHarvestDice() {
         console.log('handleRollPositionDice()')
-
+        
         let roomCode = clientRooms[client.id];
         let playerID = playerIDs[client.id];
 
@@ -262,16 +268,19 @@ io.on('connection', client => {
         let harvestDiceValue = Math.floor(Math.random()*6)+1;
         io.to(roomCode).emit('rollHarvestDiceAnimation', harvestDiceValue);
         
-        // harvest 
-        const harvestCode = performHarvest(states[roomCode], harvestDiceValue);
-        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
-
-        // draw operating expense card
-        const [cardText, charge] = drawOperatingExpense(states[roomCode]);
-        payAmount(states[roomCode], -charge);
-        
-        io.to(roomCode).emit('drawOperatingExpense', cardText);
-        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+        setTimeout(finishRollHarvestDice, 1000);
+        function finishRollHarvestDice() {
+            // harvest 
+            const harvestCode = performHarvest(states[roomCode], harvestDiceValue);
+            io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+    
+            // draw operating expense card
+            const [cardText, charge] = drawOperatingExpense(states[roomCode]);
+            payAmount(states[roomCode], -charge);
+    
+            io.to(roomCode).emit('drawOperatingExpense', cardText);
+            io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+        }
     }
 
     function handleEndTurn() {
