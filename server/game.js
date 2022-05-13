@@ -32,6 +32,7 @@ module.exports = {
     shouldPlayerHarvest,
     performHarvest,
     performBuy,
+    performPaybackDebt,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
 }
@@ -229,6 +230,32 @@ function performBuy(state, item, downPayment) {
     // update player net worth
     calculateNetWorth(state, state.turn);
     
+    return 1;
+}
+
+function performPaybackDebt(state, downPayment) {
+    const player = state.players[state.turn];
+    console.log('payback debt()');
+
+    // tried to rob the bank
+    if (downPayment < 0) {
+        return 0;
+    }
+
+    // trying to pay more than they have
+    if (downPayment > player.Cash) {
+        return 0;
+    }
+
+    // pay off debt
+    if (downPayment > player.Debt) {
+        downPayment = player.Debt;
+    }
+
+    player.Debt -= downPayment;
+    player.Cash -= downPayment;
+
+    calculateNetWorth(state, state.turn);
     return 1;
 }
 

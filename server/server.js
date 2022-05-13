@@ -13,6 +13,7 @@ const {
     shouldPlayerHarvest,
     performHarvest,
     performBuy,
+    performPaybackDebt,
     DRAW_OTB, 
     DRAW_FARMERS_FATE, 
 } = require('./game');
@@ -334,7 +335,7 @@ io.on('connection', client => {
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
-    function handlePaybackDebt() {
+    function handlePaybackDebt(downPayment) {
         console.log('handlePaybackDebt()');
         let roomCode = clientRooms[client.id];
         let playerID = playerIDs[client.id];
@@ -348,6 +349,10 @@ io.on('connection', client => {
         if (state.turn !== playerID) {
             return;
         }
+
+        const code = performPaybackDebt(state, downPayment);
+        // TODO: handle invalid buys
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
 });
