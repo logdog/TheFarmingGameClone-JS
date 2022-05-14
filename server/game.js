@@ -33,54 +33,61 @@ module.exports = {
     performHarvest,
     performBuy,
     performPaybackDebt,
+    checkPositionForDoubleYield,
+    performLoan,
+    performSellAsset,
+    performBankrupt,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
 }
 
 function createPlayer(name, color) {
     return {
-        "Name": name,
-        "Color": color,
-        "Position": 0,
-        "Year": 0,
-        "NetWorth": 40000,
-        "Cash": 5000,
-        "Debt": 5000,
-        "Hay": {
-            "Acres": 10,
-            "DoubleHay": false,
+        Name: name,
+        Color: color,
+        Position: 0,
+        Year: 0,
+        NetWorth: 40000,
+        Cash: 5000,
+        Debt: 5000,
+        shouldMove: true,
+        shouldHarvest: false,
+        IRS: false,
+        Hay: {
+            Acres: 10,
+            DoubleHay: false,
         },
-        "Grain" : {
-            "Acres": 10,
-            "DoubleCorn": false,
+        Grain : {
+            Acres: 10,
+            DoubleCorn: false,
+            HalfWheat: false
         },
-        "Fruit" : {
-            "Acres": 0,
+        Fruit : {
+            Acres: 0,
         },
-        "Livestock" : {
-            "Farm": 0,
-            "AhtanumRidge": 0,
-            "RattlesnakeRidge": 0,
-            "Cascades": 0,
-            "ToppenishRidge": 0,
-            "Total": 0,
+        Livestock : {
+            Farm: 0,
+            AhtanumRidge: 0,
+            RattlesnakeRidge: 0,
+            Cascades: 0,
+            ToppenishRidge: 0,
+            Total: 0,
         },
-        "Tractors": 0,
-        "Harvesters": 0,
-        "OTB": {
-            'Hay': 0,
-            'Grain': 0,
-            'Cows': 0,
-            'Fruit': 0,
-            'Tractor': 0,
-            'Harvester': 0,
-            'AhtanumRidge': 0,
-            'RattlesnakeRidge': 0,
-            'Cascades': 0,
-            'ToppenishRidge': 0,
+        Tractors: 0,
+        Harvesters: 0,
+        OTB: {
+            Hay: 0,
+            Grain: 0,
+            Cows: 0,
+            Fruit: 0,
+            Tractor: 0,
+            Harvester: 0,
+            AhtanumRidge: 0,
+            RattlesnakeRidge: 0,
+            Cascades: 0,
+            ToppenishRidge: 0,
         },
-        "Fate": [],
-        "CompletedHarvests": {
+        CompletedHarvests: {
             "1stHay": false,
             "2ndHay": false,
             "3rdHay": false,
@@ -233,6 +240,7 @@ function performBuy(state, item, downPayment) {
     return 1;
 }
 
+// player can choose to payoff debt
 function performPaybackDebt(state, downPayment) {
     const player = state.players[state.turn];
     console.log('payback debt()');
@@ -262,8 +270,6 @@ function performPaybackDebt(state, downPayment) {
 function createGameState(avatarIDs) {
     return {
         turn: Math.floor(Math.random() * avatarIDs.length),
-        shouldMove: true,
-        shouldHarvest: false,
         OTBDeck: createOTBDeck(),
         FarmersFateDeck: createFarmersFateDeck(),
         OperatingExpenseDeck: createOperatingExpenseDeck(),
@@ -281,6 +287,7 @@ function checkNewYear(state, positionalDiceValue) {
         player.Year++;
         player.Hay.DoubleHay = false;
         player.Grain.DoubleCorn = false;
+        player.Grain.HalfWheat = false;
 
         player.CompletedHarvests = {
             "1stHay": false,
@@ -300,67 +307,183 @@ function checkNewYear(state, positionalDiceValue) {
         for(let fateCard of fate) {
             state.FarmersFateDeck[fateCard]++;
         }
-        player.Fate = [];
+        player.IRS = false;
 
         return true;
     }
     return false;
 }
 
+
+// move the player to a new position
 function movePlayer(state, diceValue) {
-
     const player = state.players[state.turn];
-
     player.Position += diceValue;
     player.Position %= (MAX_POSITION+1);
-
-    if (isHarvestSquare(player.Position)) {
-        state.shouldHarvest = true;
-    }
-
-    state.shouldMove = false;
+    player.shouldMove = false;
+    player.shouldHarvest = shouldPlayerHarvest(state);
 }
 
-function payAmount(state, amount) {
-
+// move the player to a specific position
+function movePlayerTo(state, position) {
     const player = state.players[state.turn];
-
-    // pay the amount
-    if (player.Cash >= amount) {
-        player.Cash -= amount;
-        return 0;
-    }
-
-    // can we borrow the entire loan from the bank? (Cannot take out more than $50k)
-    let projectedDebt = player.Debt + OVERDRAFT_FEE + amount;
-
-    if (projectedDebt <= MAX_DEBT) {
-        player.Debt  = projectedDebt;
-        return 1;
-    }
-
-    let amountOverMaxDebt = projectedDebt - 50000;
-
-    // can we max out our debt and pay the remaining balance?
-    if (player.Cash >= amountOverMaxDebt) {
-        player.Cash -= amountOverMaxDebt;
-        player.Debt = MAX_DEBT;
-        return 2;
-    }
-
-    // do we have enough in assets?
-    if (amountOverMaxDebt < player.Cash + calculateAssets(state, state.turn)/2) {
-        // TODO: begin to sell assets
-        return 3;
-    }
-
-    // bankrupt
-    return 4;
+    player.Position = position;
+    player.shouldMove = false;
+    player.shouldHarvest = shouldPlayerHarvest(state);
 }
 
 function collectAmount(state, amount) {
     const player = state.players[state.turn];
     player.Cash += amount; 
+}
+
+function payAmount(state, amount) {
+
+    const player = state.players[state.turn];
+    
+    // pay the amount
+    if (player.Cash >= amount) {
+        player.Cash -= amount;
+        calculateNetWorth(state, state.turn);
+        return true;
+    }
+
+    // player did not have enough cash on hand,
+    // so they will be charged an overdraft fee
+    player.Cash -= amount;
+    player.Cash -= OVERDRAFT_FEE;
+    calculateNetWorth(state, state.turn);
+    return false;
+
+    // // can we borrow the entire loan from the bank? (Cannot take out more than $50k)
+
+    // // player should take loan from the bank if they can
+    // // 
+    // let projectedDebt = player.Debt + OVERDRAFT_FEE + amount;
+
+    // if (projectedDebt <= MAX_DEBT) {
+    //     player.Debt  = projectedDebt;
+    //     return 2;
+    // }
+
+    // let amountOverMaxDebt = projectedDebt - MAX_DEBT;
+    
+    // // can we max out our debt and pay the remaining balance?
+    // if (player.Cash >= amountOverMaxDebt) {
+    //     player.Cash -= amountOverMaxDebt;
+    //     player.Debt = MAX_DEBT;
+    //     return 3;
+    // }
+
+    // // do we have enough in assets?
+    // if (amountOverMaxDebt < player.Cash + calculateAssets(state, state.turn)/2) {
+    //     // require player to sell assets
+    //     player.MustSellAssets = true;
+    //     return 4;
+    // }
+
+    // // bankrupt
+    // return 5;
+}
+
+// the player can take a loan from the bank only if
+// they don't exceed $50k debt
+function performLoan(state, playerID, loanAmount) {
+    const player = state.players[playerID];
+    const projectedDebt = player.Debt + loanAmount;
+    if (projectedDebt <= MAX_DEBT) {
+        player.Cash += loanAmount;
+        player.Debt += loanAmount;
+        return true;
+    }
+    return false;
+}
+
+// sell an asset
+function performSellAsset(state, playerID, item) {
+    const player = state.players[playerID];
+
+    // invalid item
+    if (!item in PURCHASE_PRICES) {
+        return false;
+    }
+
+    // check player has item to sell
+    let hasItem = false;
+    switch(item) {
+        case 'Hay': hasItem = player.Hay.Acres >= 10; break
+        case 'Grain': hasItem = player.Grain.Acres >= 10; break;
+        case 'Fruit': hasItem = player.Fruit.Acres >= 5; break;
+        case 'Tractor': hasItem = player.Tractors >= 1; break;
+        case 'Harvester': hasItem = player.Harvester >= 1; break;
+        
+        /* livestock */
+        case 'Cows': hasItem = player.Livestock.Farm >= 10; break;
+        case 'AhtanumRidge': hasItem = player.Livestock.AhtanumRidge >= 20; break;
+        case 'RattlesnakeRidge': hasItem = player.Livestock.RattlesnakeRidge >= 30; break;
+        case 'Cascades': hasItem = player.Livestock.Cascades >= 40; break;
+        case 'ToppenishRidge': hasItem = player.Livestock.ToppenishRidge >= 50; break;
+
+        default: break;
+    }
+
+    if (!hasItem) {
+        return false;
+    }
+
+    const itemPrice = PURCHASE_PRICES[item];
+    player.Cash += itemPrice/2;
+    
+    switch(item) {
+        case 'Hay': player.Hay.Acres -= 10; break;
+        case 'Grain': player.Grain.Acres -= 10; break;
+        case 'Fruit': player.Fruit.Acres -= 5; break;
+        case 'Tractor': player.Tractors--; break;
+        case 'Harvester': player.Harvester--; break;
+        
+        /* livestock */
+        case 'Cows': player.Livestock.Farm -= 10; player.Livestock.Total -= 10; break;
+        case 'AhtanumRidge': player.Livestock.AhtanumRidge -= 20; player.Livestock.Total -= 20; break;
+        case 'RattlesnakeRidge': player.Livestock.RattlesnakeRidge -= 30; player.Livestock.Total -= 30; break;
+        case 'Cascades': player.Livestock.Cascades -= 40; player.Livestock.Total -= 40; break;
+        case 'ToppenishRidge': player.Livestock.ToppenishRidge -= 50; player.Livestock.Total -= 50; break;
+
+        default: break;
+    }
+    calculateNetWorth(state, playerID);
+    return true;
+}
+
+function performBankrupt(state, playerID) {
+    const player = state.players[playerID];
+    
+    // return any cards back to the deck
+    for (const item in player.OTB) {
+        state.OTBDeck[item] += player.OTB[item];
+    }
+
+    if (player.IRS) {
+        state.FarmersFateDeck[4]++;
+    }
+    if (player.Grain.HalfWheat) {
+        state.FarmersFateDeck[9]++;
+    }
+
+    const name = player.name;
+    const color = player.color;
+    
+    // player starts the game over again
+    state.players[playerID] = createPlayer(name, color);
+}
+
+
+function checkPositionForDoubleYield(state) {
+    const player = state.players[state.turn];
+    switch(player.Position) {
+        case 4: player.Hay.DoubleHay = true; break;     // Jan 4
+        case 14: player.Grain.DoubleCorn = true; break; // Spring Planting
+        default: break;
+    }
 }
 
 function checkPositionForDrawingCard(state) {
@@ -410,17 +533,15 @@ function checkPositionForBalances(state) {
         case 22: return 500;
 
         // 2nd Hay Cutting
-        case 28: return 500; // go to harvest moon
+        // case 28: return 500; // go to harvest moon
 
         // Wheat Harvest
         case 29: return 50*player.Grain.Acres; // July 4. Add $50 per acre to paycheck
-        case 30: return 5000; // go to 4th week of february and collect $5000
         case 31: return player.Harvesters > 0 ? 1000 : 0; // collect 1000 if harvester
         case 32: return 500;
         case 33: return -50*player.Grain.Acres; // Lose 50 per acre to paycheck
 
         // 3rd Hay Cutting
-        case 34: return player.Tractors > 0 ? 1000 : 0; // if tractor, go to Nov 3 and collect 1000 
 
         // Livestock
         case 36: return 500;
@@ -441,7 +562,7 @@ function checkPositionForBalances(state) {
 function drawRandomCardFromDeck(deck) {
     const total = deck.reduce((a, b) => a + b, 0);
     if (total === 0) {
-        return -1;
+        return null;
     }
 
     const val = Math.floor(Math.random()*total + 1);
@@ -457,15 +578,15 @@ function drawRandomCardFromDeck(deck) {
 
 function drawOTB(state) {
     const player = state.players[state.turn];
-    const i = drawRandomCardFromDeck(state.OTBDeck);
+    const id = drawRandomCardFromDeck(state.OTBDeck);
 
-    if (i === -1) {
+    if (id === null) {
         return null;
     }
 
-    state.OTBDeck[i]--;
-    player.OTB[OTB_ITEM_MAP[i]]++;
-    return OTBCards[i];
+    state.OTBDeck[id]--;
+    player.OTB[OTB_ITEM_MAP[id]]++;
+    return OTBCards[id];
 }
 
 function drawFarmersFate(state) {
@@ -473,13 +594,20 @@ function drawFarmersFate(state) {
     let id = drawRandomCardFromDeck(state.FarmersFateDeck);
 
     // if the draw stack is empty, reshuffle
-    if (id === -1) {
+    if (id === null) {
         state.FarmersFateDeck = createFarmersFateDeck();
         id = drawRandomCardFromDeck(state.FarmersFateDeck);
     }
 
+    if (id === 4) {
+        player.IRS = true;
+    }
+    else if (id === 9) {
+        player.Grain.HalfWheat = true;
+    }
+
+    // TODO: the FF action
     state.FarmersFateDeck[id]--;
-    player.Fate.push(id);
     return FarmersFateCards[id];
 }
 
@@ -487,7 +615,7 @@ function drawOperatingExpense(state) {
     const id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
 
     // if the draw stack is empty, reshuffle
-    if (id === -1) {
+    if (id === null) {
         state.OperatingExpenseDeck = createOperatingExpenseDeck();
         id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
     }
@@ -637,8 +765,6 @@ function performHarvest(state, diceValue) {
     const player = state.players[state.turn];
 
     const position = player.Position;
-    const doubleHay = player.Hay.DoubleHay;
-    const doubleCorn = player.Grain.DoubleCorn;
 
     if(!shouldPlayerHarvest(state)) {
         return 0;
@@ -651,7 +777,7 @@ function performHarvest(state, diceValue) {
         typeOfHarvest === '3rdHay' || typeOfHarvest === '4thHay') {
         payout = calculateHayHarvest(player.Hay.Acres, diceValue);
 
-        if (doubleHay) {
+        if (player.Hay.DoubleHay) {
             payout *= 2;
         }
 
@@ -675,7 +801,7 @@ function performHarvest(state, diceValue) {
         payout = calculateGrainHarvest(player.Grain.Acres, diceValue);
 
         // half the wheat harvest
-        if (player.Fate.includes(9)) {
+        if (player.Grain.HalfWheat) {
             payout /= 2;
         }
 
@@ -688,6 +814,10 @@ function performHarvest(state, diceValue) {
     }
     else if (typeOfHarvest === 'Corn') {
         payout = calculateGrainHarvest(player.Grain.Acres, diceValue);
+
+        if (player.Grain.DoubleCorn) {
+            payout *= 2;
+        }
     }
     else if (typeOfHarvest === 'Livestock') {
         payout = calculateLivestockHarvest(player.Livestock.Total, diceValue);
@@ -698,7 +828,7 @@ function performHarvest(state, diceValue) {
     }
 
     // IRS garnishes wages
-    if (player.Fate.includes(4)) {
+    if (player.IRS) {
         payout = 0;
     }
 

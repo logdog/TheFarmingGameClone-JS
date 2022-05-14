@@ -100,11 +100,14 @@ function paintGame(state) {
     // if game is playing
     console.log('paintGame()');
     console.log(state)
-    const myColor = state.players[myPlayerID].Color;
+
+    const me = state.players[myPlayerID];
+    const myColor = me.Color;
+    
 
     // player totals
     $("#player-totals").empty();
-    $("#player-totals").append(createPlayerTotal(state.players[myPlayerID]));
+    $("#player-totals").append(createPlayerTotal(me));
 
     // make the dice my color
     // $('.pip').css('background-color', myColor);
@@ -117,7 +120,7 @@ function paintGame(state) {
 
     // roll the dice button
     $("#roll-dice-div").empty();
-    if (state.turn === myPlayerID && state.shouldMove) {
+    if (state.turn === myPlayerID && me.shouldMove) {
         
         $("#roll-dice-div").append( `<button id="roll-dice-btn">Roll for Position!</button>` );
         $('#roll-dice-btn').click(function() {
@@ -125,7 +128,7 @@ function paintGame(state) {
             $(this).remove();
         });
     }
-    else if (state.turn === myPlayerID && state.shouldHarvest) {
+    else if (state.turn === myPlayerID && me.shouldHarvest) {
         $("#roll-dice-div").append( `<button id="roll-dice-btn">Roll for Harvest!</button>` );
         $('#roll-dice-btn').click(function() {
             socket.emit('rollHarvestDice');
