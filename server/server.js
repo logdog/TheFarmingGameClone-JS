@@ -233,6 +233,9 @@ io.on('connection', client => {
         if (paymentReceived) {
             step3(roomCode, state, positionalDiceValue);
         }
+        else {
+            client.emit('paymentRequired');
+        }
     }
 
     function handleLoan(loanAmount) {
@@ -300,7 +303,7 @@ io.on('connection', client => {
             io.to(roomCode).emit('drawOTB', cardText);
 
             // now handle the action
-            
+
             
         }
         else if (cardDrawType === DRAW_FARMERS_FATE) {

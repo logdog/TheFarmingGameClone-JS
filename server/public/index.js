@@ -21,6 +21,8 @@ socket.on('drawOTB', handleDrawOTB);
 socket.on('drawFarmersFate', handleDrawFarmersFate);
 socket.on('drawOperatingExpense', handleDrawOperatingExpense);
 
+socket.on('paymentRequired', handlePaymentRequired);
+
 // SET UP THE ROOM
 const screen1 =$('#screen-1');
 const newGameButton = $('#new-game-btn');
@@ -421,4 +423,8 @@ function handleDrawOperatingExpense(card) {
             $(this).parent().remove();
         }
     });
+}
+
+function handlePaymentRequired() {
+    alert('Your bank balance is too low. Take a loan, sell assets, or declare bankrupcy to continue.')
 }
