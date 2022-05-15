@@ -200,7 +200,6 @@ h1 {
     justify-content: left;
 }
 
-
 #game-board {
     display: block;
     flex-direction: column;
@@ -368,7 +367,6 @@ h1 {
 }
 
 /* board-image, cards, dice */
-
 #board-image {
     width: 80%;
     height: 100%;
@@ -617,4 +615,121 @@ h1 {
 
 .show-6b {
     transform: rotateX(-10.5turn) rotateY(-10turn) rotateZ(-10turn);
+}
+
+/* Control Panel */
+#controls-wrapper {
+    display: block;
+    margin-left: 1vw;
+}
+
+/* Shop */
+
+
+
+
+#shop {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: small;
+}
+
+.tab {
+    display: inline-block;
+    text-align: center;
+    font-weight: 500;
+    background-color: #F6C915;
+    font-size: large;
+    transition: 200ms;
+}
+
+.tab:hover {
+    filter: brightness(60%);
+    cursor: pointer;
+}
+
+#buy-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 8vw);
+    grid-template-rows: repeat(3, 8vw);
+    grid-auto-flow: row;
+    border: 2px solid gray;
+}
+
+.shop-item {
+    text-align: center;
+    font-size: 0.85vw;
+}
+
+.shop-item > div {
+    width: 5.5vw;
+    height: 5.5vw;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    border-radius: 25%;
+    transition: 200ms;
+    margin: auto;
+}
+
+.shop-item > * > span:first-child {
+    font-weight: 200;
+}
+
+.price {
+    font-weight: 500;
+}
+
+#shop-cows, 
+#shop-ahtanum,
+#shop-rattlesnake,
+#shop-cascades,
+#shop-toppenish {
+    background-image: url('icons/cow.png');
+}
+
+#shop-hay {
+    background-image: url('icons/hay.png');
+}
+
+#shop-grain {
+    background-image: url('icons/grain.png');
+    background-color: #F6C915;
+}
+
+#shop-fruit {
+    background-image: url('icons/fruit.png');
+    background-color: pink;
+}
+
+#shop-tractor {
+    background-image: url('icons/tractor.png');
+    background-color: lightskyblue;
+}
+
+#shop-harvester {
+    background-image: url('icons/harvester.png');
+    background-color: lightblue;
+}
+
+#shop-payback {
+    background-color: green;
+}
+
+.shop-item > div:hover {
+    width: 6vw;
+    height: 6vw;
+    cursor: pointer;
+}
+
+.shop-item.no-OTB > div{
+    background-color: white;
+    box-shadow: inset 0 0 0 1000px rgba(100, 100, 100, 0.5);
+    filter: grayscale(100%);
+}
+
+.shop-item.no-OTB > div:hover {
+    width: 5.5vw;
+    height: 5.5vw;
+    cursor: auto;
 }
