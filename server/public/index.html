@@ -112,67 +112,155 @@
                     <div class="tab" id="sell-tab"><span>Sell</span></div>
                 </div>
                 <div id="buy-wrapper">
-                    <!-- <span>All purchases require a 20% minimum down payment.</span>
-                    <span>Down Payment <input id="down-payment" type="number" value="4000"> </span> -->
+                    <ul>
+                        <li><span>All purchases require a 20% minimum down payment.</span></li>
+                        <li><span>Total debt cannot exceed $50,000</span></li>
+                        <li><span>Down Payment: <input id="down-payment" type="number" value="4000"> </span></li>
+                    </ul>
+                    <div class="shop-grid">
+                        <div class="shop-item">
+                            <button id="Buy-Hay">
+                                <span>Buy 10 Acres Hay</span>
+                                <span>$20,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Grain">
+                                <span> Buy 10 Acres Grain</span>
+                                <span>$20,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item no-OTB">
+                            <button id="Buy-Fruit">
+                                <span>Buy 5 Acres Fruit</span>
+                                <span>$25,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Cows">
+                                <span>Buy 10 Cows</span>
+                                <span>$5,000</span>
+                            </button>
+                        </div>
 
-                    <div class="shop-item">
-                        <div id="shop-cows"></div>
-                        <span>Buy 10 Cows</span>
-                        <span class="price">$5000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-hay"></div>
-                        <span>Buy 10 Acres Hay</span>
-                        <span class="price">$20000</span>
-                    </div>
-                    <div class="shop-item no-OTB">
-                        <div id="shop-grain"></div>
-                        <span>Buy 10 Acres Grain</span>
-                        <span class="price">$20000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-fruit"></div>
-                        <span>Buy 10 Acres Fruit</span>
-                        <span class="price">$25000</span>
-                    </div>
+                        <div class="shop-item">
+                            <button id="Buy-Ahtanum" title="+20 Cows">
+                                <span>Lease Ahtanum Ridge</span>
+                                <span>$20,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item no-OTB">
+                            <button id="Buy-Rattlesnake" title="+30 Cows">
+                                <span>Lease Rattlesnake Ridge</span>
+                                <span>$30,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Cascade" title="+40 Cows">
+                                <span>Lease the Cascade Range</span>
+                                <span>$40,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Toppenish" title="+50 Cows">
+                                <span>Lease Toppenish Ridge</span>
+                                <span>$50,000</span>
+                            </button>
+                        </div>
 
-                    <div class="shop-item">
-                        <div id="shop-ahtanum"></div>
-                        <span>Lease Ahtanum Ridge</span>
-                        <span class="price">$20000</span>
+                        <div class="shop-item">
+                            <button id="Buy-Tractor">
+                                <span>Buy 1 Tractor</span>
+                                <span>$10000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Harvester">
+                                <span>Buy 1 Harvester</span>
+                                <span>$10000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Btn-Payback-Debt">
+                                <span>Payback Debt</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="shop-item no-OTB">
-                        <div id="shop-rattlesnake"></div>
-                        <span>Lease Rattlesnake Ridge</span>
-                        <span class="price">$30000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-cascades"></div>
-                        <span>Lease Cascades</span>
-                        <span class="price">$40000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-toppenish"></div>
-                        <span>Lease Toppenish Ridge</span>
-                        <span class="price">$50000</span>
-                    </div>
+                </div>
+                <div id="sell-wrapper">
+                    <ul>
+                        <li><span>Total debt cannot exceed $50,000</span></li>
+                        <li><span>Loan Amount: <input id="loan-amount" type="number" value="4000"> </span></li>
+                    </ul>
+                    <div class="shop-grid">
+                        <div class="shop-item">
+                            <button id="Sell-Hay">
+                                <span>Sell 10 Acres Hay</span>
+                                <span>$10,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Grain">
+                                <span>Sell 10 Acres Grain</span>
+                                <span>$10,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Fruit">
+                                <span>Sell 5 Acres Fruit</span>
+                                <span>$12,500</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Cows">
+                                <span>Sell 10 Cows</span>
+                                <span>$2,500</span>
+                            </button>
+                        </div>
 
-                    <div class="shop-item">
-                        <div id="shop-tractor"></div>
-                        <span>Buy 1 Tractor</span>
-                        <span class="price">$10000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-harvester"></div>
-                        <span>Buy 1 Harvester</span>
-                        <span class="price">$10000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-payback"></div>
-                        <span>Payoff Debt</span>
-                    </div>
-                
+                        <div class="shop-item">
+                            <button id="Sell-Ahtanum" title="-20 Cows">
+                                <span>Sublease Ahtanum Ridge</span>
+                                <span>$10,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item no-sell">
+                            <button id="Sell-Rattlesnake" title="-30 Cows">
+                                <span>Sublease Rattlesnake Ridge</span>
+                                <span>$15,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Cascade" title="-40 Cows">
+                                <span>Sublease the Cascade Range</span>
+                                <span>$20,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item no-sell">
+                            <button id="Sell-Toppenish" title="-50 Cows">
+                                <span>Sublease Toppenish Ridge</span>
+                                <span>$25,000</span>
+                            </button>
+                        </div>
 
+                        <div class="shop-item">
+                            <button id="Sell-Tractor">
+                                <span>Sell 1 Tractor</span>
+                                <span>$5,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item no-sell">
+                            <button id="Sell-Harvester">
+                                <span>Sell 1 Harvester</span>
+                                <span>$5,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Btn-Take-Loan">
+                                <span>Take Loan</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

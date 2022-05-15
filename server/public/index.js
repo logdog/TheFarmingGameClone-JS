@@ -37,17 +37,29 @@ const screen3 = $('#screen-3');
 const startGameButton = $('#Btn-Start-Game');
 
 // SHOP BUTTONS
-const buyHayButton = $('#Btn-Hay');
-const buyGrainButton = $('#Btn-Grain');
-const buyCowsButton = $('#Btn-Cows')
-const buyFruitButton = $('#Btn-Fruit');
-const buyTractorButton = $('#Btn-Tractor');
-const buyHarvesterButton = $('#Btn-Harvester');
-const buyAhtanumRidgeButton = $('#Btn-Ahtanum-Ridge');
-const buyRattlesnakeRidgeButton = $('#Btn-Rattlesnake-Ridge');
-const buyCascadesButton = $('#Btn-Cascades');
-const buyToppenishRidgeButton = $('#Btn-Toppenish-Ridge');
-const paybackDebtButton = $('#Btn-Payback-Debt');
+const buyHayButton = $('#Buy-Hay');
+const buyGrainButton = $('#Buy-Grain');
+const buyCowsButton = $('#Buy-Cows')
+const buyFruitButton = $('#Buy-Fruit');
+const buyTractorButton = $('#Buy-Tractor');
+const buyHarvesterButton = $('#Buy-Harvester');
+const buyAhtanumRidgeButton = $('#Buy-Ahtanum');
+const buyRattlesnakeRidgeButton = $('#Buy-Rattlesnake');
+const buyCascadesButton = $('#Buy-Cascades');
+const buyToppenishRidgeButton = $('#Buy-Toppenish');
+const paybackDebtButton = $('#Buy-Payback-Debt');
+
+const sellHayButton = $('#Sell-Hay');
+const sellGrainButton = $('#Sell-Grain');
+const sellCowsButton = $('#Sell-Cows')
+const sellFruitButton = $('#Sell-Fruit');
+const sellTractorButton = $('#Sell-Tractor');
+const sellHarvesterButton = $('#Sell-Harvester');
+const sellAhtanumRidgeButton = $('#Sell-Ahtanum');
+const sellRattlesnakeRidgeButton = $('#Sell-Rattlesnake');
+const sellCascadesButton = $('#Sell-Cascades');
+const sellToppenishRidgeButton = $('#Sell-Toppenish');
+const takeLoanButton = $('#Btn-Take-Loan');
 
 
 function createPlayerTotal(player) {
@@ -154,6 +166,7 @@ function paintGame(state) {
 
 function initShopButtons() {
 
+    /* Buy */
     const downPaymentInput = $('#down-payment');
 
     buyHayButton.click(function() {
@@ -210,6 +223,58 @@ function initShopButtons() {
         console.log('payback debt');
         socket.emit('paybackDebt', downPaymentInput.val());
     });
+
+
+    /* sell */
+    const loanAmountInput = $('#loan-amount');
+
+    sellHayButton.click(function() {
+        socket.emit('sell', 'Hay');
+    });
+
+    sellGrainButton.click(function() {
+        socket.emit('sell', 'Grain');
+    });
+
+    sellCowsButton.click(function() {
+        socket.emit('sell', 'Cows');
+    });
+
+    sellFruitButton.click(function() {
+        socket.emit('sell', 'Fruit');
+    });
+
+    sellAhtanumRidgeButton.click(function() {
+        socket.emit('sell', 'AhtanumRidge');
+    });
+
+    sellRattlesnakeRidgeButton.click(function() {
+        socket.emit('sell', 'RattlesnakeRidge');
+    });
+
+    sellCascadesButton.click(function() {
+        socket.emit('sell', 'Cascades');
+    });
+
+    sellToppenishRidgeButton.click(function() {
+        socket.emit('sell', 'ToppenishRidge');
+    });
+
+    sellTractorButton.click(function() {
+        socket.emit('sell', 'Tractor');
+    });
+
+    sellHarvesterButton.click(function() {
+        socket.emit('sell', 'Harvester');
+    });
+
+    takeLoanButton.click(function() {
+        socket.emit('takeLoan', loanAmountInput.val());
+    });
+
+    /* buy-sell tabs*/
+    
+
 }
 
 function initAvatarSelection() {
