@@ -80,7 +80,7 @@ io.on('connection', client => {
 
     client.on('buy', handleBuy);
     client.on('paybackDebt', handlePaybackDebt);
-    client.on('loan', handleLoan);
+    client.on('takeLoan', handleLoan);
     client.on('sell', handleSell);
     client.on('bankrupt', handleBankrupt);
 
@@ -202,6 +202,7 @@ io.on('connection', client => {
         // roll the positional dice
         let positionalDiceValue = Math.floor(Math.random() * 6) + 1;
         io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
+        player.shouldMove = false;
 
         // wait 1 second before revealing the answer
         setTimeout(function () {
@@ -233,6 +234,7 @@ io.on('connection', client => {
 
         const player = state.players[playerID];
         player.shouldHarvest = shouldPlayerHarvest(state, playerID);
+        console.log(player)
 
         if (player.shouldHarvest) {
             io.to(roomCode).emit('gameState', JSON.stringify(state));
@@ -245,7 +247,7 @@ io.on('connection', client => {
     }
 
     function handleRollHarvestDice() {
-        console.log('handleRollPositionDice()')
+        console.log('handleRollHarvestDice()')
 
         let roomCode = clientRooms[client.id];
         let playerID = playerIDs[client.id];
@@ -267,17 +269,24 @@ io.on('connection', client => {
         setTimeout(finishRollHarvestDice, 1000);
         function finishRollHarvestDice() {
             // harvest 
-            const harvestCode = performHarvest(state, playerID, harvestDiceValue);
-            io.to(roomCode).emit('gameState', JSON.stringify(state));
-
+            const harvestSummary = performHarvest(state, playerID, harvestDiceValue);
+            
             // draw operating expense card
             const [cardText, charge] = drawOperatingExpense(state, playerID);
             console.log('operating expense: ')
             console.log(charge);
             payAmount(state, playerID, -charge);
 
+            harvestSummary.push(['Operating Expenses', charge]);
+
+            let totalHarvestAmount = harvestSummary.map(a=>a[1]).reduce((a,b)=>a+b,0);
+            harvestSummary.push(['Total', totalHarvestAmount]);
+
             player.shouldHarvest = shouldPlayerHarvest(state, playerID);
 
+            console.log(harvestSummary);
+            console.log('will send harvestsummary')
+            io.to(roomCode).emit('harvestSummary', JSON.stringify(harvestSummary));
             io.to(roomCode).emit('drawOperatingExpense', cardText);
             io.to(roomCode).emit('gameState', JSON.stringify(state));
 
@@ -460,6 +469,9 @@ io.on('connection', client => {
         const player = state.players[playerID];
 
         if (player.shouldMove || player.shouldHarvest || player.Cash < 0) {
+            client.emit('requirePayment');
+            client.emit('gameState', JSON.stringify(state));
+            
             console.log('unfinished business. cannot end turn yet')
             return;
         }
@@ -519,12 +531,16 @@ io.on('connection', client => {
         let playerID = playerIDs[client.id];
         const state = states[roomCode];
 
-        if (!state) {
+        loanAmount = parseInt(loanAmount);
+
+        if (!state || loanAmount === NaN) {
             return;
         }
 
+        const player = state.players[playerID];
         const success = performLoan(state, playerID, loanAmount);
         if (success) {
+            console.log('asdfasdf')
             player.shouldHarvest = shouldPlayerHarvest(state, playerID);
             io.to(roomCode).emit('gameState', JSON.stringify(state));
         }
@@ -542,6 +558,7 @@ io.on('connection', client => {
             return;
         }
 
+        const player = state.players[playerID];
         const success = performSellAsset(state, playerID, item);
         if (success) {
             player.shouldHarvest = shouldPlayerHarvest(state, playerID);
@@ -563,6 +580,9 @@ io.on('connection', client => {
         }
 
         performBankrupt(state, playerID);
+        const player = state.players[playerID];
+        player.shouldMove = false;
+
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 

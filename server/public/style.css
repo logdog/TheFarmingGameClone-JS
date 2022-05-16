@@ -5,8 +5,6 @@
     --cornGold: #F6C915;
 }
 
-
-
 body {
     display: flex;
     flex-direction: column;
@@ -376,7 +374,7 @@ h1 {
     background-repeat: no-repeat;
 
     display: grid;
-    grid-template-columns: [col1] 25% [col2] auto [col3] 25% [col4];
+    grid-template-columns: [col1] 33% [col2] auto [col3] 33% [col4];
     grid-template-rows: [row1] 33% [row2] auto [row3] 33% [row4];
 }
 
@@ -453,8 +451,8 @@ h1 {
 /* Dice */
 
 #dice-container {
-    grid-column-start: col2;
-    grid-column-end: col3;
+    grid-column-start: col1;
+    grid-column-end: col4;
     grid-row-start: row3;
     grid-row-end: row4;
 
@@ -483,9 +481,13 @@ h1 {
     background-color: gold;
 }
 
-/* #harvest-dice-container > * > .pip {
-    background-color: var(--cornGold);
-} */
+#mtsthelens-dice-container>.face {
+    background-color: black;
+}
+
+#mtsthelens-dice-container>.face>.pip {
+    background-color: white;
+}
 
 /* create the dice */
 .front {
@@ -617,6 +619,24 @@ h1 {
     transform: rotateX(-10.5turn) rotateY(-10turn) rotateZ(-10turn);
 }
 
+/* dice spinning animation */
+@keyframes rotating {
+    from {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
+    }
+
+    to {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(2turn);
+    }
+}
+
+.spinning-dice {
+    animation-name: rotating;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-duration: 1s;
+}
+
 /* Control Panel */
 #controls-wrapper {
     display: block;
@@ -657,6 +677,11 @@ h1 {
 
 #sell-tab.selected {
     background-color: #dc143c;
+}
+
+.tab.selected:hover {
+    filter: brightness(100%);
+    cursor: auto;
 }
 
 .tab:hover {
@@ -730,4 +755,49 @@ h1 {
 
 #Btn-Declare-Bankrupt {
     background-color: black !important;
+}
+
+/* payout-table */
+#payout-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: small;
+    border: 1px solid black;
+    margin-top: 1vh;
+}
+
+#payout-container>div:not(:first-child) {
+    display: none;
+}
+
+#payout-container>div:not(:first-child).visible {
+    display: block;
+}
+
+#hay-tab.selected {
+    background-color: #4caf50;
+}
+
+#grain-tab.selected {
+    background-color: gold;
+}
+
+#fruit-tab.selected {
+    background-color: #dc143c;
+}
+
+#livestock-tab.selected {
+    background-color: rgba(211, 139, 61, 0.846);
+}
+
+table {
+    border-collapse: collapse;
+    text-align: right;
+    width: 100%;
+}
+
+th,
+td {
+    border: 1px solid black;
 }

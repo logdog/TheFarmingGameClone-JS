@@ -50,6 +50,7 @@ function boardTemplate() {
         <div id="dice-container">
             <div id="position-dice-container" class="show-0"></div>
             <div id="harvest-dice-container"></div>
+            <div id="mtsthelens-dice-container"></div>
         </div>
         <div id="card-container"></div>
     </div>
@@ -375,7 +376,7 @@ function createOTBCard(text) {
     return `<div class="card OTBCard">
         <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> O.T.B. </span>
-        <span> ${text}</span>
+        <span>${text}</span>
     </div>`;
 }
 
@@ -383,7 +384,7 @@ function createFarmersFateCard(text) {
     return `<div class="card FarmersFateCard">
         <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> Farmers Fate </span>
-        <span> ${text}</span>
+        <span>${text}</span>
     </div>`;
 }
 
@@ -391,7 +392,23 @@ function createOperatingExpenseCard(text) {
     return `<div class="card OperatingExpenseCard">
         <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> Operating Expense </span>
-        <span> ${text}</span>
+        <span>${text}</span>
+    </div>`;
+}
+
+function createPositionCard(date, text) {
+    return `<div class="card PositionCard">
+        <span class="close-btn" title="shift-click to close all cards">&times</span>
+        <span>${date}</span>
+        <span>${text}</span>
+    </div>`;
+}
+
+function createHarvestCard(text) {
+    return `<div class="card HarvestCard">
+        <span class="close-btn" title="shift-click to close all cards">&times</span>
+        <span> Harvest Summary </span>
+        <span>${text}</span>
     </div>`;
 }
 
