@@ -8,6 +8,7 @@ $(document).ready(function () {
 const socket = io('http://localhost:3000');
 socket.on('init', handleInit);
 socket.on('roomCode', handleRoomCode);
+socket.on('startGame', handleStartGame);
 socket.on('gameState', handleGameState);
 socket.on('gameOver', handleGameOver);
 socket.on('unknownGame', handleunknownGame);
@@ -85,17 +86,79 @@ function createPlayerTotal(player) {
     const doubleCornText = player.Grain.DoubleCorn ? " (Double Corn)" : "";
     const doubleHayText = player.Hay.DoubleHay ? " (Double Hay)" : "";
     const halfWheatText = player.Grain.HalfWheat ? " (Half Wheat)" : "";
+    const IRSFilter = player.IRS;
+    const totalAcerage = player.Hay.Acres + player.Grain.Acres + player.Fruit.Acres;
+    
+    
 
-    return `<label>${player.Name}</label>
-    <label>Net Worth: $${player.NetWorth}</label>
-    <label>Cash: $${player.Cash}</label>
-    <label>Debt: $${player.Debt}</label>
-    <label>Hay: ${player.Hay.Acres} Acres${doubleHayText}</label>
-    <label>Grain: ${player.Grain.Acres} Acres${doubleCornText}${halfWheatText}</label>
-    <label>Fruit: ${player.Fruit.Acres} Acre</label>
-    <label>Cows: ${player.Livestock.Total}</label>
-    <label>Tractors: ${player.Tractors}</label>
-    <label>Harvesters: ${player.Harvesters}</label>`
+    return `<table><tbody>
+    <tr>
+        <td rowspan="6" colspan="2" id="player-profile-icon"></td>
+        <td>Net Worth</td>
+        <td class="right">$${player.NetWorth}</td>
+    </tr>
+    <tr>
+        <td>Cash</td>
+        <td class="right">$${player.Cash}</td>
+    </tr>
+    <tr>
+        <td>Debt</td>
+        <td class="right">$${player.Debt}</td>
+    </tr>
+    <tr>
+        <td>Tractors</td>
+        <td class="right">${player.Tractors}</td>
+    </tr>
+    <tr>
+        <td>Harvesters</td>
+        <td class="right">${player.Harvesters}</td>
+    </tr>
+    <tr>
+        <td>Cows on Farm</td>
+        <td class="right">${player.Livestock.Farm}</td>
+    </tr>
+    <tr>
+        <td colspan="2" class="centered bold">${player.Name}</td>
+        <td>Ahtanum</td>
+        <td class="right">${player.Livestock.AhtanumRidge}</td>
+    </tr>
+    <tr>
+        <td>Hay</td>
+        <td class="right">${player.Hay.Acres}${doubleHayText}</td>
+        <td>Rattlesnake</td>
+        <td class="right">${player.Livestock.RattlesnakeRidge}</td>
+    </tr>
+    <tr>
+        <td>Grain</td>
+        <td class="right">${player.Grain.Acres}${doubleCornText}${halfWheatText}</td>
+        <td>Casade</td>
+        <td class="right">${player.Livestock.Cascades}</td>
+    </tr>
+    <tr>
+        <td>Fruit</td>
+        <td class="right">${player.Fruit.Acres}</td>
+        <td>Toppenish</td>
+        <td class="right">${player.Livestock.ToppenishRidge}</td>
+    </tr>
+    <tr>
+        <td class="bold">Total Acreage</td>
+        <td class="right">${totalAcerage}</td>
+        <td class="bold">Total Cows</td>
+        <td class="right">${player.Livestock.Total}</td>
+    </tr>
+    </tbody></table>
+    `;
+
+    // return `<label>${player.Name}</label>
+    // <label>Net Worth: $${player.NetWorth}</label>
+    // <label>Cash: $${player.Cash}</label>
+    // <label>Debt: $${player.Debt}</label>
+    // <label>Hay: ${player.Hay.Acres} Acres${doubleHayText}</label>
+    // <label>Grain: ${player.Grain.Acres} Acres${doubleCornText}${halfWheatText}</label>
+    // <label>Fruit: ${player.Fruit.Acres} Acre</label>
+    // <label>Cows: ${player.Livestock.Total}</label>
+    // <label>Tractors: ${player.Tractors}</label>
+    // <label>Harvesters: ${player.Harvesters}</label>`
 }
 
 // tells us who we are
@@ -122,32 +185,23 @@ function paintGame(state) {
         return;
     }
 
-    screen1.css('display', 'none');
-    screen2.css('display', 'none');
-    screen3.css('display', 'none');
-    gameWrapper.css('display', 'flex');
+    
 
     // color the game board
     //$('#game-board').css('border-color', state.players[myPlayerID].Color);
-
+    
     // if game is playing
-
+    
     const me = state.players[myPlayerID];
     const myColor = me.Color;
 
+    for(let i=0; i<state.players.length; i++) {
+        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i]));
+    }
 
     // player totals
-    $("#player-totals").empty();
-    $("#player-totals").append(createPlayerTotal(me));
-
-    // make the dice my color
-    // $('.pip').css('background-color', myColor);
-    // if (myColor === 'White') {
-    //     $('.face').css('background-color', 'gray');
-    // }
-    // else {
-    //     $('.face').css('background-color', 'White');
-    // }
+    // $("#player-totals").empty();
+    // $("#player-totals").append();
 
     let ahtanumRidgeTaken = false;
     let rattlesnakeRidgeTaken = false;
@@ -253,11 +307,13 @@ function paintGame(state) {
     $("#roll-dice-div").empty();
     if (state.turn === myPlayerID && me.shouldMove) {
 
-        // do cool animation, press space bar or click to roll
+        let hasRolled = false;
         $('#position-dice-container').addClass('spinning-dice').click(rollPositionDice);
+
+        // do cool animation, press space bar or click to roll
         $(document).keydown(function(e) {
-            if (e.code === 'Space') {
-                $(document).off('keydown');
+            if (e.code === 'Space' && !hasRolled) {
+                hasRolled = true;
                 rollPositionDice();
             }
         });
@@ -269,10 +325,13 @@ function paintGame(state) {
         }
     }
     else if (state.turn === myPlayerID && me.shouldHarvest) {
+
+        let hasRolled = false;
         $('#harvest-dice-container').addClass('spinning-dice').click(rollHarvestDice);
+
         $(document).keydown(function(e) {
-            if (e.code === 'Space') {
-                $(document).off('keydown');
+            if (e.code === 'Space'  && !hasRolled) {
+                hasRolled = true;
                 rollHarvestDice();
             }
         });
@@ -586,13 +645,67 @@ function handleTakenAvatars(avatars) {
     updateStartButton();
 }
 
-function handleGameState(gameState) {
+function handleStartGame(state) {
+    
+    console.log('handleStartGame')
+    state = JSON.parse(state);
+    lastState = state;
+
+    // create divs for player totals
+    for(let i=0; i<state.players.length; i++) {
+        console.log(i)
+        $('#player-grid-wrapper').append(`<div class="player-grid" id="player-grid-${i}"></div>`);
+    }
+
+    // create player total tabs
+    let i=0;
+    for(let player of state.players) {
+        $("#player-totals>.tabs").append(`<div class="tab" id="player-tab-${i}"><span>${player.Name}</span></div>`);
+
+        
+        // when clicked, highlight
+        $(`#player-tab-${i}`).click(function() {
+
+            // highlight the correct tab
+            $('#player-totals>.tabs>.tab').removeClass('selected');
+            console.log($(this))
+            $(this).addClass('selected');
+
+            const id = parseInt($(this).attr('id').split('-').slice(-1)[0]);
+
+            // show the correct table
+            $('.player-grid').removeClass('visible');
+            $(`#player-grid-${id}`).addClass('visible');
+        });
+
+        i++;
+    }
+
+
+    // select us
+    $(`#player-tab-${myPlayerID}`).addClass('selected');
+    $(`#player-grid-${myPlayerID}`).addClass('visible');
+    
+
+    // display 
+    screen1.css('display', 'none');
+    screen2.css('display', 'none');
+    screen3.css('display', 'none');
+    gameWrapper.css('display', 'flex');
+
+    // paint game
+    paintGame(state);
+
+    
+}
+
+function handleGameState(state) {
 
     console.log('handleGameState')
-    gameState = JSON.parse(gameState);
+    state = JSON.parse(state);
     requestAnimationFrame(() => {
-        paintGame(gameState);
-        lastState = gameState;
+        paintGame(state);
+        lastState = state;
     });
 }
 
@@ -646,10 +759,8 @@ function handleRollHarvestDiceAnimation(diceValue) {
     }
 }
 
-function handleHarvestSummary(summaryArray) {
-    console.log('handleHarvestSummary')
-    console.log(JSON.parse(summaryArray))
 
+function handleHarvestSummary(summaryArray) {
     const container = $('#harvest-container');
     container.append(createHarvestCard(JSON.parse(summaryArray)));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
@@ -657,7 +768,7 @@ function handleHarvestSummary(summaryArray) {
     // functional close button
     $('.close-btn').click(function () {
         if (shiftKeyDown) {
-            container.empty();
+            $('.card-container').empty();
         }
         else {
             $(this).parent().remove();
@@ -671,14 +782,10 @@ function handleDrawOTB(card) {
     container.append(createOTBCard(card));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
-    console.log('handleDrawOTB')
-    console.log(card)
-
-
     // functional close button
     $('.close-btn').click(function () {
         if (shiftKeyDown) {
-            container.empty();
+            $('.card-container').empty();
         }
         else {
             $(this).parent().remove();
@@ -692,14 +799,10 @@ function handleDrawFarmersFate(card) {
     container.append(createFarmersFateCard(card));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
-    console.log('handleDrawFarmersFate')
-    console.log(card)
-
-
     // functional close button
     $('.close-btn').click(function () {
         if (shiftKeyDown) {
-            container.empty();
+            $('.card-container').empty();
         }
         else {
             $(this).parent().remove();
@@ -712,13 +815,10 @@ function handleDrawOperatingExpense(card) {
     container.append(createOperatingExpenseCard(card));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
-    console.log('handleDrawOperatingExpense')
-    console.log(card)
-
     // functional close button
     $('.close-btn').click(function () {
         if (shiftKeyDown) {
-            container.empty();
+            $('.card-container').empty();
         }
         else {
             $(this).parent().remove();

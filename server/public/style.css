@@ -416,7 +416,7 @@ h1 {
 }
 
 #harvest-container>.card {
-    background-color: whitesmoke;
+    background-color: white;
 }
 
 #OTB-container>.card {
@@ -479,6 +479,7 @@ h1 {
     font-weight: 200;
 }
 
+/* harvest card table */
 .card>table {
     grid-column-start: col1;
     grid-column-end: col4;
@@ -487,7 +488,9 @@ h1 {
     border-collapse: collapse;
 }
 
-.card>table>tbody>tr,
+.card>table>tbody>tr {
+    width: 100%;
+}
 .card>table>tbody>tr>td {
     width: 100%;
 }
@@ -499,6 +502,12 @@ h1 {
 .card>table>tbody>tr>td:last-child {
     text-align: right;
 }
+
+.card>table>tbody>tr:last-child>td {
+    font-weight: 600;
+}
+
+
 
 /* Dice */
 
@@ -542,27 +551,27 @@ h1 {
 }
 
 /* create the dice */
-.front {
+.face.front {
     transform: translateZ(50px);
 }
 
-.back {
+.face.back {
     transform: rotateY(180deg) translateZ(50px);
 }
 
-.right {
+.face.right {
     transform: rotateY(90deg) translateZ(50px);
 }
 
-.left {
+.face.left {
     transform: rotateY(-90deg) translateZ(50px);
 }
 
-.top {
+.face.top {
     transform: rotateX(90deg) translateZ(50px);
 }
 
-.bottom {
+.face.bottom {
     transform: rotateX(-90deg) translateZ(50px);
 }
 
@@ -691,8 +700,10 @@ h1 {
 
 /* Control Panel */
 #controls-wrapper {
-    display: block;
+    display: flex;
     margin-left: 1vw;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 /* Shop */
@@ -853,3 +864,43 @@ th,
 td {
     border: 1px solid black;
 }
+
+/* player total */
+
+td.left {
+    text-align: left;
+}
+
+td.right {
+    text-align: right;
+}
+
+td.centered {
+    text-align: center;
+}
+
+td.bold {
+    font-weight: 600;
+}
+
+.player-grid>table {
+    border-collapse: collapse;
+    table-layout: auto;
+    width: 100%;
+}
+
+#player-profile-icon {
+    width: 50%;
+    background-image: url('icons/ray.png');
+    background-size: contain; 
+    background-position:center center; 
+    background-repeat: no-repeat;
+}
+
+/* .player-grid>table>tbody>tr>td:nth-child(3) {
+    display: inline-block;
+}
+
+.player-grid>table>tbody>tr>td:nth-child(3) {
+    display: inline-block;
+} */

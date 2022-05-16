@@ -178,6 +178,7 @@ io.on('connection', client => {
 
         // initialize the game
         states[roomCode] = createGameState(Object.values(avatars[roomCode]));
+        io.to(roomCode).emit('startGame', JSON.stringify(states[roomCode]));
         io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
