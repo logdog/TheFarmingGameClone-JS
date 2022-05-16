@@ -647,16 +647,16 @@ h1 {
     font-size: large;
     transition: 200ms;
     border: 1px solid black;
+    color: white;
+    background-color: gray;
 }
 
-.tab:first-child {
+#buy-tab.selected {
     background-color: #4caf50;
-    color: white;
 }
 
-.tanb:last-child {
+#sell-tab.selected {
     background-color: #dc143c;
-    color: white;
 }
 
 .tab:hover {
@@ -678,12 +678,6 @@ h1 {
     grid-auto-flow: row;
     border: 2px solid gray;
 }
-
-/* .shop-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-} */
 
 .shop-item>button {
     width: 100%;
@@ -733,57 +727,3 @@ h1 {
     cursor: auto;
     filter: brightness(100%);
 }
-
-/* #shop-cows,
-#shop-ahtanum,
-#shop-rattlesnake,
-#shop-cascades,
-#shop-toppenish {
-    background-image: url('icons/cow.png');
-}
-
-#shop-hay {
-    background-image: url('icons/hay.png');
-}
-
-#shop-grain {
-    background-image: url('icons/grain.png');
-    background-color: #F6C915;
-}
-
-#shop-fruit {
-    background-image: url('icons/fruit.png');
-    background-color: pink;
-}
-
-#shop-tractor {
-    background-image: url('icons/tractor.png');
-    background-color: lightskyblue;
-}
-
-#shop-harvester {
-    background-image: url('icons/harvester.png');
-    background-color: lightblue;
-}
-
-#shop-payback {
-    background-color: green;
-} */
-
-/* .shop-item > div:hover {
-    width: 5.5vw;
-    height: 5.5vw;
-    cursor: pointer;
-}
-
-.shop-item.no-OTB > div{
-    background-color: white;
-    box-shadow: inset 0 0 0 1000px rgba(100, 100, 100, 0.5);
-    filter: grayscale(100%);
-}
-
-.shop-item.no-OTB > div:hover {
-    width: 5.5vw;
-    height: 5.5vw;
-    cursor: auto;
-} */

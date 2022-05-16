@@ -368,11 +368,15 @@ function initShopButtons() {
     buyTab.click(function() {
         buyWrapper.css('display', 'block');
         sellWrapper.css('display', 'none');
+        buyTab.addClass('selected');
+        sellTab.removeClass('selected');
     });
 
     sellTab.click(function() {
         buyWrapper.css('display', 'none');
         sellWrapper.css('display', 'block');
+        buyTab.removeClass('selected');
+        sellTab.addClass('selected');
     });
 
 }
