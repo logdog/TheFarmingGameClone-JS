@@ -71,13 +71,14 @@ function createPlayerTotal(player) {
 
     const doubleCornText = player.Grain.DoubleCorn ? " (Double Corn)" : "";
     const doubleHayText = player.Hay.DoubleHay ? " (Double Hay)" : "";
+    const halfWheatText = player.Grain.HalfWheat ? " (Half Wheat)" : "";
 
     return `<label>${player.Name}</label>
     <label>Net Worth: $${player.NetWorth}</label>
     <label>Cash: $${player.Cash}</label>
     <label>Debt: $${player.Debt}</label>
     <label>Hay: ${player.Hay.Acres} Acres${doubleHayText}</label>
-    <label>Grain: ${player.Grain.Acres} Acres${doubleCornText}</label>
+    <label>Grain: ${player.Grain.Acres} Acres${doubleCornText}${halfWheatText}</label>
     <label>Fruit: ${player.Fruit.Acres} Acre</label>
     <label>Cows: ${player.Livestock.Total}</label>
     <label>Tractors: ${player.Tractors}</label>
@@ -607,4 +608,9 @@ function handleDrawOperatingExpense(card) {
 
 function handlePaymentRequired() {
     alert('Your bank balance is too low. Take a loan, sell assets, or declare bankrupcy to continue.')
+    
+    buyWrapper.css('display', 'none');
+    sellWrapper.css('display', 'block');
+    buyTab.removeClass('selected');
+    sellTab.addClass('selected');
 }

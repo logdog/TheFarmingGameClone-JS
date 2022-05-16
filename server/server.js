@@ -14,6 +14,7 @@ const {
     performBuy,
     performPaybackDebt,
     checkPositionForDoubleYield,
+    shouldPlayerHarvest,
     performLoan,
     performSellAsset,
     performBankrupt,
@@ -206,7 +207,6 @@ io.on('connection', client => {
 
     function step2(roomCode, state, playerID, positionalDiceValue) {
         // update the player position based on dice roll
-        // and check if player needs to harvest later
         movePlayer(state, playerID, positionalDiceValue);
 
         // pay player for passing christmas vacation
@@ -217,25 +217,28 @@ io.on('connection', client => {
 
         // check for pay/collect money on square
         const balance = checkPositionForBalances(state, playerID);
-        let paymentReceived = false;
 
         if (balance >= 0) {
             collectAmount(state, playerID, balance);
-            paymentReceived = true;
         }
         else {
-            paymentReceived = payAmount(state, playerID, -balance);
+            // charge the player an amount of money before continuing
+            const paymentReceived = payAmount(state, playerID, -balance);
+            if (!paymentReceived) {
+                client.emit('paymentRequired');
+                return;
+            }
         }
 
+        const player = state.players[playerID];
+        player.shouldHarvest = shouldPlayerHarvest(state, playerID);
         io.to(roomCode).emit('gameState', JSON.stringify(state));
 
-        // proceed to draw a card, perform harvest, etc.
-        if (paymentReceived) {
-            step3(roomCode, state, playerID, positionalDiceValue);
+        // skip to drawing a card
+        if (!player.shouldHarvest) {
+            step3(roomCode, state, playerID);
         }
-        else {
-            client.emit('paymentRequired');
-        }
+
     }
 
     function handleLoan(loanAmount) {
@@ -249,6 +252,7 @@ io.on('connection', client => {
 
         const success = performLoan(state, playerID, loanAmount);
         if (success) {
+            player.shouldHarvest = shouldPlayerHarvest(state, playerID);
             io.to(roomCode).emit('gameState', JSON.stringify(state));
         }
         else {
@@ -267,6 +271,7 @@ io.on('connection', client => {
 
         const success = performSellAsset(state, playerID, item);
         if (success) {
+            player.shouldHarvest = shouldPlayerHarvest(state, playerID);
             io.to(roomCode).emit('gameState', JSON.stringify(state));
         }
         else {
@@ -288,7 +293,8 @@ io.on('connection', client => {
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
-    function step3(roomCode, state, playerID, positionalDiceValue) {
+    // draw a card, perform the action
+    function step3(roomCode, state, playerID) {
 
         const cardDrawType = checkPositionForDrawingCard(state, playerID);
 
@@ -303,8 +309,6 @@ io.on('connection', client => {
             io.to(roomCode).emit('drawOTB', cardText);
 
             // now handle the action
-
-            
         }
         else if (cardDrawType === DRAW_FARMERS_FATE) {
             const cardText = drawFarmersFate(state, playerID);
@@ -312,9 +316,6 @@ io.on('connection', client => {
 
             // now handle the action
         }
-
-
-
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
@@ -347,10 +348,15 @@ io.on('connection', client => {
 
             // draw operating expense card
             const [cardText, charge] = drawOperatingExpense(state, playerID);
-            payAmount(state, playerID, -charge);
-
+            const paymentReceived = payAmount(state, playerID, -charge);
+            
             io.to(roomCode).emit('drawOperatingExpense', cardText);
             io.to(roomCode).emit('gameState', JSON.stringify(state));
+
+            if (!paymentReceived) {
+                client.emit('paymentRequired');
+                return;
+            }
         }
     }
 

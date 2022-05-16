@@ -320,7 +320,6 @@ function movePlayer(state, playerID, diceValue) {
     player.Position += diceValue;
     player.Position %= (MAX_POSITION+1);
     player.shouldMove = false;
-    player.shouldHarvest = shouldPlayerHarvest(state, playerID);
 }
 
 // move the player to a specific position
@@ -328,7 +327,6 @@ function movePlayerTo(state, playerID, position) {
     const player = state.players[playerID];
     player.Position = position;
     player.shouldMove = false;
-    player.shouldHarvest = shouldPlayerHarvest(state, playerID);
 }
 
 function collectAmount(state, playerID, amount) {
@@ -692,6 +690,7 @@ function shouldPlayerHarvest(state, playerID) {
     }
 
     return isHarvestSquare(position) && hasThisAsset &&
+        player.Cash >= 0 &&
         completedHarvests[typeOfHarvestSquare(position)] == false;
 }
 
