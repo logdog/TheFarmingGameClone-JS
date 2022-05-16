@@ -1,6 +1,7 @@
 const {
     createGameState,
     movePlayer,
+    movePlayerTo,
     checkPositionForDrawingCard,
     checkPositionForBalances,
     checkNewYear,
@@ -14,11 +15,14 @@ const {
     performBuy,
     performPaybackDebt,
     checkPositionForDoubleYield,
+    shouldPlayerHarvest,
     performLoan,
     performSellAsset,
     performBankrupt,
+    shouldChangePosition,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
+    gameBoardSquares,
 } = require('./game');
 
 const { makeid } = require('./utils');
@@ -73,13 +77,15 @@ io.on('connection', client => {
 
     client.on('rollPositionDice', handleRollPositionDice);
     client.on('rollHarvestDice', handleRollHarvestDice);
+    client.on('rollMtStHelensDice', handleRollMtStHelens);
     client.on('endTurn', handleEndTurn);
 
     client.on('buy', handleBuy);
     client.on('paybackDebt', handlePaybackDebt);
-    client.on('loan', handleLoan);
+    client.on('takeLoan', handleLoan);
     client.on('sell', handleSell);
     client.on('bankrupt', handleBankrupt);
+
 
 
     function handleNewGame() {
@@ -175,6 +181,7 @@ io.on('connection', client => {
 
         // initialize the game
         states[roomCode] = createGameState(Object.values(avatars[roomCode]));
+        io.to(roomCode).emit('startGame', JSON.stringify(states[roomCode]));
         io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
     }
 
@@ -186,7 +193,7 @@ io.on('connection', client => {
         let playerID = playerIDs[client.id];
         const state = states[roomCode];
 
-        if (!state) {
+        if (!state || state.MtStHelens.happening) {
             return;
         }
 
@@ -199,133 +206,59 @@ io.on('connection', client => {
         // roll the positional dice
         let positionalDiceValue = Math.floor(Math.random() * 6) + 1;
         io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
+        player.shouldMove = false;
 
         // wait 1 second before revealing the answer
-        setTimeout(step2, 1000, roomCode, state, positionalDiceValue);
+        setTimeout(function () {
+            const oldPosition = state.players[playerID].Position;
+            movePlayer(state, playerID, positionalDiceValue);
+            movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
+        }, 1000);
     }
 
-    function step2(roomCode, state, positionalDiceValue) {
-        // update the player position based on dice roll
-        // and check if player needs to harvest later
-        movePlayer(state, positionalDiceValue);
+    function movePlayerAftermath(roomCode, state, playerID, oldPosition, newYearAllowed) {
 
         // pay player for passing christmas vacation
-        checkNewYear(state, positionalDiceValue);
+        if (newYearAllowed) {
+            checkNewYear(state, playerID, oldPosition);
+        }
 
         // check if we should double hay/corn for the year
-        checkPositionForDoubleYield(state);
+        checkPositionForDoubleYield(state, playerID);
 
         // check for pay/collect money on square
-        const balance = checkPositionForBalances(state);
-        let paymentReceived = false;
+        const balance = checkPositionForBalances(state, playerID);
 
         if (balance >= 0) {
-            collectAmount(state, balance);
-            paymentReceived = true;
+            collectAmount(state, playerID, balance);
         }
         else {
-            paymentReceived = payAmount(state, -balance);
+            payAmount(state, playerID, -balance);
         }
 
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
+        const player = state.players[playerID];
+        player.shouldHarvest = shouldPlayerHarvest(state, playerID);
+        
+        io.to(roomCode).emit('positionCard',JSON.stringify(gameBoardSquares[player.Position]));
 
-        // proceed to draw a card, perform harvest, etc.
-        if (paymentReceived) {
-            step3(roomCode, state, positionalDiceValue);
-        }
-        else {
-            client.emit('paymentRequired');
-        }
-    }
-
-    function handleLoan(loanAmount) {
-        let roomCode = clientRooms[client.id];
-        let playerID = playerIDs[client.id];
-        const state = states[roomCode];
-
-        if (!state) {
-            return;
-        }
-
-        const success = performLoan(state, playerID, loanAmount);
-        if (success) {
+        if (player.shouldHarvest) {
             io.to(roomCode).emit('gameState', JSON.stringify(state));
         }
         else {
-            client.emit('ERROR_loan');
+            // should player move because the square says so?
+            // e.g. Mar 3, July 3, Aug 1, Sep 1 (conditional)
+            step3(roomCode, state, playerID);
         }
-    }
-
-    function handleSell(item) {
-        let roomCode = clientRooms[client.id];
-        let playerID = playerIDs[client.id];
-        const state = states[roomCode];
-
-        if (!state) {
-            return;
-        }
-
-        const success = performSellAsset(state, playerID, loanAmount);
-        if (success) {
-            io.to(roomCode).emit('gameState', JSON.stringify(state));
-        }
-        else {
-            client.emit('ERROR_sell');
-        }
-    }
-
-    function handleBankrupt() {
-
-        let roomCode = clientRooms[client.id];
-        let playerID = playerIDs[client.id];
-        const state = states[roomCode];
-
-        if (!state) {
-            return;
-        }
-
-        performBankrupt(state, playerID);
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
-    }
-
-    function step3(roomCode, state, positionalDiceValue) {
-
-        const cardDrawType = checkPositionForDrawingCard(state);
-
-        if (cardDrawType === DRAW_OTB) {
-            const cardText = drawOTB(state);
-
-            // the deck could be empty
-            if (cardText === null) {
-                return;
-            }
-
-            io.to(roomCode).emit('drawOTB', cardText);
-
-            // now handle the action
-
-            
-        }
-        else if (cardDrawType === DRAW_FARMERS_FATE) {
-            const cardText = drawFarmersFate(state);
-            io.to(roomCode).emit('drawFarmersFate', cardText);
-
-            // now handle the action
-        }
-
-
-
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
     function handleRollHarvestDice() {
-        console.log('handleRollPositionDice()')
+        console.log('handleRollHarvestDice()')
 
         let roomCode = clientRooms[client.id];
         let playerID = playerIDs[client.id];
         const state = states[roomCode];
 
-        if (!state) {
+        if (!state || state.MtStHelens.happening) {
             return;
         }
 
@@ -341,16 +274,241 @@ io.on('connection', client => {
         setTimeout(finishRollHarvestDice, 1000);
         function finishRollHarvestDice() {
             // harvest 
-            const harvestCode = performHarvest(state, harvestDiceValue);
-            io.to(roomCode).emit('gameState', JSON.stringify(state));
-
+            const harvestSummary = performHarvest(state, playerID, harvestDiceValue);
+            
             // draw operating expense card
-            const [cardText, charge] = drawOperatingExpense(state);
-            payAmount(state, -charge);
+            const [cardText, charge] = drawOperatingExpense(state, playerID);
+            console.log('operating expense: ')
+            console.log(charge);
+            payAmount(state, playerID, -charge);
 
+            harvestSummary.push(['Operating Expenses', charge]);
+
+            let totalHarvestAmount = harvestSummary.map(a=>a[1]).reduce((a,b)=>a+b,0);
+            harvestSummary.push(['Total', totalHarvestAmount]);
+
+            player.shouldHarvest = shouldPlayerHarvest(state, playerID);
+
+            console.log(harvestSummary);
+            console.log('will send harvestsummary')
+            io.to(roomCode).emit('harvestSummary', JSON.stringify(harvestSummary));
             io.to(roomCode).emit('drawOperatingExpense', cardText);
             io.to(roomCode).emit('gameState', JSON.stringify(state));
+
+            // should the player move because the square says so?
+            // e.g. Mar 3, July 3, Aug 1, Sep 1 (conditional)
+            step3(roomCode, state, playerID);
         }
+    }
+
+    function handleRollMtStHelens() {
+        console.log('handleRollMtStHelens()')
+
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        if (!state) {
+            return;
+        }
+
+        if (!state.MtStHelens.happening 
+            || state.MtStHelens.turn !== playerID
+            || state.MtStHelens.rolled[playerID]) {
+            return;
+        }
+
+        let mtStHelensDiceValue = Math.floor(Math.random() * 6) + 1;
+        state.MtStHelens.rolled[playerID] = true;
+
+        io.to(roomCode).emit('rollMtStHelensDiceAnimation', mtStHelensDiceValue);
+
+        setTimeout(finishRollMtStHelensDice, 1000);
+        function finishRollMtStHelensDice() {
+
+            console.log('finishRollMtStHelensDice')
+            const player = state.players[playerID];
+            
+            // Odd - escaped; Even - hit. Ash hit players pay $100 per Acre to clean up mess.
+            if (mtStHelensDiceValue % 2 === 0) {
+                payAmount(state, playerID, 100*(player.Hay.Acres+player.Grain.Acres+player.Fruit.Acres));
+            }
+
+            // next player's turn to roll the dice
+            state.MtStHelens.turn++;
+            state.MtStHelens.turn %= state.players.length;
+
+            // if everyone has rolled, the event is over
+            const eventOver = state.MtStHelens.rolled.reduce((a,b)=>a&b, true);
+            if (eventOver) {
+                state.MtStHelens.happening = false;
+            }
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
+        }
+    }
+
+    // should the player move because of their current position??
+    function step3(roomCode, state, playerID) {
+
+        const [shouldMove, newPosition] = shouldChangePosition(state, playerID);
+
+        if (shouldMove) {
+            const oldPosition = state.players[playerID].Position;
+            movePlayerTo(state, playerID, newPosition);
+            // do not allow player to collect $5000 if they hurt their back
+            movePlayerAftermath(roomCode, state, playerID, oldPosition, oldPosition !== 11);
+        }
+        else {
+            // draw a farmer's fate or OTB card
+            step4(roomCode, state, playerID);
+        }
+    }
+
+    // draw a card, perform the action
+    function step4(roomCode, state, playerID) {
+
+        const cardDrawType = checkPositionForDrawingCard(state, playerID);
+
+        if (cardDrawType === DRAW_OTB) {
+            const cardText = drawOTB(state, playerID);
+
+            // the deck could be empty
+            if (cardText === null) {
+                return;
+            }
+
+            io.to(roomCode).emit('drawOTB', cardText);
+        }
+        else if (cardDrawType === DRAW_FARMERS_FATE) {
+            const [cardText, cardIndex] = drawFarmersFate(state, playerID);
+            io.to(roomCode).emit('drawFarmersFate', cardText);
+
+            // now handle the action
+            const player = state.players[playerID];
+
+            switch (cardIndex) {
+                case 0: {
+                    // no Tractor pay $3000
+                    if (!player.Tractors) {
+                        payAmount(state, playerID, 3000);
+                    }
+                    break;
+                }
+                case 1: {
+                    // Go to christmas. Collect your $6000
+                    const oldPosition = player.Position;
+                    movePlayerTo(state, playerID, 0);
+                    movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
+                    break;
+                }
+                case 2: {
+                    // Go to 2nd week of January. Do not collect $5000
+                    const oldPosition = player.Position;
+                    movePlayerTo(state, playerID, 2);
+                    movePlayerAftermath(roomCode, state, playerID, oldPosition, false);
+                    break;
+                }
+                case 3: {
+                    // Pay $2500 if you do not own your own Harvester
+                    if (!player.Harvesters) {
+                        payAmount(state, playerID, 2500);
+                    }
+                    break;
+                }
+                case 4: {
+                    // IRS (already handled)
+                    break;
+                }
+                case 5: {
+                    // collect $2000
+                    collectAmount(state, playerID, 2000);
+                    break;
+                }
+                case 6: {
+                    // Collect $1000
+                    collectAmount(state, playerID, 1000);
+                    break;
+                }
+                case 7: {
+                    // Lose your whole herd on your "farm"
+                    player.Livestock.Total -= player.Livestock.Farm;
+                    player.Livestock.Farm = 0;
+                    break;
+                }
+                case 8: {
+                    //  Collect $100 per Grain acre.
+                    collectAmount(state, playerID, 100*player.Grain.Acres); 
+                    break;
+                }
+                case 9: {
+                    // Lose half wheat crop for the year (already handled)
+                    break;
+                }
+                case 10: {
+                    // Pay $300 per Fruit acre.
+                    payAmount(state, playerID, 300*player.Fruit.Acres);
+                }
+                case 11: {
+                    // If you have a Harvester, collect $2000 from each player who has none.
+                    if (player.Harvesters) {
+                        for(let id=0; id<state.players.length; id++) {
+                            const other = state.players[id];
+                            if (other !== player && !other.Harvesters) {
+                                payAmount(state, id, 2000);
+                                collectAmount(state, playerID, 2000);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 12: {
+                    // Pay $7000
+                    payAmount(state, playerID, 7000);
+                    break;
+                }
+                case 13: {
+                    // Take home a free Harvester worth $10000
+                    player.Harvesters++;
+                    break;
+                }
+                case 14: {
+                    // Mt. St. Helens
+                    // $500 per Hay acre
+                    collectAmount(state, playerID, 500*player.Hay.Acres);
+                    if (state.players.length > 1) {
+                        state.MtStHelens = {
+                            happening: true,
+                            rolled: state.players.map((p,index)=>index===playerID),
+                            turn: (playerID+1)%state.players.length,
+                        };
+                    }
+                    break;
+                }
+                case 15: {
+                    //  Collect $2000 if you have cows.
+                    if (player.Livestock.Total) {
+                        collectAmount(state, playerID, 2000);
+                    }
+                    break;
+                }
+                case 16: {
+                    // leaves you a Tractor worth $10000
+                    player.Tractors++;
+                    break;
+                }
+                default: {
+                    console.log('illegal FF card ID');
+                    break;
+                }
+            }
+        }
+
+        // the net worths were updated
+        for(let id=0; id<state.players.length; id++) {
+            calculateNetWorth(state, id);
+        }
+
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
     function handleEndTurn() {
@@ -362,15 +520,18 @@ io.on('connection', client => {
         if (!state) {
             return;
         }
-        
-        if (state.turn !== playerID) {
+
+        if (state.turn !== playerID || state.MtStHelens.happening) {
             return;
         }
         // check that it is the correct player's turn, and they should move
         const player = state.players[playerID];
-        
-        if(player.shouldMove || player.shouldHarvest) {
-            console.log(player);
+
+        if (player.shouldMove || player.shouldHarvest || player.Cash < 0) {
+            client.emit('requirePayment');
+            client.emit('gameState', JSON.stringify(state));
+            
+            console.log('unfinished business. cannot end turn yet')
             return;
         }
 
@@ -399,7 +560,7 @@ io.on('connection', client => {
             return;
         }
 
-        const buyCode = performBuy(state, item, downPayment);
+        const buyCode = performBuy(state, playerID, item, downPayment);
         // TODO: handle invalid buys
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
@@ -419,8 +580,68 @@ io.on('connection', client => {
             return;
         }
 
-        const code = performPaybackDebt(state, downPayment);
+        const code = performPaybackDebt(state, playerID, downPayment);
         // TODO: handle invalid buys
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
+    }
+
+    function handleLoan(loanAmount) {
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        loanAmount = parseInt(loanAmount);
+
+        if (!state || loanAmount === NaN) {
+            return;
+        }
+
+        const player = state.players[playerID];
+        const success = performLoan(state, playerID, loanAmount);
+        if (success) {
+            console.log('asdfasdf')
+            player.shouldHarvest = shouldPlayerHarvest(state, playerID);
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
+        }
+        else {
+            client.emit('ERROR_loan');
+        }
+    }
+
+    function handleSell(item) {
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        if (!state) {
+            return;
+        }
+
+        const player = state.players[playerID];
+        const success = performSellAsset(state, playerID, item);
+        if (success) {
+            player.shouldHarvest = shouldPlayerHarvest(state, playerID);
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
+        }
+        else {
+            client.emit('ERROR_sell');
+        }
+    }
+
+    function handleBankrupt() {
+
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        if (!state) {
+            return;
+        }
+
+        performBankrupt(state, playerID);
+        const player = state.players[playerID];
+        player.shouldMove = false;
+
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 

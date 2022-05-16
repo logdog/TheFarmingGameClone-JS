@@ -5,8 +5,6 @@
     --cornGold: #F6C915;
 }
 
-
-
 body {
     display: flex;
     flex-direction: column;
@@ -376,16 +374,43 @@ h1 {
     background-repeat: no-repeat;
 
     display: grid;
-    grid-template-columns: [col1] 25% [col2] auto [col3] 25% [col4];
+    grid-template-columns: [col1] 33% [col2] auto [col3] 33% [col4];
     grid-template-rows: [row1] 33% [row2] auto [row3] 33% [row4];
 }
 
 
-#card-container {
+.card-container {
+    width: 100%;
+    height: auto;
+}
+
+#POS-container {
     grid-column-start: col2;
     grid-column-end: col3;
-    grid-row-start: row2;
+    grid-row-start: row1;
     grid-row-end: row3;
+}
+
+#harvest-container {
+    grid-column-start: col1;
+    grid-column-end: col2;
+    grid-row-start: row1;
+    grid-row-end: row3;
+}
+
+#OTB-FF-container {
+    grid-column-start: col3;
+    grid-column-end: col4;
+    grid-row-start: row1;
+    grid-row-end: row3;
+}
+
+.card.HarvestCard {
+    background-color: white;
+}
+
+.card.PositionCard {
+    background-color: white;
 }
 
 .card.OTBCard {
@@ -400,14 +425,21 @@ h1 {
     background-color: lightgoldenrodyellow;
 }
 
-.card {
+/* .card {
     display: none;
-}
+} */
 
-.card:last-child {
-    size: 100% 100%;
+/* .card:last-child {
+    border-width: 5%;
+    border-style: solid;
 
-    border-width: 5px;
+    display: grid;
+    grid-template-columns: [col1] 20px [col2] auto [col3] 20px [col4];
+    grid-template-rows: [row1] 20px [row2] auto [row3];
+} */
+
+.card {
+    border-width: 5%;
     border-style: solid;
 
     display: grid;
@@ -415,6 +447,7 @@ h1 {
     grid-template-rows: [row1] 20px [row2] auto [row3];
 }
 
+/* x button */
 .card>span:first-child {
     grid-column-start: col3;
     grid-column-end: col4;
@@ -424,7 +457,6 @@ h1 {
     transition: 0.2s;
 }
 
-/* x button */
 .card>span:first-child:hover {
     background-color: gray;
     cursor: pointer;
@@ -441,7 +473,7 @@ h1 {
 }
 
 /* description */
-.card>span:last-child {
+.card>span:nth-child(3) {
     grid-column-start: col1;
     grid-column-end: col4;
     grid-row-start: row2;
@@ -450,11 +482,41 @@ h1 {
     font-weight: 200;
 }
 
+/* harvest card table */
+.card>table {
+    grid-column-start: col1;
+    grid-column-end: col4;
+    grid-row-start: row2;
+    grid-row-end: row3;
+    border-collapse: collapse;
+}
+
+.card>table>tbody>tr {
+    width: 100%;
+}
+.card>table>tbody>tr>td {
+    width: 100%;
+}
+
+.card>table>tbody>tr>td:first-child {
+    text-align: left;
+}
+
+.card>table>tbody>tr>td:last-child {
+    text-align: right;
+}
+
+.card>table>tbody>tr:last-child>td {
+    font-weight: 600;
+}
+
+
+
 /* Dice */
 
 #dice-container {
-    grid-column-start: col2;
-    grid-column-end: col3;
+    grid-column-start: col1;
+    grid-column-end: col4;
     grid-row-start: row3;
     grid-row-end: row4;
 
@@ -463,7 +525,7 @@ h1 {
     justify-content: center;
 }
 
-#dice-container > div {
+#dice-container>div {
     width: 100px;
     height: 100px;
     margin: 25px;
@@ -479,36 +541,40 @@ h1 {
     border: 1px solid black;
 }
 
-#harvest-dice-container > .face {
+#harvest-dice-container>.face {
     background-color: gold;
 }
 
-/* #harvest-dice-container > * > .pip {
-    background-color: var(--cornGold);
-} */
+#mtsthelens-dice-container>.face {
+    background-color: black;
+}
+
+#mtsthelens-dice-container>.face>.pip {
+    background-color: white;
+}
 
 /* create the dice */
-.front {
+.face.front {
     transform: translateZ(50px);
 }
 
-.back {
+.face.back {
     transform: rotateY(180deg) translateZ(50px);
 }
 
-.right {
+.face.right {
     transform: rotateY(90deg) translateZ(50px);
 }
 
-.left {
+.face.left {
     transform: rotateY(-90deg) translateZ(50px);
 }
 
-.top {
+.face.top {
     transform: rotateX(90deg) translateZ(50px);
 }
 
-.bottom {
+.face.bottom {
     transform: rotateX(-90deg) translateZ(50px);
 }
 
@@ -617,15 +683,33 @@ h1 {
     transform: rotateX(-10.5turn) rotateY(-10turn) rotateZ(-10turn);
 }
 
+/* dice spinning animation */
+@keyframes rotating {
+    from {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
+    }
+
+    to {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(2turn);
+    }
+}
+
+.spinning-dice {
+    animation-name: rotating;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-duration: 1s;
+}
+
 /* Control Panel */
 #controls-wrapper {
-    display: block;
+    display: flex;
     margin-left: 1vw;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 /* Shop */
-
-
 
 
 #shop {
@@ -633,15 +717,37 @@ h1 {
     display: flex;
     flex-direction: column;
     font-size: small;
+    border: 1px solid black;
+}
+
+.tabs {
+    display: flex;
+    justify-content: space-between;
 }
 
 .tab {
-    display: inline-block;
+    display: block;
+    width: 100%;
     text-align: center;
     font-weight: 500;
-    background-color: #F6C915;
-    font-size: large;
+    font-size: medium;
     transition: 200ms;
+    border: 1px solid black;
+    color: white;
+    background-color: gray;
+}
+
+#buy-tab.selected {
+    background-color: #4caf50;
+}
+
+#sell-tab.selected {
+    background-color: #dc143c;
+}
+
+.tab.selected:hover {
+    filter: brightness(100%);
+    cursor: auto;
 }
 
 .tab:hover {
@@ -649,87 +755,165 @@ h1 {
     cursor: pointer;
 }
 
-#buy-wrapper {
+#buy-wrapper>ul,
+#sell-wrapper>ul {
+    list-style-type: none;
+    padding: 2px;
+    margin: 0;
+}
+
+.shop-grid {
     display: grid;
     grid-template-columns: repeat(4, 8vw);
-    grid-template-rows: repeat(3, 8vw);
+    grid-template-rows: repeat(3, auto);
     grid-auto-flow: row;
     border: 2px solid gray;
 }
 
-.shop-item {
-    text-align: center;
-    font-size: 0.85vw;
+.shop-item>button {
+    width: 100%;
+    height: 100%;
+    justify-self: center;
+    align-self: center;
 }
 
-.shop-item > div {
-    width: 5.5vw;
-    height: 5.5vw;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    border-radius: 25%;
-    transition: 200ms;
-    margin: auto;
-}
-
-.shop-item > * > span:first-child {
-    font-weight: 200;
-}
-
-.price {
-    font-weight: 500;
-}
-
-#shop-cows, 
-#shop-ahtanum,
-#shop-rattlesnake,
-#shop-cascades,
-#shop-toppenish {
-    background-image: url('icons/cow.png');
-}
-
-#shop-hay {
-    background-image: url('icons/hay.png');
-}
-
-#shop-grain {
-    background-image: url('icons/grain.png');
-    background-color: #F6C915;
-}
-
-#shop-fruit {
-    background-image: url('icons/fruit.png');
-    background-color: pink;
-}
-
-#shop-tractor {
-    background-image: url('icons/tractor.png');
-    background-color: lightskyblue;
-}
-
-#shop-harvester {
-    background-image: url('icons/harvester.png');
-    background-color: lightblue;
-}
-
-#shop-payback {
-    background-color: green;
-}
-
-.shop-item > div:hover {
-    width: 6vw;
-    height: 6vw;
+.shop-item>button:hover {
     cursor: pointer;
+    filter: brightness(80%);
 }
 
-.shop-item.no-OTB > div{
-    background-color: white;
-    box-shadow: inset 0 0 0 1000px rgba(100, 100, 100, 0.5);
-    filter: grayscale(100%);
+.shop-item>button>span {
+    font-size: 0.75vw;
 }
 
-.shop-item.no-OTB > div:hover {
-    width: 5.5vw;
-    height: 5.5vw;
+.shop-item>button>span:last-child {
+    font-weight: 600;
+}
+
+
+#buy-wrapper>.shop-grid>.shop-item>button {
+    background-color: #4caf50;
+    color: white;
+    border: 1px solid black;
+    transition: 200ms;
+}
+
+#sell-wrapper>.shop-grid>.shop-item>button {
+    background-color: #dc143c;
+    color: white;
+    border: 1px solid black;
+    transition: 200ms;
+}
+
+#buy-wrapper>.shop-grid>.shop-item>button.no-OTB,
+#sell-wrapper>.shop-grid>.shop-item>button.no-sell {
+    background-color: gray;
+    color: white;
+    border: 1px solid black;
+}
+
+
+#buy-wrapper>.shop-grid>.shop-item>button.no-OTB:hover,
+#sell-wrapper>.shop-grid>.shop-item>button.no-sell:hover {
     cursor: auto;
+    filter: brightness(100%);
 }
+
+#Btn-Declare-Bankrupt {
+    background-color: black !important;
+}
+
+/* payout-table */
+#payout-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: small;
+    border: 1px solid black;
+}
+
+#payout-container>div:not(:first-child) {
+    display: none;
+}
+
+#payout-container>div:not(:first-child).visible {
+    display: block;
+}
+
+#hay-tab.selected {
+    background-color: #4caf50;
+}
+
+#grain-tab.selected {
+    background-color: gold;
+}
+
+#fruit-tab.selected {
+    background-color: #dc143c;
+}
+
+#livestock-tab.selected {
+    background-color: rgba(211, 139, 61, 0.846);
+}
+
+.payout-table>table {
+    border-collapse: collapse;
+    text-align: right;
+    width: 100%;
+}
+
+th,
+td {
+    border: 1px solid black;
+}
+
+/* player total */
+
+td.left {
+    text-align: left;
+}
+
+td.right {
+    text-align: right;
+}
+
+td.centered {
+    text-align: center;
+}
+
+td.bold {
+    font-weight: 600;
+}
+
+.player-grid>table {
+    border-collapse: collapse;
+    table-layout: auto;
+    width: 100%;
+}
+
+.player-profile-icon {
+    width: 50%;
+    background-size: contain; 
+    background-position:center center; 
+    background-repeat: no-repeat;
+}
+
+.player-grid {
+    display: none;
+}
+
+.player-grid.visible {
+    display: block;
+}
+
+.player-tab {
+    font-size: auto;
+}
+
+/* .player-grid>table>tbody>tr>td:nth-child(3) {
+    display: inline-block;
+}
+
+.player-grid>table>tbody>tr>td:nth-child(3) {
+    display: inline-block;
+} */

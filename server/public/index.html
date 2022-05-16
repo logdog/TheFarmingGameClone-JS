@@ -79,128 +79,201 @@
     <div id="game-wrapper" style="display: none;">
         <div id="game-board"></div>
         <div id="controls-wrapper" style="display: flex; flex-direction: column;">
-            <div id="player-totals"
-                style="display: flex; flex-direction: column; border: 3px solid black; margin: 10px;"></div>
-
-
-            <!-- <div id="shop" style="border: 3px solid green; margin: 10px;">
-                <div id="shop-row-1">
-                    <label>Down Payment</label>
-                    
-                </div>
-                <div id="shop-row-2">
-                    <button id="Btn-Hay"><span>10 Acres Hay<br>$20000</span></button>
-                    <button id="Btn-Grain"><span>10 Acres Grain<br>$20000</span></button>
-                    <button id="Btn-Cows"><span>10 Cows<br>$5000</span></button>
-                    <button id="Btn-Fruit"><span>5 Acres Fruit<br>$25000</span></button>
-                    <button id="Btn-Tractor"><span>1 Tractor<br>$10000</span></button>
-                    <button id="Btn-Harvester"><span>1 Harvester<br>$10000</span></button>
-                </div>
-                <div id="shop-row-3">
-                    <button id="Btn-Ahtanum-Ridge"><span>Ahtanum Ridge<br>20 Cows<br>$20000</span></button>
-                    <button id="Btn-Rattlesnake-Ridge"><span>Rattlesnake Ridge<br>30 Cows<br>$30000</span></button>
-                    <button id="Btn-Cascades"><span>Cascades<br>40 Cows<br>$40000</span></button>
-                    <button id="Btn-Toppenish-Ridge"><span>Toppenish Ridge<br>50 Cows<br>$50000</span></button>
-                    <button id="Btn-Payback-Debt"><span>Payback Debt<br>Enter Down Payment</span></button>
-                </div>
-            </div> -->
-
+            <div id="player-totals">
+                <div class="tabs"></div>
+                <div id="player-grid-wrapper"></div>
+            </div>
 
             <div id="shop">
                 <div class="tabs">
-                    <div class="tab" id="buy-tab"><span>Buy</span></div>
+                    <div class="tab selected" id="buy-tab"><span>Buy</span></div>
                     <div class="tab" id="sell-tab"><span>Sell</span></div>
                 </div>
                 <div id="buy-wrapper">
-                    <!-- <span>All purchases require a 20% minimum down payment.</span>
-                    <span>Down Payment <input id="down-payment" type="number" value="4000"> </span> -->
+                    <ul>
+                        <li><span>All purchases must be made between Christmas Vacation and Spring Planting.</span></li>
+                        <li><span>All purchases require a 20% minimum down payment.</span></li>
+                        <li><span>Total debt cannot exceed $50,000</span></li>
+                        <li><span>Down Payment: <input id="down-payment" type="number" value="4000"> </span></li>
+                    </ul>
+                    <div class="shop-grid">
+                        <div class="shop-item">
+                            <button id="Buy-Hay">
+                                <span>Buy 10 Acres Hay</span>
+                                <span>$20,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Grain">
+                                <span> Buy 10 Acres Grain</span>
+                                <span>$20,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Fruit">
+                                <span>Buy 5 Acres Fruit</span>
+                                <span>$25,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Cows">
+                                <span>Buy 10 Cows</span>
+                                <span>$5,000</span>
+                            </button>
+                        </div>
 
-                    <div class="shop-item">
-                        <div id="shop-cows"></div>
-                        <span>Buy 10 Cows</span>
-                        <span class="price">$5000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-hay"></div>
-                        <span>Buy 10 Acres Hay</span>
-                        <span class="price">$20000</span>
-                    </div>
-                    <div class="shop-item no-OTB">
-                        <div id="shop-grain"></div>
-                        <span>Buy 10 Acres Grain</span>
-                        <span class="price">$20000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-fruit"></div>
-                        <span>Buy 10 Acres Fruit</span>
-                        <span class="price">$25000</span>
-                    </div>
+                        <div class="shop-item">
+                            <button id="Buy-Ahtanum" title="+20 Cows">
+                                <span>Lease Ahtanum Ridge</span>
+                                <span>$20,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Rattlesnake" title="+30 Cows">
+                                <span>Lease Rattlesnake Ridge</span>
+                                <span>$30,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Cascades" title="+40 Cows">
+                                <span>Lease the Cascade Range</span>
+                                <span>$40,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Toppenish" title="+50 Cows">
+                                <span>Lease Toppenish Ridge</span>
+                                <span>$50,000</span>
+                            </button>
+                        </div>
 
-                    <div class="shop-item">
-                        <div id="shop-ahtanum"></div>
-                        <span>Lease Ahtanum Ridge</span>
-                        <span class="price">$20000</span>
+                        <div class="shop-item">
+                            <button id="Buy-Tractor">
+                                <span>Buy 1 Tractor</span>
+                                <span>$10000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Buy-Harvester">
+                                <span>Buy 1 Harvester</span>
+                                <span>$10000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Btn-Payback-Debt">
+                                <span>Payback Debt</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="shop-item no-OTB">
-                        <div id="shop-rattlesnake"></div>
-                        <span>Lease Rattlesnake Ridge</span>
-                        <span class="price">$30000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-cascades"></div>
-                        <span>Lease Cascades</span>
-                        <span class="price">$40000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-toppenish"></div>
-                        <span>Lease Toppenish Ridge</span>
-                        <span class="price">$50000</span>
-                    </div>
+                </div>
+                <div id="sell-wrapper" style="display: none;">
+                    <ul>
+                        <li><span>Total debt cannot exceed $50,000</span></li>
+                        <li><span>Loan Amount: <input id="loan-amount" type="number" value="4000"> </span></li>
+                    </ul>
+                    <div class="shop-grid">
+                        <div class="shop-item">
+                            <button id="Sell-Hay">
+                                <span>Sell 10 Acres Hay</span>
+                                <span>$10,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Grain">
+                                <span>Sell 10 Acres Grain</span>
+                                <span>$10,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Fruit">
+                                <span>Sell 5 Acres Fruit</span>
+                                <span>$12,500</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Cows">
+                                <span>Sell 10 Cows</span>
+                                <span>$2,500</span>
+                            </button>
+                        </div>
 
-                    <div class="shop-item">
-                        <div id="shop-tractor"></div>
-                        <span>Buy 1 Tractor</span>
-                        <span class="price">$10000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-harvester"></div>
-                        <span>Buy 1 Harvester</span>
-                        <span class="price">$10000</span>
-                    </div>
-                    <div class="shop-item">
-                        <div id="shop-payback"></div>
-                        <span>Payoff Debt</span>
-                    </div>
-                
+                        <div class="shop-item">
+                            <button id="Sell-Ahtanum" title="-20 Cows">
+                                <span>Sublease Ahtanum Ridge</span>
+                                <span>$10,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item no-sell">
+                            <button id="Sell-Rattlesnake" title="-30 Cows">
+                                <span>Sublease Rattlesnake Ridge</span>
+                                <span>$15,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Cascades" title="-40 Cows">
+                                <span>Sublease the Cascade Range</span>
+                                <span>$20,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Toppenish" title="-50 Cows">
+                                <span>Sublease Toppenish Ridge</span>
+                                <span>$25,000</span>
+                            </button>
+                        </div>
 
+                        <div class="shop-item">
+                            <button id="Sell-Tractor">
+                                <span>Sell 1 Tractor</span>
+                                <span>$5,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Sell-Harvester">
+                                <span>Sell 1 Harvester</span>
+                                <span>$5,000</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Btn-Take-Loan">
+                                <span>Take Loan</span>
+                            </button>
+                        </div>
+                        <div class="shop-item">
+                            <button id="Btn-Declare-Bankrupt">
+                                <span>Declare Bankruptcy</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- <div id="shop-row-1">
-                    <label>Down Payment</label>
-                    <input id="down-payment" type="number" value="1000">
+            
+            <div id="payout-container">
+                <div class="tabs">
+                    <div class="tab selected" id="hay-tab"><span>Hay</span></div>
+                    <div class="tab" id="grain-tab"><span>Grain</span></div>
+                    <div class="tab" id="fruit-tab"><span>Fruit</span></div>
+                    <div class="tab" id="livestock-tab"><span>Livestock</span></div>
                 </div>
-                <div id="shop-row-2">
-                    <button id="Btn-Hay"><span>10 Acres Hay<br>$20000</span></button>
-                    <button id="Btn-Grain"><span>10 Acres Grain<br>$20000</span></button>
-                    <button id="Btn-Cows"><span>10 Cows<br>$5000</span></button>
-                    <button id="Btn-Fruit"><span>5 Acres Fruit<br>$25000</span></button>
-                    <button id="Btn-Tractor"><span>1 Tractor<br>$10000</span></button>
-                    <button id="Btn-Harvester"><span>1 Harvester<br>$10000</span></button>
+                <div class="payout-table visible" id="hay-table">
+                    <table><tr><td>DICE</td><td>10 Acres</td><td>20 Acres</td><td>30 Acres</td><td>40 Acres</td><td>50 Acres</td><td>60 Acres</td></tr><tr><td>1</td><td>400</td><td>800</td><td>1200</td><td>1600</td><td>2000</td><td>2400</td></tr><tr><td>2</td><td>600</td><td>1200</td><td>1800</td><td>2400</td><td>3000</td><td>3600</td></tr><tr><td>3</td><td>1000</td><td>2000</td><td>3000</td><td>4000</td><td>5000</td><td>6000</td></tr><tr><td>4</td><td>1500</td><td>3000</td><td>4500</td><td>6000</td><td>7500</td><td>9000</td></tr><tr><td>5</td><td>2200</td><td>4400</td><td>6600</td><td>8800</td><td>11000</td><td>13200</td></tr><tr><td>6</td><td>3000</td><td>6000</td><td>9000</td><td>12000</td><td>15000</td><td>18000</td></tr></table>
                 </div>
-                <div id="shop-row-3">
-                    <button id="Btn-Ahtanum-Ridge"><span>Ahtanum Ridge<br>20 Cows<br>$20000</span></button>
-                    <button id="Btn-Rattlesnake-Ridge"><span>Rattlesnake Ridge<br>30 Cows<br>$30000</span></button>
-                    <button id="Btn-Cascades"><span>Cascades<br>40 Cows<br>$40000</span></button>
-                    <button id="Btn-Toppenish-Ridge"><span>Toppenish Ridge<br>50 Cows<br>$50000</span></button>
-                    <button id="Btn-Payback-Debt"><span>Payback Debt<br>Enter Down Payment</span></button>
-                </div> -->
-
+                <div class="payout-table" id="grain-table">
+                    <table><tr><td>DICE</td><td>10 Acres</td><td>20 Acres</td><td>30 Acres</td><td>40 Acres</td><td>50 Acres</td><td>60 Acres </td></tr><tr><td>1</td><td>800</td><td>1500</td><td>2300</td><td>3000</td><td>3800</td><td>4500 </td></tr><tr><td>2</td><td>1500</td><td>3000</td><td>4500</td><td>6000</td><td>7500</td><td>9000 </td></tr><tr><td>3</td><td>2500</td><td>5000</td><td>7500</td><td>10000</td><td>12500</td><td>15000 </td></tr><tr><td>4</td><td>3800</td><td>7500</td><td>11300</td><td>15000</td><td>18800</td><td>31500 </td></tr><tr><td>5</td><td>5300</td><td>10500</td><td>15800</td><td>21000</td><td>26300</td><td>31500 </td></tr><tr><td>6</td><td>7000</td><td>14000</td><td>21000</td><td>28000</td><td>35000</td><td>42000 </td></tr></table>
+                </div>
+                <div class="payout-table" id="fruit-table">
+                    <table><tr><td>DICE</td><td>5 Acres</td><td>10 Acres</td><td>15 Acres</td><td>20 Acres</td><td>25 Acres </td></tr><tr><td>1</td><td>2000</td><td>4000</td><td>6000</td><td>8000</td><td>10000 </td></tr><tr><td>2</td><td>3500</td><td>7000</td><td>10500</td><td>14000</td><td>17500 </td></tr><tr><td>3</td><td>6000</td><td>12000</td><td>18000</td><td>24000</td><td>30000 </td></tr><tr><td>4</td><td>9000</td><td>18000</td><td>27000</td><td>36000</td><td>45000 </td></tr><tr><td>5</td><td>13000</td><td>26000</td><td>39000</td><td>52000</td><td>65000 </td></tr><tr><td>6</td><td>17500</td><td>35000</td><td>52500</td><td>70000</td><td>87500 </td></tr></table>
+                </div>
+                <div class="payout-table" id="livestock-table">
+                    <table><tr><td>DICE</td><td>10 Head</td><td>20 Head</td><td>30 Head</td><td>40 Head</td><td>50 Head</td><td>60 Head </td></tr><tr><td>1</td><td>1400</td><td>2800</td><td>4200</td><td>5600</td><td>7000</td><td>8400 </td></tr><tr><td>2</td><td>2000</td><td>4000</td><td>6000</td><td>8000</td><td>10000</td><td>12000 </td></tr><tr><td>3</td><td>2800</td><td>5600</td><td>8400</td><td>11200</td><td>14000</td><td>16800 </td></tr><tr><td>4</td><td>3800</td><td>7600</td><td>11400</td><td>15200</td><td>19000</td><td>22800 </td></tr><tr><td>5</td><td>5000</td><td>10000</td><td>15000</td><td>20000</td><td>25000</td><td>30000 </td></tr><tr><td>6</td><td>7500</td><td>15000</td><td>22500</td><td>30000</td><td>37500</td><td>45000 </td></tr></table>
+                </div>
+            </div>
+            
+            
             <div id="roll-dice-div"></div>
-
-            <!-- <div id="payout-table" style="font-size: 0.5vw;">
-                <table><tr><td></td><td></td><td></td><td>HAY</td><td></td><td></td><td></td><td></td><td></td><td></td><td>FRUIT</td><td></td><td></td><td></td><td></td></tr><tr><td>DICE</td><td>10 Acres</td><td>20 Acres</td><td>30 Acres</td><td>40 Acres</td><td>50 Acres</td><td>60 Acres</td><td></td><td>DICE</td><td>5 Acres</td><td>10 Acres</td><td>15 Acres</td><td>20 Acres</td><td></td><td></td></tr><tr><td>1</td><td>400</td><td>800</td><td>1200</td><td>1600</td><td>2000</td><td>2400</td><td></td><td>1</td><td>2000</td><td>4000</td><td>6000</td><td>8000</td><td></td><td></td></tr><tr><td>2</td><td>600</td><td>1200</td><td>1800</td><td>2400</td><td>3000</td><td>3600</td><td></td><td>2</td><td>3500</td><td>7000</td><td>10500</td><td>14000</td><td></td><td></td></tr><tr><td>3</td><td>1000</td><td>2000</td><td>3000</td><td>4000</td><td>5000</td><td>6000</td><td></td><td>3</td><td>6000</td><td>12000</td><td>18000</td><td>24000</td><td></td><td></td></tr><tr><td>4</td><td>1500</td><td>3000</td><td>4500</td><td>6000</td><td>7500</td><td>9000</td><td></td><td>4</td><td>9000</td><td>18000</td><td>27000</td><td>36000</td><td></td><td></td></tr><tr><td>5</td><td>2200</td><td>4400</td><td>6600</td><td>8800</td><td>11000</td><td>13200</td><td></td><td>5</td><td>13000</td><td>26000</td><td>39000</td><td>52000</td><td></td><td></td></tr><tr><td>6</td><td>3000</td><td>6000</td><td>9000</td><td>12000</td><td>15000</td><td>18000</td><td></td><td>6</td><td>17500</td><td>35000</td><td>52500</td><td>70000</td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td>GRAIN</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>LIVESTOCK</td><td></td><td></td><td></td></tr><tr><td>DICE</td><td>10 Acres</td><td>20 Acres</td><td>30 Acres</td><td>40 Acres</td><td>50 Acres</td><td>60 Acres</td><td></td><td>DICE</td><td>10 Acres</td><td>20 Acres</td><td>30 Acres</td><td>40 Acres</td><td>50 Acres</td><td>60 Acres</td></tr><tr><td>1</td><td>800</td><td>1500</td><td>2300</td><td>3000</td><td>3800</td><td>4500</td><td></td><td>1</td><td>1400</td><td>2800</td><td>4200</td><td>5600</td><td>7000</td><td>8400</td></tr><tr><td>2</td><td>1500</td><td>3000</td><td>4500</td><td>6000</td><td>7500</td><td>9000</td><td></td><td>2</td><td>2000</td><td>4000</td><td>6000</td><td>8000</td><td>10000</td><td>12000</td></tr><tr><td>3</td><td>2500</td><td>5000</td><td>7500</td><td>10000</td><td>12500</td><td>15000</td><td></td><td>3</td><td>2800</td><td>5600</td><td>8400</td><td>11200</td><td>14000</td><td>16800</td></tr><tr><td>4</td><td>3800</td><td>7500</td><td>11300</td><td>15000</td><td>18800</td><td>31500</td><td></td><td>4</td><td>3800</td><td>7600</td><td>11400</td><td>15200</td><td>19000</td><td>22800</td></tr><tr><td>5</td><td>5300</td><td>10500</td><td>15800</td><td>21000</td><td>26300</td><td>31500</td><td></td><td>5</td><td>5000</td><td>10000</td><td>15000</td><td>20000</td><td>25000</td><td>30000</td></tr><tr><td>6</td><td>7000</td><td>14000</td><td>21000</td><td>28000</td><td>35000</td><td>42000</td><td></td><td>6</td><td>7500</td><td>15000</td><td>22500</td><td>30000</td><td>37500</td><td>45000</td></tr></table>
-            </div> -->
+        
+        
         </div>
 
     </div>
