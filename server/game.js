@@ -609,7 +609,7 @@ function drawRandomCardFromDeck(deck) {
     let accumulated = 0;
     for(let i=0; i<deck.length; i++) {
         accumulated += deck[i];
-        if (val < accumulated) {
+        if (val <= accumulated) {
             return i;
         }
     }
@@ -632,11 +632,16 @@ function drawFarmersFate(state, playerID) {
     const player = state.players[playerID];
     let id = drawRandomCardFromDeck(state.FarmersFateDeck);
 
+    console.log('drawFarmersFate');
+    console.log(id)
+
     // if the draw stack is empty, reshuffle
     if (id === null) {
         state.FarmersFateDeck = createFarmersFateDeck();
         id = drawRandomCardFromDeck(state.FarmersFateDeck);
     }
+
+    console.log(id)
 
     if (id === FF_IRS_INDEX) {
         player.IRS = true;
@@ -645,9 +650,8 @@ function drawFarmersFate(state, playerID) {
         player.Grain.HalfWheat = true;
     }
 
-    // TODO: the FF action
     state.FarmersFateDeck[id]--;
-    return FarmersFateCards[id];
+    return [FarmersFateCards[id], id];
 }
 
 function drawOperatingExpense(state, playerID) {
@@ -658,6 +662,9 @@ function drawOperatingExpense(state, playerID) {
         state.OperatingExpenseDeck = createOperatingExpenseDeck();
         id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
     }
+    console.log('drawOpExpense()')
+    console.log(state);
+    console.log(id)
 
     state.OperatingExpenseDeck[id]--;
     return [OperatingExpenseCards[id], operatingExpenseCosts(state, playerID, id)];

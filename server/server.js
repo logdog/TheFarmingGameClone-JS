@@ -320,7 +320,7 @@ io.on('connection', client => {
             io.to(roomCode).emit('drawOTB', cardText);
         }
         else if (cardDrawType === DRAW_FARMERS_FATE) {
-            const cardText = drawFarmersFate(state, playerID);
+            const [cardText, cardIndex] = drawFarmersFate(state, playerID);
             io.to(roomCode).emit('drawFarmersFate', cardText);
 
             // now handle the action
