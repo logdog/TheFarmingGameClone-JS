@@ -182,6 +182,11 @@ function performBuy(state, playerID, item, downPayment) {
     const player = state.players[playerID];
     console.log('buy');
 
+    // wrong time of year
+    if (!isBuyingSquare(player.Position)) {
+        return 0;
+    }
+
     // invalid item
     if (!item in PURCHASE_PRICES) {
         return 0;
@@ -754,6 +759,10 @@ function shouldPlayerHarvest(state, playerID) {
 
 function isHarvestSquare(position) {
     return position >= 19 && position <= 48;
+}
+
+function isBuyingSquare(position) {
+    return position >= 0 && position <= 14;
 }
 
 

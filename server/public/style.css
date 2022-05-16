@@ -727,7 +727,7 @@ h1 {
     width: 100%;
     text-align: center;
     font-weight: 500;
-    font-size: large;
+    font-size: medium;
     transition: 200ms;
     border: 1px solid black;
     color: white;
@@ -827,7 +827,6 @@ h1 {
     flex-direction: column;
     font-size: small;
     border: 1px solid black;
-    margin-top: 1vh;
 }
 
 #payout-container>div:not(:first-child) {
@@ -902,6 +901,10 @@ td.bold {
 
 .player-grid.visible {
     display: block;
+}
+
+.player-tab {
+    font-size: auto;
 }
 
 /* .player-grid>table>tbody>tr>td:nth-child(3) {

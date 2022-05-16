@@ -89,7 +89,7 @@ function createPlayerTotal(player, isYou) {
     const IRSFilter = player.IRS;
     const totalAcerage = player.Hay.Acres + player.Grain.Acres + player.Fruit.Acres;
     
-    const name = player.Name + (isYou ? " (You)" : "");
+    const name = player.Name + (isYou ? " (Me)" : "");
     console.log(name)
 
     return `<table><tbody>
