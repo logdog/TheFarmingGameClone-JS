@@ -61,6 +61,11 @@ const sellCascadesButton = $('#Sell-Cascades');
 const sellToppenishRidgeButton = $('#Sell-Toppenish');
 const takeLoanButton = $('#Btn-Take-Loan');
 
+const buyTab = $('#buy-tab');
+const sellTab = $('#sell-tab');
+const buyWrapper = $('#buy-wrapper');
+const sellWrapper = $('#sell-wrapper');
+
 
 function createPlayerTotal(player) {
 
@@ -131,6 +136,93 @@ function paintGame(state) {
     // else {
     //     $('.face').css('background-color', 'White');
     // }
+
+    // shop: buy
+    console.log(me.OTB);
+    buyHayButton.removeClass('no-OTB');
+    buyGrainButton.removeClass('no-OTB');
+    buyCowsButton.removeClass('no-OTB');
+    buyFruitButton.removeClass('no-OTB');
+    buyAhtanumRidgeButton.removeClass('no-OTB');
+    buyRattlesnakeRidgeButton.removeClass('no-OTB');
+    buyCascadesButton.removeClass('no-OTB');
+    buyToppenishRidgeButton.removeClass('no-OTB');
+    buyTractorButton.removeClass('no-OTB');
+    buyHarvesterButton.removeClass('no-OTB');
+    if (!me.OTB['Hay']) {
+        buyHayButton.addClass('no-OTB');
+    }
+    if (!me.OTB['Grain']) {
+        buyGrainButton.addClass('no-OTB');
+    }
+    if (!me.OTB['Cows']) {
+        buyCowsButton.addClass('no-OTB');
+    }
+    if (!me.OTB['Fruit']) {
+        buyFruitButton.addClass('no-OTB');
+    }
+    if (!me.OTB['AhtanumRidge']) {
+        buyAhtanumRidgeButton.addClass('no-OTB');
+    }
+    if (!me.OTB['RattlesnakeRidge']) {
+        buyRattlesnakeRidgeButton.addClass('no-OTB');
+    }
+    if (!me.OTB['Cascades']) {
+        console.log('asdfasdfasdf')
+        buyCascadesButton.addClass('no-OTB');
+    }
+    if (!me.OTB['ToppenishRidge']) {
+        buyToppenishRidgeButton.addClass('no-OTB');
+    }
+    if (!me.OTB['Tractor']) {
+        buyTractorButton.addClass('no-OTB');
+    }
+    if (!me.OTB['Harvester']) {
+        buyHarvesterButton.addClass('no-OTB');
+    }
+
+    // shop: sell
+    sellHayButton.removeClass('no-sell');
+    sellGrainButton.removeClass('no-sell');
+    sellCowsButton.removeClass('no-sell');
+    sellFruitButton.removeClass('no-sell');
+    sellAhtanumRidgeButton.removeClass('no-sell');
+    sellRattlesnakeRidgeButton.removeClass('no-sell');
+    sellCascadesButton.removeClass('no-sell');
+    sellToppenishRidgeButton.removeClass('no-sell');
+    sellTractorButton.removeClass('no-sell');
+    sellHarvesterButton.removeClass('no-sell');
+    if (!me.Hay.Acres) {
+        sellHayButton.addClass('no-sell');
+    }
+    if (!me.Grain.Acres) {
+        sellGrainButton.addClass('no-sell');
+    }
+    if (!me.Livestock.Total) {
+        sellCowsButton.addClass('no-sell');
+    }
+    if (!me.Fruit.Acres) {
+        sellFruitButton.addClass('no-sell');
+    }
+    if (!me.Livestock.AhtanumRidge) {
+        sellAhtanumRidgeButton.addClass('no-sell');
+    }
+    if (!me.Livestock.RattlesnakeRidge) {
+        sellRattlesnakeRidgeButton.addClass('no-sell');
+    }
+    if (!me.Livestock.Cascades) {
+        sellCascadesButton.addClass('no-sell');
+    }
+    if (!me.Livestock.ToppenishRidge) {
+        sellToppenishRidgeButton.addClass('no-sell');
+    }
+    if (!me.Tractors) {
+        sellTractorButton.addClass('no-sell');
+    }
+    if (!me.Harvesters) {
+        sellHarvesterButton.addClass('no-sell');
+    }
+
 
     // roll the dice button
     $("#roll-dice-div").empty();
@@ -273,7 +365,15 @@ function initShopButtons() {
     });
 
     /* buy-sell tabs*/
-    
+    buyTab.click(function() {
+        buyWrapper.css('display', 'block');
+        sellWrapper.css('display', 'none');
+    });
+
+    sellTab.click(function() {
+        buyWrapper.css('display', 'none');
+        sellWrapper.css('display', 'block');
+    });
 
 }
 

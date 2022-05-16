@@ -634,13 +634,29 @@ h1 {
     border: 1px solid black;
 }
 
+.tabs {
+    display: flex;
+    justify-content: space-between;
+}
+
 .tab {
-    display: inline-block;
+    display: block;
+    width: 100%;
     text-align: center;
     font-weight: 500;
-    background-color: #F6C915;
     font-size: large;
     transition: 200ms;
+    border: 1px solid black;
+}
+
+.tab:first-child {
+    background-color: #4caf50;
+    color: white;
+}
+
+.tanb:last-child {
+    background-color: #dc143c;
+    color: white;
 }
 
 .tab:hover {
@@ -676,50 +692,9 @@ h1 {
     align-self: center;
 }
 
-#buy-wrapper>.shop-grid>.shop-item>button {
-    background-color: #4caf50;
-    color: white;
-    border: 1px solid black;
-    transition: 250ms;
-}
-
-#buy-wrapper>.shop-grid>.shop-item>button:hover {
+.shop-item>button:hover {
     cursor: pointer;
     filter: brightness(80%);
-}
-
-#buy-wrapper>.shop-grid>.shop-item.no-OTB>button {
-    background-color: gray;
-    color: white;
-    border: 1px solid black;
-}
-
-#buy-wrapper>.shop-grid>.shop-item.no-OTB>button:hover {
-    cursor: auto;
-    filter: brightness(100%);
-}
-
-#sell-wrapper>.shop-grid>.shop-item>button {
-    background-color: #dc143c;
-    color: white;
-    border: 1px solid black;
-    transition: 250ms;
-}
-
-#sell-wrapper>.shop-grid>.shop-item>button:hover {
-    cursor: pointer;
-    filter: brightness(80%);
-}
-
-#sell-wrapper>.shop-grid>.shop-item.no-sell>button {
-    background-color: gray;
-    color: white;
-    border: 1px solid black;
-}
-
-#sell-wrapper>.shop-grid>.shop-item.no-sell>button:hover {
-    cursor: auto;
-    filter: brightness(100%);
 }
 
 .shop-item>button>span {
@@ -730,26 +705,36 @@ h1 {
     font-weight: 600;
 }
 
-.shop-item>div {
-    display: none;
-    /* width: 5vw;
-    height: 5vw;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    border-radius: 25%;
+
+#buy-wrapper>.shop-grid>.shop-item>button {
+    background-color: #4caf50;
+    color: white;
+    border: 1px solid black;
     transition: 200ms;
-    margin: auto; */
 }
 
-.shop-item>*>span:first-child {
-    font-weight: 200;
+#sell-wrapper>.shop-grid>.shop-item>button {
+    background-color: #dc143c;
+    color: white;
+    border: 1px solid black;
+    transition: 200ms;
 }
 
-.price {
-    font-weight: 500;
+#buy-wrapper>.shop-grid>.shop-item>button.no-OTB,
+#sell-wrapper>.shop-grid>.shop-item>button.no-sell {
+    background-color: gray;
+    color: white;
+    border: 1px solid black;
 }
 
-#shop-cows,
+
+#buy-wrapper>.shop-grid>.shop-item>button.no-OTB:hover,
+#sell-wrapper>.shop-grid>.shop-item>button.no-sell:hover {
+    cursor: auto;
+    filter: brightness(100%);
+}
+
+/* #shop-cows,
 #shop-ahtanum,
 #shop-rattlesnake,
 #shop-cascades,
@@ -783,7 +768,7 @@ h1 {
 
 #shop-payback {
     background-color: green;
-}
+} */
 
 /* .shop-item > div:hover {
     width: 5.5vw;
