@@ -137,6 +137,17 @@ function paintGame(state) {
     //     $('.face').css('background-color', 'White');
     // }
 
+    let ahtanumRidgeTaken = false;
+    let rattlesnakeRidgeTaken = false;
+    let cascadesTaken = false;
+    let toppennishRidgeTaken = false;
+    for (let player of state.players) {
+        ahtanumRidgeTaken |= (player.Livestock.AhtanumRidge > 0);
+        rattlesnakeRidgeTaken |= (player.Livestock.RattlesnakeRidge > 0);
+        cascadesTaken |= (player.Livestock.Cascades > 0);
+        toppennishRidgeTaken |= (player.Livestock.ToppenishRidge > 0);
+    }
+
     // shop: buy
     console.log(me.OTB);
     buyHayButton.removeClass('no-OTB');
@@ -155,23 +166,23 @@ function paintGame(state) {
     if (!me.OTB['Grain']) {
         buyGrainButton.addClass('no-OTB');
     }
-    if (!me.OTB['Cows']) {
+    if (!me.OTB['Cows'] || me.Livestock.Farm >= 20) {
         buyCowsButton.addClass('no-OTB');
     }
     if (!me.OTB['Fruit']) {
         buyFruitButton.addClass('no-OTB');
     }
-    if (!me.OTB['AhtanumRidge']) {
+    if (!me.OTB['AhtanumRidge'] || ahtanumRidgeTaken) {
         buyAhtanumRidgeButton.addClass('no-OTB');
     }
-    if (!me.OTB['RattlesnakeRidge']) {
+    if (!me.OTB['RattlesnakeRidge'] || rattlesnakeRidgeTaken) {
         buyRattlesnakeRidgeButton.addClass('no-OTB');
     }
-    if (!me.OTB['Cascades']) {
+    if (!me.OTB['Cascades'] || cascadesTaken) {
         console.log('asdfasdfasdf')
         buyCascadesButton.addClass('no-OTB');
     }
-    if (!me.OTB['ToppenishRidge']) {
+    if (!me.OTB['ToppenishRidge'] || toppennishRidgeTaken) {
         buyToppenishRidgeButton.addClass('no-OTB');
     }
     if (!me.OTB['Tractor']) {

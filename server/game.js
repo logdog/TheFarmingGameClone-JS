@@ -162,9 +162,9 @@ const PURCHASE_PRICES = {
 const OTB_ITEM_MAP = ['Hay', 'Grain', 'Cows', 'Fruit', 'Tractor', 'Harvester',
     'AhtanumRidge', 'RattlesnakeRidge', 'Cascades', 'ToppenishRidge'];
 
-function performBuy(state, item, downPayment) {
+function performBuy(state, playerID, item, downPayment) {
 
-    const player = state.players[state.turn];
+    const player = state.players[playerID];
     console.log('buy');
     
     // invalid item
@@ -235,14 +235,14 @@ function performBuy(state, item, downPayment) {
     }
 
     // update player net worth
-    calculateNetWorth(state, state.turn);
+    calculateNetWorth(state, playerID);
     
     return 1;
 }
 
 // player can choose to payoff debt
-function performPaybackDebt(state, downPayment) {
-    const player = state.players[state.turn];
+function performPaybackDebt(state, playerID, downPayment) {
+    const player = state.players[playerID];
     console.log('payback debt()');
 
     // tried to rob the bank
@@ -263,7 +263,7 @@ function performPaybackDebt(state, downPayment) {
     player.Debt -= downPayment;
     player.Cash -= downPayment;
 
-    calculateNetWorth(state, state.turn);
+    calculateNetWorth(state, playerID);
     return 1;
 }
 
@@ -277,10 +277,9 @@ function createGameState(avatarIDs) {
     };
 }
 
-function checkNewYear(state, positionalDiceValue) {
+function checkNewYear(state, playerID, positionalDiceValue) {
 
-    const player = state.players[state.turn];
-
+    const player = state.players[playerID];
     // new year, get $5000
     if (player.Position >= 0 && player.Position - positionalDiceValue < 0) {
         player.Cash += 5000;
@@ -316,35 +315,35 @@ function checkNewYear(state, positionalDiceValue) {
 
 
 // move the player to a new position
-function movePlayer(state, diceValue) {
-    const player = state.players[state.turn];
+function movePlayer(state, playerID, diceValue) {
+    const player = state.players[playerID];
     player.Position += diceValue;
     player.Position %= (MAX_POSITION+1);
     player.shouldMove = false;
-    player.shouldHarvest = shouldPlayerHarvest(state);
+    player.shouldHarvest = shouldPlayerHarvest(state, playerID);
 }
 
 // move the player to a specific position
-function movePlayerTo(state, position) {
-    const player = state.players[state.turn];
+function movePlayerTo(state, playerID, position) {
+    const player = state.players[playerID];
     player.Position = position;
     player.shouldMove = false;
-    player.shouldHarvest = shouldPlayerHarvest(state);
+    player.shouldHarvest = shouldPlayerHarvest(state, playerID);
 }
 
-function collectAmount(state, amount) {
-    const player = state.players[state.turn];
+function collectAmount(state, playerID, amount) {
+    const player = state.players[playerID];
     player.Cash += amount; 
 }
 
-function payAmount(state, amount) {
+function payAmount(state, playerID, amount) {
 
-    const player = state.players[state.turn];
+    const player = state.players[playerID];
     
     // pay the amount
     if (player.Cash >= amount) {
         player.Cash -= amount;
-        calculateNetWorth(state, state.turn);
+        calculateNetWorth(state, playerID);
         return true;
     }
 
@@ -352,7 +351,7 @@ function payAmount(state, amount) {
     // so they will be charged an overdraft fee
     player.Cash -= amount;
     player.Cash -= OVERDRAFT_FEE;
-    calculateNetWorth(state, state.turn);
+    calculateNetWorth(state, playerID);
     return false;
 
     // // can we borrow the entire loan from the bank? (Cannot take out more than $50k)
@@ -477,8 +476,8 @@ function performBankrupt(state, playerID) {
 }
 
 
-function checkPositionForDoubleYield(state) {
-    const player = state.players[state.turn];
+function checkPositionForDoubleYield(state, playerID) {
+    const player = state.players[playerID];
     switch(player.Position) {
         case 4: player.Hay.DoubleHay = true; break;     // Jan 4
         case 14: player.Grain.DoubleCorn = true; break; // Spring Planting
@@ -486,8 +485,8 @@ function checkPositionForDoubleYield(state) {
     }
 }
 
-function checkPositionForDrawingCard(state) {
-    const player = state.players[state.turn];
+function checkPositionForDrawingCard(state, playerID) {
+    const player = state.players[playerID];
     switch(player.Position) {
         case 2: return DRAW_OTB; // Jan 2
         case 6: return DRAW_FARMERS_FATE; // Feb 2
@@ -509,8 +508,8 @@ function checkPositionForDrawingCard(state) {
     }
 }
 
-function checkPositionForBalances(state) {
-    const player = state.players[state.turn];
+function checkPositionForBalances(state, playerID) {
+    const player = state.players[playerID];
     switch(player.Position) {
 
         // positive numbers COLLECT 
@@ -576,8 +575,8 @@ function drawRandomCardFromDeck(deck) {
     }
 }
 
-function drawOTB(state) {
-    const player = state.players[state.turn];
+function drawOTB(state, playerID) {
+    const player = state.players[playerID];
     const id = drawRandomCardFromDeck(state.OTBDeck);
 
     if (id === null) {
@@ -589,8 +588,8 @@ function drawOTB(state) {
     return OTBCards[id];
 }
 
-function drawFarmersFate(state) {
-    const player = state.players[state.turn];
+function drawFarmersFate(state, playerID) {
+    const player = state.players[playerID];
     let id = drawRandomCardFromDeck(state.FarmersFateDeck);
 
     // if the draw stack is empty, reshuffle
@@ -624,8 +623,8 @@ function drawOperatingExpense(state) {
     return [OperatingExpenseCards[id], operatingExpenseCosts(state, id)];
 }
 
-function operatingExpenseCosts(state, id) {
-    const player = state.players[state.turn];
+function operatingExpenseCosts(state, playerID, id) {
+    const player = state.players[playerID];
     switch(id) {
         case 0: return -0.1*player.Debt; // pay 10% interest
         case 1: return -3000; 
@@ -671,8 +670,8 @@ function calculateNetWorth(state, playerID) {
     player.NetWorth = netWorth;
 }
 
-function shouldPlayerHarvest(state) {
-    const player = state.players[state.turn];
+function shouldPlayerHarvest(state, playerID) {
+    const player = state.players[playerID];
     const position = player.Position;
     const completedHarvests = player.CompletedHarvests;
     const typeOfHarvest = typeOfHarvestSquare(position);
@@ -761,12 +760,15 @@ function calculateLivestockHarvest(heads, diceRoll) {
 }
 
 
-function performHarvest(state, diceValue) {
-    const player = state.players[state.turn];
+function performHarvest(state, playerID, diceValue) {
 
+    console.log('performHarvest()');
+
+    const player = state.players[playerID];
     const position = player.Position;
 
-    if(!shouldPlayerHarvest(state)) {
+
+    if(!shouldPlayerHarvest(state, playerID)) {
         return 0;
     }
     
@@ -834,7 +836,7 @@ function performHarvest(state, diceValue) {
 
     // pay the player
     player.Cash += payout;
-    calculateNetWorth(state, state.turn);
+    calculateNetWorth(state, playerID);
 
     // record that the Harvest was performed
     state.shouldHarvest = false;
