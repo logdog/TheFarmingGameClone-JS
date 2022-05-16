@@ -76,6 +76,7 @@ io.on('connection', client => {
 
     client.on('rollPositionDice', handleRollPositionDice);
     client.on('rollHarvestDice', handleRollHarvestDice);
+    client.on('rollMtStHelensDice', handleRollMtStHelens);
     client.on('endTurn', handleEndTurn);
 
     client.on('buy', handleBuy);
@@ -83,6 +84,7 @@ io.on('connection', client => {
     client.on('takeLoan', handleLoan);
     client.on('sell', handleSell);
     client.on('bankrupt', handleBankrupt);
+
 
 
     function handleNewGame() {
@@ -190,7 +192,7 @@ io.on('connection', client => {
         let playerID = playerIDs[client.id];
         const state = states[roomCode];
 
-        if (!state) {
+        if (!state || state.MtStHelens.happening) {
             return;
         }
 
@@ -202,6 +204,7 @@ io.on('connection', client => {
 
         // roll the positional dice
         let positionalDiceValue = Math.floor(Math.random() * 6) + 1;
+        positionalDiceValue = 6; // mt st helens
         io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
         player.shouldMove = false;
 
@@ -254,7 +257,7 @@ io.on('connection', client => {
         let playerID = playerIDs[client.id];
         const state = states[roomCode];
 
-        if (!state) {
+        if (!state || state.MtStHelens.happening) {
             return;
         }
 
@@ -294,6 +297,52 @@ io.on('connection', client => {
             // should the player move because the square says so?
             // e.g. Mar 3, July 3, Aug 1, Sep 1 (conditional)
             step3(roomCode, state, playerID);
+        }
+    }
+
+    function handleRollMtStHelens() {
+        console.log('handleRollMtStHelens()')
+
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        if (!state) {
+            return;
+        }
+
+        if (!state.MtStHelens.happening 
+            || state.MtStHelens.turn !== playerID
+            || state.MtStHelens.rolled[playerID]) {
+            return;
+        }
+
+        let mtStHelensDiceValue = Math.floor(Math.random() * 6) + 1;
+        state.MtStHelens.rolled[playerID] = true;
+
+        io.to(roomCode).emit('rollMtStHelensDiceAnimation', mtStHelensDiceValue);
+
+        setTimeout(finishRollMtStHelensDice, 1000);
+        function finishRollMtStHelensDice() {
+
+            console.log('finishRollMtStHelensDice')
+            const player = state.players[playerID];
+            
+            // Odd - escaped; Even - hit. Ash hit players pay $100 per Acre to clean up mess.
+            if (mtStHelensDiceValue % 2 === 0) {
+                payAmount(state, playerID, 100*(player.Hay.Acres+player.Grain.Acres+player.Fruit.Acres));
+            }
+
+            // next player's turn to roll the dice
+            state.MtStHelens.turn++;
+            state.MtStHelens.turn %= state.players.length;
+
+            // if everyone has rolled, the event is over
+            const eventOver = state.MtStHelens.rolled.reduce((a,b)=>a&b, true);
+            if (eventOver) {
+                state.MtStHelens.happening = false;
+            }
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
         }
     }
 
@@ -423,7 +472,15 @@ io.on('connection', client => {
                 }
                 case 14: {
                     // Mt. St. Helens
-                    // TODO
+                    // $500 per Hay acre
+                    collectAmount(state, playerID, 500*player.Hay.Acres);
+                    if (state.players.length > 1) {
+                        state.MtStHelens = {
+                            happening: true,
+                            rolled: state.players.map((p,index)=>index===playerID),
+                            turn: (playerID+1)%state.players.length,
+                        };
+                    }
                     break;
                 }
                 case 15: {
@@ -463,7 +520,7 @@ io.on('connection', client => {
             return;
         }
 
-        if (state.turn !== playerID) {
+        if (state.turn !== playerID || state.MtStHelens.happening) {
             return;
         }
         // check that it is the correct player's turn, and they should move

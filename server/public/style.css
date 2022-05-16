@@ -385,8 +385,8 @@ h1 {
     grid-row-start: row1;
     grid-row-end: row2;
 
-    align-self: center;
-    justify-self: center;
+    /* align-self: center;
+    justify-self: center; */
 }
 
 .card-container {
@@ -397,8 +397,8 @@ h1 {
 #OTB-container {
     grid-column-start: col1;
     grid-column-end: col2;
-    grid-row-start: row2;
-    grid-row-end: row3;
+    grid-row-start: row1;
+    grid-row-end: row2;
 }
 
 #OP-container {
@@ -411,8 +411,8 @@ h1 {
 #FF-container {
     grid-column-start: col3;
     grid-column-end: col4;
-    grid-row-start: row2;
-    grid-row-end: row3;
+    grid-row-start: row1;
+    grid-row-end: row2;
 }
 
 #harvest-container>.card {
@@ -431,11 +431,20 @@ h1 {
     background-color: lightgoldenrodyellow;
 }
 
-.card {
+/* .card {
     display: none;
-}
+} */
 
-.card:last-child {
+/* .card:last-child {
+    border-width: 5%;
+    border-style: solid;
+
+    display: grid;
+    grid-template-columns: [col1] 20px [col2] auto [col3] 20px [col4];
+    grid-template-rows: [row1] 20px [row2] auto [row3];
+} */
+
+.card {
     border-width: 5%;
     border-style: solid;
 

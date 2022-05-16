@@ -308,6 +308,11 @@ function createGameState(avatarIDs) {
         OTBDeck: createOTBDeck(),
         FarmersFateDeck: createFarmersFateDeck(),
         OperatingExpenseDeck: createOperatingExpenseDeck(),
+        MtStHelens: {
+            happening: false,
+            rolled: Array(avatarIDs.length).fill(false),
+            turn: 0,
+        },
         players: avatarIDs.map(id => createPlayer(
             avatarNames[id], avatarColors[id], avatarPaths[id])),
     };
@@ -617,6 +622,9 @@ function drawRandomCardFromDeck(deck) {
     if (total === 0) {
         return null;
     }
+
+    // mt st helens testing
+    return 14;
 
     const val = Math.floor(Math.random() * total + 1);
 

@@ -18,6 +18,7 @@ socket.on('morePlayersJoined', handleMorePlayersJoined);
 socket.on('takenAvatars', handleTakenAvatars);
 socket.on('rollPositionDiceAnimation', handleRollPositionDiceAnimation);
 socket.on('rollHarvestDiceAnimation', handleRollHarvestDiceAnimation);
+socket.on('rollMtStHelensDiceAnimation', handleRollMtStHelensDiceAnimation);
 socket.on('drawOTB', handleDrawOTB);
 socket.on('drawFarmersFate', handleDrawFarmersFate);
 socket.on('drawOperatingExpense', handleDrawOperatingExpense);
@@ -88,7 +89,7 @@ function createPlayerTotal(player, isYou) {
     const halfWheatText = player.Grain.HalfWheat ? " (Half Wheat)" : "";
     const IRSFilter = player.IRS;
     const totalAcerage = player.Hay.Acres + player.Grain.Acres + player.Fruit.Acres;
-    
+
     const name = player.Name + (isYou ? " (Me)" : "");
     console.log(name)
 
@@ -186,18 +187,11 @@ function paintGame(state) {
         return;
     }
 
-    
-
-    // color the game board
-    //$('#game-board').css('border-color', state.players[myPlayerID].Color);
-    
-    // if game is playing
-    
     const me = state.players[myPlayerID];
     const myColor = me.Color;
 
-    for(let i=0; i<state.players.length; i++) {
-        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i], myPlayerID===i));
+    for (let i = 0; i < state.players.length; i++) {
+        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i], myPlayerID === i));
     }
 
     // player totals
@@ -300,19 +294,49 @@ function paintGame(state) {
         sellHarvesterButton.addClass('no-sell');
     }
 
+    // draw the game tokens on the board
+    $(".player").remove();
+    for (let player of state.players) {
+        $(`#cell-${player.Position} > .players-on-me`).append(`<div class="player ${player.Color}" title="${player.Name}"></div>`);
+    }
 
     // roll the dice button
     $('#position-dice-container').removeClass('spinning-dice').off('click');
     $('#harvest-dice-container').removeClass('spinning-dice').off('click');
-
+    $('#mtsthelens-dice-container').removeClass('spinning-dice').off('click');
     $("#roll-dice-div").empty();
+
+    if (state.MtStHelens.happening) {
+        console.log('paint game mt st helens')
+        if (state.MtStHelens.turn === myPlayerID) {
+            console.log('spinning mt st helens')
+            let hasRolled = false;
+            $('#mtsthelens-dice-container').addClass('spinning-dice').click(rollMtStHelensDice);
+
+            // do cool animation, press space bar or click to roll
+            $(document).keydown(function (e) {
+                if (e.code === 'Space' && !hasRolled) {
+                    hasRolled = true;
+                    rollMtStHelensDice();
+                }
+            });
+
+            function rollMtStHelensDice() {
+                $('#mtsthelens-dice-container').removeClass('spinning-dice').off('click');
+                socket.emit('rollMtStHelensDice');
+            }
+        }
+        return;
+    }
+
+
     if (state.turn === myPlayerID && me.shouldMove) {
 
         let hasRolled = false;
         $('#position-dice-container').addClass('spinning-dice').click(rollPositionDice);
 
         // do cool animation, press space bar or click to roll
-        $(document).keydown(function(e) {
+        $(document).keydown(function (e) {
             if (e.code === 'Space' && !hasRolled) {
                 hasRolled = true;
                 rollPositionDice();
@@ -321,7 +345,7 @@ function paintGame(state) {
 
         function rollPositionDice() {
             $('#position-dice-container').removeClass('spinning-dice').off('click');
-            
+
             socket.emit('rollPositionDice');
         }
     }
@@ -330,8 +354,8 @@ function paintGame(state) {
         let hasRolled = false;
         $('#harvest-dice-container').addClass('spinning-dice').click(rollHarvestDice);
 
-        $(document).keydown(function(e) {
-            if (e.code === 'Space'  && !hasRolled) {
+        $(document).keydown(function (e) {
+            if (e.code === 'Space' && !hasRolled) {
                 hasRolled = true;
                 rollHarvestDice();
             }
@@ -350,11 +374,7 @@ function paintGame(state) {
         });
     }
 
-    // draw the game tokens on the board
-    $(".player").remove();
-    for (let player of state.players) {
-        $(`#cell-${player.Position} > .players-on-me`).append(`<div class="player ${player.Color}" title="${player.Name}"></div>`);
-    }
+
 }
 
 function initShopButtons() {
@@ -647,24 +667,24 @@ function handleTakenAvatars(avatars) {
 }
 
 function handleStartGame(state) {
-    
+
     console.log('handleStartGame')
     state = JSON.parse(state);
     lastState = state;
 
     // create divs for player totals
-    for(let i=0; i<state.players.length; i++) {
+    for (let i = 0; i < state.players.length; i++) {
         console.log(i)
         $('#player-grid-wrapper').append(`<div class="player-grid" id="player-grid-${i}"></div>`);
     }
 
     // create player total tabs
-    let i=0;
-    for(let player of state.players) {
+    let i = 0;
+    for (let player of state.players) {
         $("#player-totals>.tabs").append(`<div class="player-tab tab" id="player-tab-${i}"><span>${player.Name}</span></div>`);
 
         // when clicked, highlight
-        $(`#player-tab-${i}`).click(function() {
+        $(`#player-tab-${i}`).click(function () {
 
             // highlight the correct tab
             $('#player-totals>.tabs>.tab').removeClass('selected');
@@ -680,14 +700,12 @@ function handleStartGame(state) {
             // change back the other ones
             $('.player-tab').css('background-color', 'gray');
             $('.player-tab').css('color', 'white');
-            
+
             // show the correct color
             $(this).css('background-color', lastState.players[id].Color);
             if (lastState.players[id].Color === 'White') {
                 $(this).css('color', 'Black');
             }
-
-
         });
 
         i++;
@@ -700,7 +718,7 @@ function handleStartGame(state) {
         $(`#player-tab-${myPlayerID}`).css('color', 'Black');
     }
     $(`#player-grid-${myPlayerID}`).addClass('visible');
-    
+
 
     // display 
     screen1.css('display', 'none');
@@ -711,7 +729,7 @@ function handleStartGame(state) {
     // paint game
     paintGame(state);
 
-    
+
 }
 
 function handleGameState(state) {
@@ -748,6 +766,9 @@ function handletooManyPlayers(msg) {
 
 function handleRollPositionDiceAnimation(diceValue) {
 
+    // close the previous cards
+    $('.card-container').empty();
+
     const diceContainer = $('#position-dice-container');
     const oldClass = diceContainer.attr('class');
     diceContainer.removeClass();
@@ -765,6 +786,22 @@ function handleRollHarvestDiceAnimation(diceValue) {
     const diceContainer = $('#harvest-dice-container');
     const oldClass = diceContainer.attr('class');
     diceContainer.removeClass();
+
+    if (oldClass && oldClass.slice(-1) === 'a') {
+        diceContainer.addClass(`show-${diceValue}b`);
+    }
+    else {
+        diceContainer.addClass(`show-${diceValue}a`);
+    }
+}
+
+function handleRollMtStHelensDiceAnimation(diceValue) {
+
+    const diceContainer = $('#mtsthelens-dice-container');
+    const oldClass = diceContainer.attr('class');
+    diceContainer.removeClass();
+
+    console.log('handleRollMtStHelensDiceAnimation')
 
     if (oldClass && oldClass.slice(-1) === 'a') {
         diceContainer.addClass(`show-${diceValue}b`);
