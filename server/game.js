@@ -481,8 +481,8 @@ function performBankrupt(state, playerID) {
         state.FarmersFateDeck[9]++;
     }
 
-    const name = player.name;
-    const color = player.color;
+    const name = player.Name;
+    const color = player.Color;
     
     // player starts the game over again
     state.players[playerID] = createPlayer(name, color);

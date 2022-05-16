@@ -60,6 +60,7 @@ const sellRattlesnakeRidgeButton = $('#Sell-Rattlesnake');
 const sellCascadesButton = $('#Sell-Cascades');
 const sellToppenishRidgeButton = $('#Sell-Toppenish');
 const takeLoanButton = $('#Btn-Take-Loan');
+const declareBankruptButton = $('#Btn-Declare-Bankrupt');
 
 const buyTab = $('#buy-tab');
 const sellTab = $('#sell-tab');
@@ -389,6 +390,13 @@ function initShopButtons() {
         sellWrapper.css('display', 'block');
         buyTab.removeClass('selected');
         sellTab.addClass('selected');
+    });
+
+    declareBankruptButton.click(function() {
+        const yes = confirm('If you declare bankrupcy, you will lose ALL OF YOUR ASSETS and will start the game over. This action CANNOT be undone. Are you sure you want to declare bankrupcy?');
+        if (yes) {
+            socket.emit('bankrupt');
+        }
     });
 
 }
