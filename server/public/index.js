@@ -19,11 +19,12 @@ socket.on('takenAvatars', handleTakenAvatars);
 socket.on('rollPositionDiceAnimation', handleRollPositionDiceAnimation);
 socket.on('rollHarvestDiceAnimation', handleRollHarvestDiceAnimation);
 socket.on('rollMtStHelensDiceAnimation', handleRollMtStHelensDiceAnimation);
+socket.on('positionCard', handlePositionCard);
 socket.on('drawOTB', handleDrawOTB);
 socket.on('drawFarmersFate', handleDrawFarmersFate);
 socket.on('drawOperatingExpense', handleDrawOperatingExpense);
 
-socket.on('paymentRequired', handlePaymentRequired);
+socket.on('requirePayment', handleRequirePayment);
 socket.on('harvestSummary', handleHarvestSummary);
 
 // SET UP THE ROOM
@@ -132,7 +133,7 @@ function createPlayerTotal(player, isYou) {
     </tr>
     <tr>
         <td>Grain</td>
-        <td class="right">${player.Grain.Acres}${doubleCornText}${halfWheatText}</td>
+        <td class="right">${doubleCornText}${halfWheatText}${player.Grain.Acres}</td>
         <td>Casade</td>
         <td class="right">${player.Livestock.Cascades}</td>
     </tr>
@@ -811,6 +812,21 @@ function handleRollMtStHelensDiceAnimation(diceValue) {
     }
 }
 
+function handlePositionCard(card) {
+    const container = $('#POS-container');
+    container.append(createPositionCard(JSON.parse(card)));
+    container.children().last().css('border-color', lastState.players[lastState.turn].Color);
+
+    // functional close button
+    $('.close-btn').click(function () {
+        if (shiftKeyDown) {
+            $('.card-container').empty();
+        }
+        else {
+            $(this).parent().remove();
+        }
+    });
+}
 
 function handleHarvestSummary(summaryArray) {
     const container = $('#harvest-container');
@@ -826,11 +842,27 @@ function handleHarvestSummary(summaryArray) {
             $(this).parent().remove();
         }
     });
-
 }
 
+function handleDrawOperatingExpense(card) {
+    const container = $('#harvest-container');
+    container.append(createOperatingExpenseCard(card));
+    container.children().last().css('border-color', lastState.players[lastState.turn].Color);
+
+    // functional close button
+    $('.close-btn').click(function () {
+        if (shiftKeyDown) {
+            $('.card-container').empty();
+        }
+        else {
+            $(this).parent().remove();
+        }
+    });
+}
+
+
 function handleDrawOTB(card) {
-    const container = $('#OTB-container');
+    const container = $('#OTB-FF-container');
     container.append(createOTBCard(card));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
@@ -847,7 +879,7 @@ function handleDrawOTB(card) {
 }
 
 function handleDrawFarmersFate(card) {
-    const container = $('#FF-container');
+    const container = $('#OTB-FF-container');
     container.append(createFarmersFateCard(card));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
@@ -862,23 +894,7 @@ function handleDrawFarmersFate(card) {
     });
 }
 
-function handleDrawOperatingExpense(card) {
-    const container = $('#OP-container');
-    container.append(createOperatingExpenseCard(card));
-    container.children().last().css('border-color', lastState.players[lastState.turn].Color);
-
-    // functional close button
-    $('.close-btn').click(function () {
-        if (shiftKeyDown) {
-            $('.card-container').empty();
-        }
-        else {
-            $(this).parent().remove();
-        }
-    });
-}
-
-function handlePaymentRequired() {
+function handleRequirePayment() {
     alert('Your bank balance is too low. Take a loan, sell assets, or declare bankrupcy to continue.')
 
     buyWrapper.css('display', 'none');

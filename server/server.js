@@ -22,6 +22,7 @@ const {
     shouldChangePosition,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
+    gameBoardSquares,
 } = require('./game');
 
 const { makeid } = require('./utils');
@@ -204,7 +205,6 @@ io.on('connection', client => {
 
         // roll the positional dice
         let positionalDiceValue = Math.floor(Math.random() * 6) + 1;
-        positionalDiceValue = 6; // mt st helens
         io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
         player.shouldMove = false;
 
@@ -238,7 +238,8 @@ io.on('connection', client => {
 
         const player = state.players[playerID];
         player.shouldHarvest = shouldPlayerHarvest(state, playerID);
-        console.log(player)
+        
+        io.to(roomCode).emit('positionCard',JSON.stringify(gameBoardSquares[player.Position]));
 
         if (player.shouldHarvest) {
             io.to(roomCode).emit('gameState', JSON.stringify(state));

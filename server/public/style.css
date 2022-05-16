@@ -379,55 +379,49 @@ h1 {
 }
 
 
-#harvest-container {
-    grid-column-start: col2;
-    grid-column-end: col3;
-    grid-row-start: row1;
-    grid-row-end: row2;
-
-    /* align-self: center;
-    justify-self: center; */
-}
-
 .card-container {
     width: 100%;
     height: auto;
 }
 
-#OTB-container {
-    grid-column-start: col1;
-    grid-column-end: col2;
-    grid-row-start: row1;
-    grid-row-end: row2;
-}
-
-#OP-container {
+#POS-container {
     grid-column-start: col2;
     grid-column-end: col3;
-    grid-row-start: row2;
+    grid-row-start: row1;
     grid-row-end: row3;
 }
 
-#FF-container {
+#harvest-container {
+    grid-column-start: col1;
+    grid-column-end: col2;
+    grid-row-start: row1;
+    grid-row-end: row3;
+}
+
+#OTB-FF-container {
     grid-column-start: col3;
     grid-column-end: col4;
     grid-row-start: row1;
-    grid-row-end: row2;
+    grid-row-end: row3;
 }
 
-#harvest-container>.card {
+.card.HarvestCard {
     background-color: white;
 }
 
-#OTB-container>.card {
+.card.PositionCard {
+    background-color: white;
+}
+
+.card.OTBCard {
     background-color: lightblue;
 }
 
-#FF-container>.card {
+.card.FarmersFateCard {
     background-color: lightpink;
 }
 
-#OP-container>.card {
+.card.OperatingExpenseCard {
     background-color: lightgoldenrodyellow;
 }
 

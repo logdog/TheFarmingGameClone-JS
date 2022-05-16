@@ -52,10 +52,9 @@ function boardTemplate() {
             <div id="harvest-dice-container"></div>
             <div id="mtsthelens-dice-container"></div>
         </div>
+        <div class="card-container" id="POS-container"></div>
         <div class="card-container" id="harvest-container"></div>
-        <div class="card-container" id="OTB-container"></div>
-        <div class="card-container" id="OP-container"></div>
-        <div class="card-container" id="FF-container"></div>
+        <div class="card-container" id="OTB-FF-container"></div>
     </div>
     <div id="column-right" class="side-row">`
 
@@ -375,6 +374,16 @@ gameBoardSquares = [
     }
 ];
 
+function createPositionCard(card) {
+    console.log(card)
+    console.log('createPosChard')
+    return `<div class="card PositionCard">
+        <span class="close-btn" title="shift-click to close all cards">&times</span>
+        <span>${card.Date}</span>
+        <span>${card.Text}</span>
+    </div>`;
+}
+
 function createOTBCard(text) {
     return `<div class="card OTBCard">
         <span class="close-btn" title="shift-click to close all cards">&times</span>
@@ -395,14 +404,6 @@ function createOperatingExpenseCard(text) {
     return `<div class="card OperatingExpenseCard">
         <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> Operating Expense </span>
-        <span>${text}</span>
-    </div>`;
-}
-
-function createPositionCard(date, text) {
-    return `<div class="card PositionCard">
-        <span class="close-btn" title="shift-click to close all cards">&times</span>
-        <span>${date}</span>
         <span>${text}</span>
     </div>`;
 }
