@@ -46,10 +46,11 @@ module.exports = {
     DRAW_FARMERS_FATE,
 }
 
-function createPlayer(name, color) {
+function createPlayer(name, color, path) {
     return {
         Name: name,
         Color: color,
+        Path: path,
         Position: 0,
         Year: 0,
         NetWorth: 40000,
@@ -136,6 +137,15 @@ const avatarColors = [
     "Black",
     "White",
     "Blue",
+];
+
+const avatarPaths = [
+    "icons/willie.png",
+    "icons/tom.png",
+    "icons/ray.png",
+    "icons/harry.png",
+    "icons/sidney.png",
+    "icons/sam.png"
 ];
 
 
@@ -293,7 +303,8 @@ function createGameState(avatarIDs) {
         OTBDeck: createOTBDeck(),
         FarmersFateDeck: createFarmersFateDeck(),
         OperatingExpenseDeck: createOperatingExpenseDeck(),
-        players: avatarIDs.map(id => createPlayer(avatarNames[id], avatarColors[id])),
+        players: avatarIDs.map(id => createPlayer(
+            avatarNames[id], avatarColors[id], avatarPaths[id])),
     };
 }
 
@@ -512,9 +523,10 @@ function performBankrupt(state, playerID) {
 
     const name = player.Name;
     const color = player.Color;
+    const path = player.Path;
 
     // player starts the game over again
-    state.players[playerID] = createPlayer(name, color);
+    state.players[playerID] = createPlayer(name, color, path);
 }
 
 

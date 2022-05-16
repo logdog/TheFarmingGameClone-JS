@@ -81,7 +81,7 @@ const fruitTable = $('#fruit-table');
 const livestockTable = $('#livestock-table');
 
 
-function createPlayerTotal(player) {
+function createPlayerTotal(player, isYou) {
 
     const doubleCornText = player.Grain.DoubleCorn ? " (Double Corn)" : "";
     const doubleHayText = player.Hay.DoubleHay ? " (Double Hay)" : "";
@@ -89,11 +89,12 @@ function createPlayerTotal(player) {
     const IRSFilter = player.IRS;
     const totalAcerage = player.Hay.Acres + player.Grain.Acres + player.Fruit.Acres;
     
-    
+    const name = player.Name + (isYou ? " (You)" : "");
+    console.log(name)
 
     return `<table><tbody>
     <tr>
-        <td rowspan="6" colspan="2" id="player-profile-icon"></td>
+        <td rowspan="6" colspan="2" class="player-profile-icon" style="background-image: url(${player.Path})"></td>
         <td>Net Worth</td>
         <td class="right">$${player.NetWorth}</td>
     </tr>
@@ -118,7 +119,7 @@ function createPlayerTotal(player) {
         <td class="right">${player.Livestock.Farm}</td>
     </tr>
     <tr>
-        <td colspan="2" class="centered bold">${player.Name}</td>
+        <td colspan="2" class="centered bold">${name}</td>
         <td>Ahtanum</td>
         <td class="right">${player.Livestock.AhtanumRidge}</td>
     </tr>
@@ -196,7 +197,7 @@ function paintGame(state) {
     const myColor = me.Color;
 
     for(let i=0; i<state.players.length; i++) {
-        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i]));
+        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i], myPlayerID===i));
     }
 
     // player totals
@@ -660,9 +661,8 @@ function handleStartGame(state) {
     // create player total tabs
     let i=0;
     for(let player of state.players) {
-        $("#player-totals>.tabs").append(`<div class="tab" id="player-tab-${i}"><span>${player.Name}</span></div>`);
+        $("#player-totals>.tabs").append(`<div class="player-tab tab" id="player-tab-${i}"><span>${player.Name}</span></div>`);
 
-        
         // when clicked, highlight
         $(`#player-tab-${i}`).click(function() {
 
@@ -676,6 +676,18 @@ function handleStartGame(state) {
             // show the correct table
             $('.player-grid').removeClass('visible');
             $(`#player-grid-${id}`).addClass('visible');
+
+            // change back the other ones
+            $('.player-tab').css('background-color', 'gray');
+            $('.player-tab').css('color', 'white');
+            
+            // show the correct color
+            $(this).css('background-color', lastState.players[id].Color);
+            if (lastState.players[id].Color === 'White') {
+                $(this).css('color', 'Black');
+            }
+
+
         });
 
         i++;
@@ -683,7 +695,10 @@ function handleStartGame(state) {
 
 
     // select us
-    $(`#player-tab-${myPlayerID}`).addClass('selected');
+    $(`#player-tab-${myPlayerID}`).addClass('selected').css('background-color', lastState.players[myPlayerID].Color);
+    if (lastState.players[myPlayerID].Color === 'White') {
+        $(`#player-tab-${myPlayerID}`).css('color', 'Black');
+    }
     $(`#player-grid-${myPlayerID}`).addClass('visible');
     
 

@@ -889,12 +889,19 @@ td.bold {
     width: 100%;
 }
 
-#player-profile-icon {
+.player-profile-icon {
     width: 50%;
-    background-image: url('icons/ray.png');
     background-size: contain; 
     background-position:center center; 
     background-repeat: no-repeat;
+}
+
+.player-grid {
+    display: none;
+}
+
+.player-grid.visible {
+    display: block;
 }
 
 /* .player-grid>table>tbody>tr>td:nth-child(3) {
