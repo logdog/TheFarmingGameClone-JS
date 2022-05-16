@@ -47,7 +47,7 @@ const buyAhtanumRidgeButton = $('#Buy-Ahtanum');
 const buyRattlesnakeRidgeButton = $('#Buy-Rattlesnake');
 const buyCascadesButton = $('#Buy-Cascades');
 const buyToppenishRidgeButton = $('#Buy-Toppenish');
-const paybackDebtButton = $('#Buy-Payback-Debt');
+const paybackDebtButton = $('#Btn-Payback-Debt');
 
 const sellHayButton = $('#Sell-Hay');
 const sellGrainButton = $('#Sell-Grain');
