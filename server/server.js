@@ -324,7 +324,122 @@ io.on('connection', client => {
             io.to(roomCode).emit('drawFarmersFate', cardText);
 
             // now handle the action
+            const player = state.players[playerID];
+
+            switch (cardIndex) {
+                case 0: {
+                    // no Tractor pay $3000
+                    if (!player.Tractors) {
+                        payAmount(state, playerID, 3000);
+                    }
+                    break;
+                }
+                case 1: {
+                    // Go to christmas. Collect your $6000
+                    const oldPosition = player.Position;
+                    movePlayerTo(state, playerID, 0);
+                    movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
+                    break;
+                }
+                case 2: {
+                    // Go to 2nd week of January. Do not collect $5000
+                    const oldPosition = player.Position;
+                    movePlayerTo(state, playerID, 2);
+                    movePlayerAftermath(roomCode, state, playerID, oldPosition, false);
+                    break;
+                }
+                case 3: {
+                    // Pay $2500 if you do not own your own Harvester
+                    if (!player.Harvesters) {
+                        payAmount(state, playerID, 2500);
+                    }
+                    break;
+                }
+                case 4: {
+                    // IRS (already handled)
+                    break;
+                }
+                case 5: {
+                    // collect $2000
+                    collectAmount(state, playerID, 2000);
+                    break;
+                }
+                case 6: {
+                    // Collect $1000
+                    collectAmount(state, playerID, 1000);
+                    break;
+                }
+                case 7: {
+                    // Lose your whole herd on your "farm"
+                    player.Livestock.Total -= player.Livestock.Farm;
+                    player.Livestock.Farm = 0;
+                    break;
+                }
+                case 8: {
+                    //  Collect $100 per Grain acre.
+                    collectAmount(state, playerID, 100*player.Grain.Acres); 
+                    break;
+                }
+                case 9: {
+                    // Lose half wheat crop for the year (already handled)
+                    break;
+                }
+                case 10: {
+                    // Pay $300 per Fruit acre.
+                    payAmount(state, playerID, 300*player.Fruit.Acres);
+                }
+                case 11: {
+                    // If you have a Harvester, collect $2000 from each player who has none.
+                    if (player.Harvesters) {
+                        for(let id=0; id<state.players.length; id++) {
+                            const other = state.players[id];
+                            if (other !== player && !other.Harvesters) {
+                                payAmount(state, id, 2000);
+                                collectAmount(state, playerID, 2000);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 12: {
+                    // Pay $7000
+                    payAmount(state, playerID, 7000);
+                    break;
+                }
+                case 13: {
+                    // Take home a free Harvester worth $10000
+                    player.Harvesters++;
+                    break;
+                }
+                case 14: {
+                    // Mt. St. Helens
+                    // TODO
+                    break;
+                }
+                case 15: {
+                    //  Collect $2000 if you have cows.
+                    if (player.Livestock.Total) {
+                        collectAmount(state, playerID, 2000);
+                    }
+                    break;
+                }
+                case 16: {
+                    // leaves you a Tractor worth $10000
+                    player.Tractors++;
+                    break;
+                }
+                default: {
+                    console.log('illegal FF card ID');
+                    break;
+                }
+            }
         }
+
+        // the net worths were updated
+        for(let id=0; id<state.players.length; id++) {
+            calculateNetWorth(state, id);
+        }
+
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
