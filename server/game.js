@@ -20,6 +20,7 @@ const DRAW_FARMERS_FATE = 2;
 module.exports = {
     createGameState,
     movePlayer,
+    movePlayerTo,
     checkPositionForDrawingCard,
     checkPositionForBalances,
     checkNewYear,
@@ -37,6 +38,7 @@ module.exports = {
     performLoan,
     performSellAsset,
     performBankrupt,
+    shouldChangePosition,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
 }
@@ -172,14 +174,10 @@ function performBuy(state, playerID, item, downPayment) {
         return 0;
     }
 
-    console.log('1');
-
     // insufficient funds
     if (player.Cash < downPayment) {
         return 0;
     }
-
-    console.log('2');
 
     // did not put 20% down
     const itemPrice = PURCHASE_PRICES[item];
@@ -188,7 +186,6 @@ function performBuy(state, playerID, item, downPayment) {
         return 0;
     }
 
-    console.log('3');
 
     // too much debt
     let loanAmount = itemPrice - downPayment;
@@ -196,14 +193,10 @@ function performBuy(state, playerID, item, downPayment) {
         return 0;
     }
 
-    console.log('4');
-
     // don't have the OTB
     if (!player.OTB[item]) {
         return 0;
     }
-
-    console.log('5');
 
     // if the player tries to pay too much
     if (downPayment > itemPrice) {
@@ -277,16 +270,27 @@ function createGameState(avatarIDs) {
     };
 }
 
-function checkNewYear(state, playerID, positionalDiceValue) {
+function checkNewYear(state, playerID, oldPosition) {
 
     const player = state.players[playerID];
+
     // new year, get $5000
-    if (player.Position >= 0 && player.Position - positionalDiceValue < 0) {
+    if (player.Position < oldPosition) {
+
+        // add Farmer's Fate cards back to the deck
+        if (player.IRS) {
+            state.FarmersFateDeck[4]++;
+        }
+        if (player.Grain.HalfWheat) {
+            state.FarmersFateDeck[9]++;
+        }
+       
         player.Cash += 5000;
         player.Year++;
         player.Hay.DoubleHay = false;
         player.Grain.DoubleCorn = false;
         player.Grain.HalfWheat = false;
+        player.IRS = false;
 
         player.CompletedHarvests = {
             "1stHay": false,
@@ -299,14 +303,6 @@ function checkNewYear(state, playerID, positionalDiceValue) {
             "Apple": false,
             "Livestock": false,
         }
-
-        // TODO: remove IRS card, other Farmers Fate end of the year cards
-        // and put it back into the deck
-        const fate = player.Fate;
-        for(let fateCard of fate) {
-            state.FarmersFateDeck[fateCard]++;
-        }
-        player.IRS = false;
 
         return true;
     }
@@ -327,6 +323,25 @@ function movePlayerTo(state, playerID, position) {
     const player = state.players[playerID];
     player.Position = position;
     player.shouldMove = false;
+}
+
+function shouldChangePosition(state, playerID) {
+    const player = state.players[playerID];
+    const position = player.Position;
+
+    switch(position) {
+        case 7: return [true, 14];  // Feb 3 -> Spring Planting
+        case 11: return [true, 2];  // Mar 3 -> Jan 2
+        case 28: return [true, 36]; // July 3 -> Harvest Moon
+        case 30: return [true, 8];  // Aug 1 -> Feb 4
+        case 34: {
+            if (player.Tractors) {
+                return [true, 45]; // Sep 1 -> Nov 3
+            }
+            return [false, null];
+        }
+        default: return [false, null];
+    }
 }
 
 function collectAmount(state, playerID, amount) {
@@ -608,7 +623,7 @@ function drawFarmersFate(state, playerID) {
     return FarmersFateCards[id];
 }
 
-function drawOperatingExpense(state) {
+function drawOperatingExpense(state, playerID) {
     const id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
 
     // if the draw stack is empty, reshuffle
@@ -618,7 +633,7 @@ function drawOperatingExpense(state) {
     }
 
     state.OperatingExpenseDeck[id]--;
-    return [OperatingExpenseCards[id], operatingExpenseCosts(state, id)];
+    return [OperatingExpenseCards[id], operatingExpenseCosts(state, playerID, id)];
 }
 
 function operatingExpenseCosts(state, playerID, id) {

@@ -1,6 +1,7 @@
 const {
     createGameState,
     movePlayer,
+    movePlayerTo,
     checkPositionForDrawingCard,
     checkPositionForBalances,
     checkNewYear,
@@ -18,6 +19,7 @@ const {
     performLoan,
     performSellAsset,
     performBankrupt,
+    shouldChangePosition,
     DRAW_OTB,
     DRAW_FARMERS_FATE,
 } = require('./game');
@@ -202,15 +204,19 @@ io.on('connection', client => {
         io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
 
         // wait 1 second before revealing the answer
-        setTimeout(step2, 1000, roomCode, state, playerID, positionalDiceValue);
+        setTimeout(function () {
+            const oldPosition = state.players[playerID].Position;
+            movePlayer(state, playerID, positionalDiceValue);
+            movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
+        }, 1000);
     }
 
-    function step2(roomCode, state, playerID, positionalDiceValue) {
-        // update the player position based on dice roll
-        movePlayer(state, playerID, positionalDiceValue);
+    function movePlayerAftermath(roomCode, state, playerID, oldPosition, newYearAllowed) {
 
         // pay player for passing christmas vacation
-        checkNewYear(state, playerID, positionalDiceValue);
+        if (newYearAllowed) {
+            checkNewYear(state, playerID, oldPosition);
+        }
 
         // check if we should double hay/corn for the year
         checkPositionForDoubleYield(state, playerID);
@@ -222,23 +228,177 @@ io.on('connection', client => {
             collectAmount(state, playerID, balance);
         }
         else {
-            // charge the player an amount of money before continuing
-            const paymentReceived = payAmount(state, playerID, -balance);
-            if (!paymentReceived) {
-                client.emit('paymentRequired');
-                return;
-            }
+            payAmount(state, playerID, -balance);
         }
 
         const player = state.players[playerID];
         player.shouldHarvest = shouldPlayerHarvest(state, playerID);
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
 
-        // skip to drawing a card
-        if (!player.shouldHarvest) {
+        if (player.shouldHarvest) {
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
+        }
+        else {
+            // should player move because the square says so?
+            // e.g. Mar 3, July 3, Aug 1, Sep 1 (conditional)
             step3(roomCode, state, playerID);
         }
+    }
 
+    function handleRollHarvestDice() {
+        console.log('handleRollPositionDice()')
+
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        if (!state) {
+            return;
+        }
+
+        const player = state.players[playerID];
+        if (state.turn !== playerID || !player.shouldHarvest) {
+            return;
+        }
+
+        // roll the harvest dice
+        let harvestDiceValue = Math.floor(Math.random() * 6) + 1;
+        io.to(roomCode).emit('rollHarvestDiceAnimation', harvestDiceValue);
+
+        setTimeout(finishRollHarvestDice, 1000);
+        function finishRollHarvestDice() {
+            // harvest 
+            const harvestCode = performHarvest(state, playerID, harvestDiceValue);
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
+
+            // draw operating expense card
+            const [cardText, charge] = drawOperatingExpense(state, playerID);
+            console.log('operating expense: ')
+            console.log(charge);
+            payAmount(state, playerID, -charge);
+
+            player.shouldHarvest = shouldPlayerHarvest(state, playerID);
+
+            io.to(roomCode).emit('drawOperatingExpense', cardText);
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
+
+            // should the player move because the square says so?
+            // e.g. Mar 3, July 3, Aug 1, Sep 1 (conditional)
+            step3(roomCode, state, playerID);
+        }
+    }
+
+    // should the player move because of their current position??
+    function step3(roomCode, state, playerID) {
+
+        const [shouldMove, newPosition] = shouldChangePosition(state, playerID);
+
+        if (shouldMove) {
+            const oldPosition = state.players[playerID].Position;
+            movePlayerTo(state, playerID, newPosition);
+            // do not allow player to collect $5000 if they hurt their back
+            movePlayerAftermath(roomCode, state, playerID, oldPosition, oldPosition !== 11);
+        }
+        else {
+            // draw a farmer's fate card
+            step4(roomCode, state, playerID);
+        }
+    }
+
+    // draw a card, perform the action
+    function step4(roomCode, state, playerID) {
+
+        const cardDrawType = checkPositionForDrawingCard(state, playerID);
+
+        if (cardDrawType === DRAW_OTB) {
+            const cardText = drawOTB(state, playerID);
+
+            // the deck could be empty
+            if (cardText === null) {
+                return;
+            }
+
+            io.to(roomCode).emit('drawOTB', cardText);
+
+            // now handle the action
+        }
+        else if (cardDrawType === DRAW_FARMERS_FATE) {
+            const cardText = drawFarmersFate(state, playerID);
+            io.to(roomCode).emit('drawFarmersFate', cardText);
+
+            // now handle the action
+        }
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
+    }
+
+    function handleEndTurn() {
+        console.log('handleEndTurn()');
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        if (!state) {
+            return;
+        }
+
+        if (state.turn !== playerID) {
+            return;
+        }
+        // check that it is the correct player's turn, and they should move
+        const player = state.players[playerID];
+
+        if (player.shouldMove || player.shouldHarvest || player.Cash < 0) {
+            console.log('unfinished business. cannot end turn yet')
+            return;
+        }
+
+        state.turn++;
+        state.turn %= state.players.length;
+
+        // next player should move next
+        state.players[state.turn].shouldMove = true;
+        state.players[state.turn].shouldHarvest = false;
+
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
+    }
+
+    function handleBuy(item, downPayment) {
+        console.log('handleBuy()');
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        if (!state) {
+            return;
+        }
+
+        // can only buy on your turn
+        if (state.turn !== playerID) {
+            return;
+        }
+
+        const buyCode = performBuy(state, playerID, item, downPayment);
+        // TODO: handle invalid buys
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
+    }
+
+    function handlePaybackDebt(downPayment) {
+        console.log('handlePaybackDebt()');
+        let roomCode = clientRooms[client.id];
+        let playerID = playerIDs[client.id];
+        const state = states[roomCode];
+
+        if (!state) {
+            return;
+        }
+
+        // can only buy on your turn
+        if (state.turn !== playerID) {
+            return;
+        }
+
+        const code = performPaybackDebt(state, playerID, downPayment);
+        // TODO: handle invalid buys
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
     function handleLoan(loanAmount) {
@@ -290,144 +450,6 @@ io.on('connection', client => {
         }
 
         performBankrupt(state, playerID);
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
-    }
-
-    // draw a card, perform the action
-    function step3(roomCode, state, playerID) {
-
-        const cardDrawType = checkPositionForDrawingCard(state, playerID);
-
-        if (cardDrawType === DRAW_OTB) {
-            const cardText = drawOTB(state, playerID);
-
-            // the deck could be empty
-            if (cardText === null) {
-                return;
-            }
-
-            io.to(roomCode).emit('drawOTB', cardText);
-
-            // now handle the action
-        }
-        else if (cardDrawType === DRAW_FARMERS_FATE) {
-            const cardText = drawFarmersFate(state, playerID);
-            io.to(roomCode).emit('drawFarmersFate', cardText);
-
-            // now handle the action
-        }
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
-    }
-
-    function handleRollHarvestDice() {
-        console.log('handleRollPositionDice()')
-
-        let roomCode = clientRooms[client.id];
-        let playerID = playerIDs[client.id];
-        const state = states[roomCode];
-
-        if (!state) {
-            return;
-        }
-
-        const player = state.players[playerID];
-        if (state.turn !== playerID || !player.shouldHarvest) {
-            return;
-        }
-
-        // roll the harvest dice
-        let harvestDiceValue = Math.floor(Math.random() * 6) + 1;
-        io.to(roomCode).emit('rollHarvestDiceAnimation', harvestDiceValue);
-
-        setTimeout(finishRollHarvestDice, 1000);
-        function finishRollHarvestDice() {
-            // harvest 
-            console.log(state, playerID)
-            const harvestCode = performHarvest(state, playerID, harvestDiceValue);
-            io.to(roomCode).emit('gameState', JSON.stringify(state));
-
-            // draw operating expense card
-            const [cardText, charge] = drawOperatingExpense(state, playerID);
-            const paymentReceived = payAmount(state, playerID, -charge);
-            
-            io.to(roomCode).emit('drawOperatingExpense', cardText);
-            io.to(roomCode).emit('gameState', JSON.stringify(state));
-
-            if (!paymentReceived) {
-                client.emit('paymentRequired');
-                return;
-            }
-        }
-    }
-
-    function handleEndTurn() {
-        console.log('handleEndTurn()');
-        let roomCode = clientRooms[client.id];
-        let playerID = playerIDs[client.id];
-        const state = states[roomCode];
-
-        if (!state) {
-            return;
-        }
-        
-        if (state.turn !== playerID) {
-            return;
-        }
-        // check that it is the correct player's turn, and they should move
-        const player = state.players[playerID];
-        
-        if(player.shouldMove || player.shouldHarvest) {
-            console.log(player);
-            return;
-        }
-
-        state.turn++;
-        state.turn %= state.players.length;
-
-        // next player should move next
-        state.players[state.turn].shouldMove = true;
-        state.players[state.turn].shouldHarvest = false;
-
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
-    }
-
-    function handleBuy(item, downPayment) {
-        console.log('handleBuy()');
-        let roomCode = clientRooms[client.id];
-        let playerID = playerIDs[client.id];
-        const state = states[roomCode];
-
-        if (!state) {
-            return;
-        }
-
-        // can only buy on your turn
-        if (state.turn !== playerID) {
-            return;
-        }
-
-        const buyCode = performBuy(state, playerID, item, downPayment);
-        // TODO: handle invalid buys
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
-    }
-
-    function handlePaybackDebt(downPayment) {
-        console.log('handlePaybackDebt()');
-        let roomCode = clientRooms[client.id];
-        let playerID = playerIDs[client.id];
-        const state = states[roomCode];
-
-        if (!state) {
-            return;
-        }
-
-        // can only buy on your turn
-        if (state.turn !== playerID) {
-            return;
-        }
-
-        const code = performPaybackDebt(state, playerID, downPayment);
-        // TODO: handle invalid buys
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
