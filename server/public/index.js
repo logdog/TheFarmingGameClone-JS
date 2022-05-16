@@ -645,14 +645,40 @@ function handleRollHarvestDiceAnimation(diceValue) {
         diceContainer.addClass(`show-${diceValue}a`);
     }
 }
-function handleDrawOTB(card) {
-    $('#card-container').append(createOTBCard(card));
-    $('#card-container').children().last().css('border-color', lastState.players[lastState.turn].Color);
+
+function handleHarvestSummary(summaryArray) {
+    console.log('handleHarvestSummary')
+    console.log(JSON.parse(summaryArray))
+
+    const container = $('#harvest-container');
+    container.append(createHarvestCard(JSON.parse(summaryArray)));
+    container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
     // functional close button
     $('.close-btn').click(function () {
         if (shiftKeyDown) {
-            $('#card-container').empty();
+            container.empty();
+        }
+        else {
+            $(this).parent().remove();
+        }
+    });
+
+}
+
+function handleDrawOTB(card) {
+    const container = $('#OTB-container');
+    container.append(createOTBCard(card));
+    container.children().last().css('border-color', lastState.players[lastState.turn].Color);
+
+    console.log('handleDrawOTB')
+    console.log(card)
+
+
+    // functional close button
+    $('.close-btn').click(function () {
+        if (shiftKeyDown) {
+            container.empty();
         }
         else {
             $(this).parent().remove();
@@ -662,13 +688,18 @@ function handleDrawOTB(card) {
 }
 
 function handleDrawFarmersFate(card) {
-    $('#card-container').append(createFarmersFateCard(card));
-    $('#card-container').children().last().css('border-color', lastState.players[lastState.turn].Color);
+    const container = $('#FF-container');
+    container.append(createFarmersFateCard(card));
+    container.children().last().css('border-color', lastState.players[lastState.turn].Color);
+
+    console.log('handleDrawFarmersFate')
+    console.log(card)
+
 
     // functional close button
     $('.close-btn').click(function () {
         if (shiftKeyDown) {
-            $('#card-container').empty();
+            container.empty();
         }
         else {
             $(this).parent().remove();
@@ -677,13 +708,17 @@ function handleDrawFarmersFate(card) {
 }
 
 function handleDrawOperatingExpense(card) {
-    $('#card-container').append(createOperatingExpenseCard(card));
-    $('#card-container').children().last().css('border-color', lastState.players[lastState.turn].Color);
+    const container = $('#OP-container');
+    container.append(createOperatingExpenseCard(card));
+    container.children().last().css('border-color', lastState.players[lastState.turn].Color);
+
+    console.log('handleDrawOperatingExpense')
+    console.log(card)
 
     // functional close button
     $('.close-btn').click(function () {
         if (shiftKeyDown) {
-            $('#card-container').empty();
+            container.empty();
         }
         else {
             $(this).parent().remove();
@@ -698,9 +733,4 @@ function handlePaymentRequired() {
     sellWrapper.css('display', 'block');
     buyTab.removeClass('selected');
     sellTab.addClass('selected');
-}
-
-function handleHarvestSummary(summaryArray) {
-    console.log('handleHarvestSummary')
-    console.log(summaryArray)
 }

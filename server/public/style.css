@@ -379,22 +379,55 @@ h1 {
 }
 
 
-#card-container {
+#harvest-container {
+    grid-column-start: col2;
+    grid-column-end: col3;
+    grid-row-start: row1;
+    grid-row-end: row2;
+
+    align-self: center;
+    justify-self: center;
+}
+
+.card-container {
+    width: 100%;
+    height: auto;
+}
+
+#OTB-container {
+    grid-column-start: col1;
+    grid-column-end: col2;
+    grid-row-start: row2;
+    grid-row-end: row3;
+}
+
+#OP-container {
     grid-column-start: col2;
     grid-column-end: col3;
     grid-row-start: row2;
     grid-row-end: row3;
 }
 
-.card.OTBCard {
+#FF-container {
+    grid-column-start: col3;
+    grid-column-end: col4;
+    grid-row-start: row2;
+    grid-row-end: row3;
+}
+
+#harvest-container>.card {
+    background-color: whitesmoke;
+}
+
+#OTB-container>.card {
     background-color: lightblue;
 }
 
-.card.FarmersFateCard {
+#FF-container>.card {
     background-color: lightpink;
 }
 
-.card.OperatingExpenseCard {
+#OP-container>.card {
     background-color: lightgoldenrodyellow;
 }
 
@@ -403,9 +436,7 @@ h1 {
 }
 
 .card:last-child {
-    size: 100% 100%;
-
-    border-width: 5px;
+    border-width: 5%;
     border-style: solid;
 
     display: grid;
@@ -413,6 +444,7 @@ h1 {
     grid-template-rows: [row1] 20px [row2] auto [row3];
 }
 
+/* x button */
 .card>span:first-child {
     grid-column-start: col3;
     grid-column-end: col4;
@@ -422,7 +454,6 @@ h1 {
     transition: 0.2s;
 }
 
-/* x button */
 .card>span:first-child:hover {
     background-color: gray;
     cursor: pointer;
@@ -439,13 +470,34 @@ h1 {
 }
 
 /* description */
-.card>span:last-child {
+.card>span:nth-child(3) {
     grid-column-start: col1;
     grid-column-end: col4;
     grid-row-start: row2;
     grid-row-end: row3;
 
     font-weight: 200;
+}
+
+.card>table {
+    grid-column-start: col1;
+    grid-column-end: col4;
+    grid-row-start: row2;
+    grid-row-end: row3;
+    border-collapse: collapse;
+}
+
+.card>table>tbody>tr,
+.card>table>tbody>tr>td {
+    width: 100%;
+}
+
+.card>table>tbody>tr>td:first-child {
+    text-align: left;
+}
+
+.card>table>tbody>tr>td:last-child {
+    text-align: right;
 }
 
 /* Dice */
@@ -791,7 +843,7 @@ h1 {
     background-color: rgba(211, 139, 61, 0.846);
 }
 
-table {
+.payout-table>table {
     border-collapse: collapse;
     text-align: right;
     width: 100%;

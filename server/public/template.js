@@ -52,7 +52,10 @@ function boardTemplate() {
             <div id="harvest-dice-container"></div>
             <div id="mtsthelens-dice-container"></div>
         </div>
-        <div id="card-container"></div>
+        <div class="card-container" id="harvest-container"></div>
+        <div class="card-container" id="OTB-container"></div>
+        <div class="card-container" id="OP-container"></div>
+        <div class="card-container" id="FF-container"></div>
     </div>
     <div id="column-right" class="side-row">`
 
@@ -404,11 +407,29 @@ function createPositionCard(date, text) {
     </div>`;
 }
 
-function createHarvestCard(text) {
+function createHarvestCard(summaryArray) {
+
+    /*
+    [
+        [ '10 Acres Grain, Rolled 6', 7000 ],
+        [ 'Operating Expenses', -500 ],
+        [ 'Total', 6500 ]
+    ]
+    */
+
+    let tableStr = '';
+
+    for(let a of summaryArray) {
+        tableStr += `<tr>
+        <td>${a[0]}</td>
+        <td>${a[1]}</td>
+        </tr>`;
+    }
+
     return `<div class="card HarvestCard">
         <span class="close-btn" title="shift-click to close all cards">&times</span>
         <span> Harvest Summary </span>
-        <span>${text}</span>
+        <table><tbody>${tableStr}</tbody></table>
     </div>`;
 }
 
