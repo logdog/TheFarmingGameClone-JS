@@ -667,7 +667,7 @@ h1 {
 #buy-wrapper>ul,
 #sell-wrapper>ul {
     list-style-type: none;
-    padding: 0;
+    padding: 2px;
     margin: 0;
 }
 

@@ -393,7 +393,7 @@ function initShopButtons() {
     });
 
     declareBankruptButton.click(function() {
-        const yes = confirm('If you declare bankrupcy, you will lose ALL OF YOUR ASSETS and will start the game over. This action CANNOT be undone. Are you sure you want to declare bankrupcy?');
+        const yes = confirm('If you declare bankruptcy, you will lose ALL OF YOUR ASSETS and will start the game over. This action CANNOT be undone. Are you sure you want to declare bankruptcy?');
         if (yes) {
             socket.emit('bankrupt');
         }
