@@ -126,14 +126,14 @@ function createPlayerTotal(player, isYou) {
         <td class="right">${player.Livestock.AhtanumRidge}</td>
     </tr>
     <tr>
-        <td>Hay</td>
-        <td class="right">${player.Hay.Acres}${doubleHayText}</td>
+        <td>Hay${doubleHayText}</td>
+        <td class="right">${player.Hay.Acres}</td>
         <td>Rattlesnake</td>
         <td class="right">${player.Livestock.RattlesnakeRidge}</td>
     </tr>
     <tr>
-        <td>Grain</td>
-        <td class="right">${doubleCornText}${halfWheatText}${player.Grain.Acres}</td>
+        <td>Grain${doubleCornText}${halfWheatText}</td>
+        <td class="right">${player.Grain.Acres}</td>
         <td>Casade</td>
         <td class="right">${player.Livestock.Cascades}</td>
     </tr>
