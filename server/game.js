@@ -17,6 +17,9 @@ const DRAW_NOTHING = 0;
 const DRAW_OTB = 1;
 const DRAW_FARMERS_FATE = 2;
 
+const FF_IRS_INDEX = 4;
+const FF_HALF_WHEAT_INDEX = 9;
+
 module.exports = {
     createGameState,
     movePlayer,
@@ -198,6 +201,30 @@ function performBuy(state, playerID, item, downPayment) {
         return 0;
     }
 
+    // player cannot have more than 20 cattle on their farm
+    if (player.Livestock.Farm >= 20) {
+        return 0;
+    }
+
+    // only one player can lease these properties
+    let ahtanumRidgeTaken = false;
+    let rattlesnakeRidgeTaken = false;
+    let cascadesTaken = false;
+    let toppennishRidgeTaken = false;
+    for (let player of state.players) {
+        ahtanumRidgeTaken |= (player.Livestock.AhtanumRidge > 0);
+        rattlesnakeRidgeTaken |= (player.Livestock.RattlesnakeRidge > 0);
+        cascadesTaken |= (player.Livestock.Cascades > 0);
+        toppennishRidgeTaken |= (player.Livestock.ToppenishRidge > 0);
+    }
+
+    if (item === 'AhtanumRidge' && ahtanumRidgeTaken ||
+    item === 'RattlesnakeRidge' && rattlesnakeRidgeTaken ||
+    item === 'Cascades' && cascadesTaken ||
+    item === 'ToppenishRidge' && toppennishRidgeTaken) {
+        return 0;
+    }
+
     // if the player tries to pay too much
     if (downPayment > itemPrice) {
         downPayment = itemPrice;
@@ -279,10 +306,10 @@ function checkNewYear(state, playerID, oldPosition) {
 
         // add Farmer's Fate cards back to the deck
         if (player.IRS) {
-            state.FarmersFateDeck[4]++;
+            state.FarmersFateDeck[FF_IRS_INDEX]++;
         }
         if (player.Grain.HalfWheat) {
-            state.FarmersFateDeck[9]++;
+            state.FarmersFateDeck[FF_HALF_WHEAT_INDEX]++;
         }
        
         player.Cash += 5000;
@@ -475,10 +502,10 @@ function performBankrupt(state, playerID) {
     }
 
     if (player.IRS) {
-        state.FarmersFateDeck[4]++;
+        state.FarmersFateDeck[FF_IRS_INDEX]++;
     }
     if (player.Grain.HalfWheat) {
-        state.FarmersFateDeck[9]++;
+        state.FarmersFateDeck[FF_HALF_WHEAT_INDEX]++;
     }
 
     const name = player.Name;
@@ -611,10 +638,10 @@ function drawFarmersFate(state, playerID) {
         id = drawRandomCardFromDeck(state.FarmersFateDeck);
     }
 
-    if (id === 4) {
+    if (id === FF_IRS_INDEX) {
         player.IRS = true;
     }
-    else if (id === 9) {
+    else if (id === FF_HALF_WHEAT_INDEX) {
         player.Grain.HalfWheat = true;
     }
 

@@ -299,7 +299,7 @@ io.on('connection', client => {
             movePlayerAftermath(roomCode, state, playerID, oldPosition, oldPosition !== 11);
         }
         else {
-            // draw a farmer's fate card
+            // draw a farmer's fate or OTB card
             step4(roomCode, state, playerID);
         }
     }
@@ -318,8 +318,6 @@ io.on('connection', client => {
             }
 
             io.to(roomCode).emit('drawOTB', cardText);
-
-            // now handle the action
         }
         else if (cardDrawType === DRAW_FARMERS_FATE) {
             const cardText = drawFarmersFate(state, playerID);
