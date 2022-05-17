@@ -5,7 +5,8 @@ $(document).ready(function () {
 });
 
 // SOCKET IO connections
-const socket = io('http://localhost:3000');
+//const socket = io('http://localhost:3000');
+const socket = io();
 socket.on('init', handleInit);
 socket.on('roomCode', handleRoomCode);
 socket.on('startGame', handleStartGame);
