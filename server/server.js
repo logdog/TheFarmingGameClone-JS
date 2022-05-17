@@ -292,7 +292,7 @@ io.on('connection', client => {
             console.log(harvestSummary);
             console.log('will send harvestsummary')
             io.to(roomCode).emit('harvestSummary', JSON.stringify(harvestSummary));
-            io.to(roomCode).emit('drawOperatingExpense', cardText);
+            io.to(roomCode).emit('drawOperatingExpense', JSON.stringify(cardText));
             io.to(roomCode).emit('gameState', JSON.stringify(state));
 
             // should the player move because the square says so?
@@ -377,11 +377,11 @@ io.on('connection', client => {
                 return;
             }
 
-            io.to(roomCode).emit('drawOTB', cardText);
+            io.to(roomCode).emit('drawOTB', JSON.stringify(cardText));
         }
         else if (cardDrawType === DRAW_FARMERS_FATE) {
             const [cardText, cardIndex] = drawFarmersFate(state, playerID);
-            io.to(roomCode).emit('drawFarmersFate', cardText);
+            io.to(roomCode).emit('drawFarmersFate', JSON.stringify(cardText));
 
             // now handle the action
             const player = state.players[playerID];

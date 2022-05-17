@@ -847,7 +847,7 @@ function handleHarvestSummary(summaryArray) {
 
 function handleDrawOperatingExpense(card) {
     const container = $('#harvest-container');
-    container.append(createOperatingExpenseCard(card));
+    container.append(createOperatingExpenseCard(JSON.parse(card)));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
     // functional close button
@@ -864,7 +864,9 @@ function handleDrawOperatingExpense(card) {
 
 function handleDrawOTB(card) {
     const container = $('#OTB-FF-container');
-    container.append(createOTBCard(card));
+    console.log('handleDrawOTB')
+    console.log(card)
+    container.append(createOTBCard(JSON.parse(card)));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
     // functional close button
