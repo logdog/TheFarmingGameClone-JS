@@ -970,7 +970,7 @@ function drawFarmersFate(state, playerID) {
     }
 
     console.log('id', id)
-    console.log(OTBCards[id])
+    console.log(OTBCards)
 
     if (id === FF_IRS_INDEX) {
         player.IRS = true;
