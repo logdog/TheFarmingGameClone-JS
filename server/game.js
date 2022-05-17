@@ -984,7 +984,7 @@ function drawFarmersFate(state, playerID) {
 }
 
 function drawOperatingExpense(state, playerID) {
-    const id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
+    let id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
 
     // if the draw stack is empty, reshuffle
     if (id === null) {
