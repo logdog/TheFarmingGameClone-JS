@@ -2,9 +2,9 @@
 const fs = require('fs');
 
 try {
-    OTBCards = fs.readFileSync('./OTB.txt', 'utf8').split('\r\n');
-    FarmersFateCards = fs.readFileSync('./FarmersFate.txt', 'utf8').split('\r\n');
-    OperatingExpenseCards = fs.readFileSync('./OperatingExpense.txt', 'utf8').split('\r\n');
+    OTBCards = fs.readFileSync('./OTB.txt', 'utf8').split('\n');
+    FarmersFateCards = fs.readFileSync('./FarmersFate.txt', 'utf8').split('\n');
+    OperatingExpenseCards = fs.readFileSync('./OperatingExpense.txt', 'utf8').split('\n');
 } catch (err) {
     console.error(err);
 }
