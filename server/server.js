@@ -416,7 +416,8 @@ io.on('connection', client => {
                     // Go to 2nd week of January. Do not collect $5000
                     const oldPosition = player.Position;
                     movePlayerTo(state, playerID, 2);
-                    movePlayerAftermath(roomCode, state, playerID, oldPosition, false);
+                    movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
+                    payAmount(state, playerID, 5000);
                     break;
                 }
                 case 3: {

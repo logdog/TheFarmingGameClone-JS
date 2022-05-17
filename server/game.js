@@ -449,7 +449,7 @@ const avatarPaths = [
 
 
 const MAX_POSITION = 48;
-const MAX_DEBT = 50000;
+const MAX_DEBT = 500000;
 const OVERDRAFT_FEE = 1000;
 
 const HAY_VALUE_PER_ACRE = 2000;
