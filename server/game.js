@@ -446,10 +446,8 @@ const avatarPaths = [
     "icons/sam.png"
 ];
 
-
-
 const MAX_POSITION = 48;
-const MAX_DEBT = 500000;
+const MAX_DEBT = 100000;
 const OVERDRAFT_FEE = 1000;
 
 const HAY_VALUE_PER_ACRE = 2000;
@@ -775,7 +773,7 @@ function performSellAsset(state, playerID, item) {
         case 'Grain': hasItem = player.Grain.Acres >= 10; break;
         case 'Fruit': hasItem = player.Fruit.Acres >= 5; break;
         case 'Tractor': hasItem = player.Tractors >= 1; break;
-        case 'Harvester': hasItem = player.Harvester >= 1; break;
+        case 'Harvester': hasItem = player.Harvesters >= 1; break;
 
         /* livestock */
         case 'Cows': hasItem = player.Livestock.Farm >= 10; break;
@@ -799,7 +797,7 @@ function performSellAsset(state, playerID, item) {
         case 'Grain': player.Grain.Acres -= 10; break;
         case 'Fruit': player.Fruit.Acres -= 5; break;
         case 'Tractor': player.Tractors--; break;
-        case 'Harvester': player.Harvester--; break;
+        case 'Harvester': player.Harvesters--; break;
 
         /* livestock */
         case 'Cows': player.Livestock.Farm -= 10; player.Livestock.Total -= 10; break;

@@ -878,7 +878,6 @@ function handleDrawOTB(card) {
             $(this).parent().remove();
         }
     });
-
 }
 
 function handleDrawFarmersFate(card) {
