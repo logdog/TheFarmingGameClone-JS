@@ -181,8 +181,16 @@ io.on('connection', client => {
 
         // initialize the game
         states[roomCode] = createGameState(Object.values(avatars[roomCode]));
-        io.to(roomCode).emit('startGame', JSON.stringify(states[roomCode]));
-        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+        const state = states[roomCode];
+
+        // give 2 OTB cards to each player
+        for(let i=0; i<state.players.length; i++) {
+            drawOTB(state, i);
+            drawOTB(state, i);
+        }
+
+        io.to(roomCode).emit('startGame', JSON.stringify(state));
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
     /* Gameplay */
