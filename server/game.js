@@ -483,15 +483,21 @@ function performBuy(state, playerID, item, downPayment) {
         return 0;
     }
 
+    console.log('buy 1');
+
     // invalid item
     if (!item in PURCHASE_PRICES) {
         return 0;
     }
 
+    console.log('buy 2');
+
     // insufficient funds
     if (player.Cash < downPayment) {
         return 0;
     }
+
+    console.log('buy 3');
 
     // did not put 20% down
     const itemPrice = PURCHASE_PRICES[item];
@@ -500,6 +506,7 @@ function performBuy(state, playerID, item, downPayment) {
         return 0;
     }
 
+    console.log('buy 4');
 
     // too much debt
     let loanAmount = itemPrice - downPayment;
@@ -507,15 +514,21 @@ function performBuy(state, playerID, item, downPayment) {
         return 0;
     }
 
+    console.log('buy 5');
+
     // don't have the OTB
     if (!player.OTB[item]) {
         return 0;
     }
 
+    console.log('buy 6');
+
     // player cannot have more than 20 cattle on their farm
-    if (player.Livestock.Farm >= 20) {
+    if (item === 'Cows' && player.Livestock.Farm >= 20) {
         return 0;
     }
+
+    console.log('buy 7');
 
     // only one player can lease these properties
     let ahtanumRidgeTaken = false;
