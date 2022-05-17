@@ -916,17 +916,21 @@ function checkPositionForBalances(state, playerID) {
 
 // returns the type of card that is drawn from the deck
 function drawRandomCardFromDeck(deck) {
+
+    console.log('drawRandomCard')
     const total = deck.reduce((a, b) => a + b, 0);
     if (total === 0) {
         return null;
     }
 
+    console.log('drawRandomCard 1')
     const val = Math.floor(Math.random() * total + 1);
 
     let accumulated = 0;
     for (let i = 0; i < deck.length; i++) {
         accumulated += deck[i];
         if (val <= accumulated) {
+            console.log(i)
             return i;
         }
     }
@@ -936,9 +940,16 @@ function drawOTB(state, playerID) {
     const player = state.players[playerID];
     const id = drawRandomCardFromDeck(state.OTBDeck);
 
+    console.log('drawOTB')
+
+
     if (id === null) {
         return null;
     }
+
+    console.log('drawOTB 1')
+    console.log('id', id)
+    console.log(OTBCards[id])
 
     state.OTBDeck[id]--;
     player.OTB[OTB_ITEM_MAP[id]]++;
@@ -958,7 +969,8 @@ function drawFarmersFate(state, playerID) {
         id = drawRandomCardFromDeck(state.FarmersFateDeck);
     }
 
-    console.log(id)
+    console.log('id', id)
+    console.log(OTBCards[id])
 
     if (id === FF_IRS_INDEX) {
         player.IRS = true;
