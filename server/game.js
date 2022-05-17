@@ -476,25 +476,25 @@ const OTB_ITEM_MAP = ['Hay', 'Grain', 'Cows', 'Fruit', 'Tractor', 'Harvester',
 function performBuy(state, playerID, item, downPayment) {
 
     const player = state.players[playerID];
-    console.log('buy');
+    console.log('buy 0');
 
     // wrong time of year
     if (!isBuyingSquare(player.Position)) {
-        return 0;
+        return [false, 'You can only buy between Christmas Vacation and Spring Planting'];
     }
 
     console.log('buy 1');
 
     // invalid item
     if (!item in PURCHASE_PRICES) {
-        return 0;
+        return [false, 'Unknown item: ' + item];
     }
 
     console.log('buy 2');
 
     // insufficient funds
     if (player.Cash < downPayment) {
-        return 0;
+        return [false, `Your down payment ($${downPayment}) is larger than your cash balance ($${player.Cash})`];
     }
 
     console.log('buy 3');
@@ -503,7 +503,7 @@ function performBuy(state, playerID, item, downPayment) {
     const itemPrice = PURCHASE_PRICES[item];
     const minimumDownPayment = 0.2 * itemPrice;
     if (downPayment < minimumDownPayment) {
-        return 0;
+        return [false, `Must make minimum 20% down payment ($${minimumDownPayment})`];
     }
 
     console.log('buy 4');
@@ -511,21 +511,21 @@ function performBuy(state, playerID, item, downPayment) {
     // too much debt
     let loanAmount = itemPrice - downPayment;
     if (loanAmount + player.Debt > MAX_DEBT) {
-        return 0;
+        return [false, `This purchase would put your debt total over the ${MAX_DEBT} threshold. You must make a down payment of at least $${itemPrice - (MAX_DEBT-player.Debt)}`];
     }
 
     console.log('buy 5');
 
     // don't have the OTB
     if (!player.OTB[item]) {
-        return 0;
+        return [false, 'You do not have an OTB for this item'];
     }
 
     console.log('buy 6');
 
     // player cannot have more than 20 cattle on their farm
     if (item === 'Cows' && player.Livestock.Farm >= 20) {
-        return 0;
+        return [false, 'Your farm can only hold 20 cows. Lease additional land for more cattle.'];
     }
 
     console.log('buy 7');
@@ -546,7 +546,7 @@ function performBuy(state, playerID, item, downPayment) {
         item === 'RattlesnakeRidge' && rattlesnakeRidgeTaken ||
         item === 'Cascades' && cascadesTaken ||
         item === 'ToppenishRidge' && toppennishRidgeTaken) {
-        return 0;
+        return [false, 'This property is already leased.'];
     }
 
     // if the player tries to pay too much
@@ -581,7 +581,7 @@ function performBuy(state, playerID, item, downPayment) {
     // update player net worth
     calculateNetWorth(state, playerID);
 
-    return 1;
+    return [true, null];
 }
 
 // player can choose to payoff debt

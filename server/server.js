@@ -586,9 +586,14 @@ io.on('connection', client => {
             return;
         }
 
-        const buyCode = performBuy(state, playerID, item, downPayment);
-        // TODO: handle invalid buys
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
+        const [success, msg] = performBuy(state, playerID, item, downPayment);
+
+        if (success) {
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
+        }
+        else {
+            client.emit('errorBuy', msg);
+        }
     }
 
     function handlePaybackDebt(downPayment) {
@@ -625,7 +630,6 @@ io.on('connection', client => {
         const player = state.players[playerID];
         const success = performLoan(state, playerID, loanAmount);
         if (success) {
-            console.log('asdfasdf')
             player.shouldHarvest = shouldPlayerHarvest(state, playerID);
             io.to(roomCode).emit('gameState', JSON.stringify(state));
         }
@@ -668,6 +672,9 @@ io.on('connection', client => {
         const player = state.players[playerID];
         player.shouldMove = false;
 
+        drawOTB(state, playerID);
+        drawOTB(state, playerID);
+        
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 

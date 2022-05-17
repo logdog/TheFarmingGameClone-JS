@@ -28,6 +28,8 @@ socket.on('drawOperatingExpense', handleDrawOperatingExpense);
 socket.on('requirePayment', handleRequirePayment);
 socket.on('harvestSummary', handleHarvestSummary);
 
+socket.on('errorBuy', handleErrorBuy);
+
 // SET UP THE ROOM
 const screen1 = $('#screen-1');
 const newGameButton = $('#new-game-btn');
@@ -903,4 +905,8 @@ function handleRequirePayment() {
     sellWrapper.css('display', 'block');
     buyTab.removeClass('selected');
     sellTab.addClass('selected');
+}
+
+function handleErrorBuy(msg) {
+    alert(msg)
 }
