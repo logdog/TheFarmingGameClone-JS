@@ -23,7 +23,7 @@ const FF_HALF_WHEAT_INDEX = 9;
 const gameBoardSquares = [
     {
         "index": 0,
-        "Date": "XMAS VACTACTION",
+        "Date": "XMAS VACATION",
         "Harvest": null,
         "Text": "COLLECT $1000 Christmas bonus. Collect years wage of $5000 as you pass."
     },
@@ -127,7 +127,7 @@ const gameBoardSquares = [
         "index": 17,
         "Date": "May 1",
         "Harvest": null,
-        "Text": "The whole Valley is grean. Collect $500"
+        "Text": "The whole Valley is green. Collect $500"
     },
     {
         "index": 18,
@@ -193,7 +193,7 @@ const gameBoardSquares = [
         "index": 28,
         "Date": "July 3",
         "Harvest": "Second-Hay-Cutting",
-        "Text": "It's a cooker! 114 deggrees in the shape. Wipe your brow and go to Harvest Moon after getting Hay check."
+        "Text": "It's a cooker! 114 degrees in the shade. Wipe your brow and go to Harvest Moon after getting Hay check."
     },
     {
         "index": 29,
@@ -1251,7 +1251,7 @@ function performHarvest(state, playerID, diceValue) {
     }
     else if (typeOfHarvest === 'Livestock') {
         payout = calculateLivestockHarvest(player.Livestock.Total, diceValue);
-        harvestSummary.push([`${player.Livestock.Total} Head, Rolled ${diceValue}`, payout]);
+        harvestSummary.push([`${player.Livestock.Total} Cows, Rolled ${diceValue}`, payout]);
 
         if (position === 37) {
             harvestSummary.push([`Market Collapse`, -payout / 2]);
