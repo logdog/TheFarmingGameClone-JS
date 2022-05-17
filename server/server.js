@@ -372,6 +372,9 @@ io.on('connection', client => {
         if (cardDrawType === DRAW_OTB) {
             const cardText = drawOTB(state, playerID);
 
+            console.log('card text otb:')
+            console.log(cardText)
+
             // the deck could be empty
             if (cardText === null) {
                 return;
