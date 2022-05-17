@@ -4,7 +4,7 @@ const {
     movePlayerTo,
     checkPositionForDrawingCard,
     checkPositionForBalances,
-    checkNewYear,
+    performNewYearCleanSlate,
     collectAmount,
     payAmount,
     drawOTB,
@@ -217,19 +217,14 @@ io.on('connection', client => {
         player.shouldMove = false;
 
         // wait 1 second before revealing the answer
-        setTimeout(function () {
-            const oldPosition = state.players[playerID].Position;
-            movePlayer(state, playerID, positionalDiceValue);
-            movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
-        }, 1000);
+        setTimeout(finishRollPositionDice, 1000, roomCode, state, playerID, positionalDiceValue);
+        function finishRollPositionDice (roomCode, state, playerID, positionalDiceValue) {
+            movePlayer(state, playerID, positionalDiceValue); // also pay player $5000, return FF cards, etc
+            movePlayerAftermath(roomCode, state, playerID);
+        }
     }
 
-    function movePlayerAftermath(roomCode, state, playerID, oldPosition, newYearAllowed) {
-
-        // pay player for passing christmas vacation
-        if (newYearAllowed) {
-            checkNewYear(state, playerID, oldPosition);
-        }
+    function movePlayerAftermath(roomCode, state, playerID) {
 
         // check if we should double hay/corn for the year
         checkPositionForDoubleYield(state, playerID);
@@ -270,7 +265,10 @@ io.on('connection', client => {
             return;
         }
 
+        // check that the player should harvest first
         const player = state.players[playerID];
+        player.shouldHarvest = shouldPlayerHarvest(state, playerID);
+        
         if (state.turn !== playerID || !player.shouldHarvest) {
             return;
         }
@@ -279,10 +277,15 @@ io.on('connection', client => {
         let harvestDiceValue = Math.floor(Math.random() * 6) + 1;
         io.to(roomCode).emit('rollHarvestDiceAnimation', harvestDiceValue);
 
-        setTimeout(finishRollHarvestDice, 1000);
-        function finishRollHarvestDice() {
+        setTimeout(finishRollHarvestDice, 1000, roomCode, state, playerID, harvestDiceValue);
+        function finishRollHarvestDice(roomCode, state, playerID, harvestDiceValue) {
             // harvest 
             const harvestSummary = performHarvest(state, playerID, harvestDiceValue);
+
+            // 
+            if (harvestSummary === null) {
+                return;
+            }
             
             // draw operating expense card
             const [cardText, charge] = drawOperatingExpense(state, playerID);
@@ -331,8 +334,9 @@ io.on('connection', client => {
 
         io.to(roomCode).emit('rollMtStHelensDiceAnimation', mtStHelensDiceValue);
 
-        setTimeout(finishRollMtStHelensDice, 1000);
-        function finishRollMtStHelensDice() {
+        setTimeout(finishRollMtStHelensDice, 1000, roomCode, state, playerID, mtStHelensDiceValue);
+
+        function finishRollMtStHelensDice(roomCode, state, playerID, mtStHelensDiceValue) {
 
             console.log('finishRollMtStHelensDice')
             const player = state.players[playerID];
@@ -363,8 +367,13 @@ io.on('connection', client => {
         if (shouldMove) {
             const oldPosition = state.players[playerID].Position;
             movePlayerTo(state, playerID, newPosition);
-            // do not allow player to collect $5000 if they hurt their back
-            movePlayerAftermath(roomCode, state, playerID, oldPosition, oldPosition !== 11);
+
+            // only August 1 will put the player in a new year
+            if (oldPosition === 30) {
+                performNewYearCleanSlate(state, playerID);
+            }
+
+            movePlayerAftermath(roomCode, state, playerID);
         }
         else {
             // draw a farmer's fate or OTB card
@@ -409,15 +418,20 @@ io.on('connection', client => {
                     // Go to christmas. Collect your $6000
                     const oldPosition = player.Position;
                     movePlayerTo(state, playerID, 0);
-                    movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
+                    performNewYearCleanSlate(state, playerID);
+                    movePlayerAftermath(roomCode, state, playerID);
                     break;
                 }
                 case 2: {
                     // Go to 2nd week of January. Do not collect $5000
                     const oldPosition = player.Position;
                     movePlayerTo(state, playerID, 2);
-                    movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
+
+                    // this is a new year (drought year), but immediately lose the $5000
+                    performNewYearCleanSlate(state, playerID);
                     payAmount(state, playerID, 5000);
+
+                    movePlayerAftermath(roomCode, state, playerID);
                     break;
                 }
                 case 3: {

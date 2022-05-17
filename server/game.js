@@ -323,7 +323,7 @@ module.exports = {
     movePlayerTo,
     checkPositionForDrawingCard,
     checkPositionForBalances,
-    checkNewYear,
+    performNewYearCleanSlate,
     collectAmount,
     payAmount,
     drawOTB,
@@ -627,52 +627,65 @@ function createGameState(avatarIDs) {
     };
 }
 
-function checkNewYear(state, playerID, oldPosition) {
+
+
+/* there are different ways a player can advance to a previous date
+    1. naturally rolls and crosses xmas vacation (handled in movePlayer())  -> new year
+    2. hurts back and goes to Jan 2                                         -> not new year
+    3. draws a farmer's fate card and moves to Jan2                         -> depends
+    4. harvests wheat and moves to Feb 4                                    -> new year
+    5. draws a farmer's fate card and goes to xmas vacation                 -> new year
+
+    We really need to break this down into cases, which is handled in server.js logic
+*/
+
+function performNewYearCleanSlate(state, playerID) {
 
     const player = state.players[playerID];
 
-    // new year, get $5000
-    if (player.Position < oldPosition) {
-
-        // add Farmer's Fate cards back to the deck
-        if (player.IRS) {
-            state.FarmersFateDeck[FF_IRS_INDEX]++;
-        }
-        if (player.Grain.HalfWheat) {
-            state.FarmersFateDeck[FF_HALF_WHEAT_INDEX]++;
-        }
-
-        player.Cash += 5000;
-        player.Year++;
-        player.Hay.DoubleHay = false;
-        player.Grain.DoubleCorn = false;
-        player.Grain.HalfWheat = false;
-        player.IRS = false;
-
-        player.CompletedHarvests = {
-            "1stHay": false,
-            "2ndHay": false,
-            "3rdHay": false,
-            "4thHay": false,
-            "Wheat": false,
-            "Corn": false,
-            "Cherry": false,
-            "Apple": false,
-            "Livestock": false,
-        }
-
-        return true;
+    // add Farmer's Fate cards back to the deck
+    if (player.IRS) {
+        state.FarmersFateDeck[FF_IRS_INDEX]++;
     }
-    return false;
-}
+    if (player.Grain.HalfWheat) {
+        state.FarmersFateDeck[FF_HALF_WHEAT_INDEX]++;
+    }
 
+    player.Cash += 5000;
+    player.Year++;
+    player.Hay.DoubleHay = false;
+    player.Grain.DoubleCorn = false;
+    player.Grain.HalfWheat = false;
+    player.IRS = false;
+
+    player.CompletedHarvests = {
+        "1stHay": false,
+        "2ndHay": false,
+        "3rdHay": false,
+        "4thHay": false,
+        "Wheat": false,
+        "Corn": false,
+        "Cherry": false,
+        "Apple": false,
+        "Livestock": false,
+    }
+}
 
 // move the player to a new position
 function movePlayer(state, playerID, diceValue) {
     const player = state.players[playerID];
+    const oldPosition = player.Position;
+    
+    // update position
     player.Position += diceValue;
     player.Position %= (MAX_POSITION + 1);
     player.shouldMove = false;
+
+    // new year
+    if (player.Position < oldPosition) {
+        performNewYearCleanSlate(state, playerID);
+    }
+
 }
 
 // move the player to a specific position
@@ -687,10 +700,10 @@ function shouldChangePosition(state, playerID) {
     const position = player.Position;
 
     switch (position) {
-        case 7: return [true, 14];  // Feb 3 -> Spring Planting
-        case 11: return [true, 2];  // Mar 3 -> Jan 2
-        case 28: return [true, 36]; // July 3 -> Harvest Moon
-        case 30: return [true, 8];  // Aug 1 -> Feb 4
+        case 7: return [true, 14];  // Feb 3 -> Spring Planting (move forward)
+        case 11: return [true, 2];  // Mar 3 -> Jan 2           (move backwards, not a new year)
+        case 28: return [true, 36]; // July 3 -> Harvest Moon   (move forward)
+        case 30: return [true, 8];  // Aug 1 -> Feb 4           (move forward + new year)
         case 34: {
             if (player.Tractors) {
                 return [true, 45]; // Sep 1 -> Nov 3
@@ -1161,10 +1174,10 @@ function performHarvest(state, playerID, diceValue) {
 
 
     if (!shouldPlayerHarvest(state, playerID)) {
-        return 0;
+        return null;
     }
 
-    let harvestSummary = [];
+    const harvestSummary = [];
 
     const typeOfHarvest = typeOfHarvestSquare(position);
     let payout = 0;
