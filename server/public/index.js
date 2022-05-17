@@ -101,15 +101,15 @@ function createPlayerTotal(player, isYou) {
     <tr>
         <td rowspan="6" colspan="2" class="player-profile-icon" style="background-image: url(${player.Path})"></td>
         <td>Net Worth</td>
-        <td class="right">$${player.NetWorth}</td>
+        <td class="right">$${new Intl.NumberFormat().format(player.NetWorth)}</td>
     </tr>
     <tr>
         <td>Cash</td>
-        <td class="right">$${player.Cash}</td>
+        <td class="right">$${new Intl.NumberFormat().format(player.Cash)}</td>
     </tr>
     <tr>
         <td>Debt</td>
-        <td class="right">$${player.Debt}</td>
+        <td class="right">$${new Intl.NumberFormat().format(player.Debt)}</td>
     </tr>
     <tr>
         <td>Tractors</td>
