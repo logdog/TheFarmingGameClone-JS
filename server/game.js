@@ -478,57 +478,12 @@ function performBuy(state, playerID, item, downPayment) {
     const player = state.players[playerID];
     console.log('buy 0');
 
-    // wrong time of year
-    if (!isBuyingSquare(player.Position)) {
-        return [false, 'You can only buy between Christmas Vacation and Spring Planting'];
-    }
-
-    console.log('buy 1');
-
-    // invalid item
-    if (!item in PURCHASE_PRICES) {
-        return [false, 'Unknown item: ' + item];
-    }
-
-    console.log('buy 2');
-
-    // insufficient funds
-    if (player.Cash < downPayment) {
-        return [false, `Your down payment ($${downPayment}) is larger than your cash balance ($${player.Cash})`];
-    }
-
-    console.log('buy 3');
-
-    // did not put 20% down
-    const itemPrice = PURCHASE_PRICES[item];
-    const minimumDownPayment = 0.2 * itemPrice;
-    if (downPayment < minimumDownPayment) {
-        return [false, `Must make minimum 20% down payment ($${minimumDownPayment})`];
-    }
-
-    console.log('buy 4');
-
-    // too much debt
-    let loanAmount = itemPrice - downPayment;
-    if (loanAmount + player.Debt > MAX_DEBT) {
-        return [false, `This purchase would put your debt total over the ${MAX_DEBT} threshold. You must make a down payment of at least $${itemPrice - (MAX_DEBT-player.Debt)}`];
-    }
-
-    console.log('buy 5');
-
     // don't have the OTB
     if (!player.OTB[item]) {
         return [false, 'You do not have an OTB for this item'];
     }
 
-    console.log('buy 6');
-
-    // player cannot have more than 20 cattle on their farm
-    if (item === 'Cows' && player.Livestock.Farm >= 20) {
-        return [false, 'Your farm can only hold 20 cows. Lease additional land for more cattle.'];
-    }
-
-    console.log('buy 7');
+    console.log('buy 1');
 
     // only one player can lease these properties
     let ahtanumRidgeTaken = false;
@@ -549,6 +504,55 @@ function performBuy(state, playerID, item, downPayment) {
         return [false, 'This property is already leased.'];
     }
 
+    console.log('buy 2');
+
+
+    // wrong time of year
+    if (!isBuyingSquare(player.Position)) {
+        return [false, 'You can only buy between Christmas Vacation and Spring Planting'];
+    }
+
+    console.log('buy 3');
+
+    // invalid item
+    if (!item in PURCHASE_PRICES) {
+        return [false, 'Unknown item: ' + item];
+    }
+
+    console.log('buy 4');
+
+    // insufficient funds
+    if (player.Cash < downPayment) {
+        return [false, `Your down payment ($${downPayment}) is larger than your cash balance ($${player.Cash})`];
+    }
+
+    console.log('buy 5');
+
+    // did not put 20% down
+    const itemPrice = PURCHASE_PRICES[item];
+    const minimumDownPayment = 0.2 * itemPrice;
+    if (downPayment < minimumDownPayment) {
+        return [false, `Must make minimum 20% down payment ($${minimumDownPayment})`];
+    }
+
+    console.log('buy 6');
+
+    // too much debt
+    let loanAmount = itemPrice - downPayment;
+    if (loanAmount + player.Debt > MAX_DEBT) {
+        return [false, `This purchase would put your debt total over the ${MAX_DEBT} threshold. You must make a down payment of at least $${itemPrice - (MAX_DEBT-player.Debt)}`];
+    }
+
+    console.log('buy 7');
+
+    // player cannot have more than 20 cattle on their farm
+    if (item === 'Cows' && player.Livestock.Farm >= 20) {
+        return [false, 'Your farm can only hold 20 cows. Lease additional land for more cattle.'];
+    }
+
+    console.log('buy 8');
+
+    
     // if the player tries to pay too much
     if (downPayment > itemPrice) {
         downPayment = itemPrice;
