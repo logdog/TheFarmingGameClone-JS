@@ -2,9 +2,9 @@
 const fs = require('fs');
 
 try {
-    OTBCards = fs.readFileSync('./OTB.txt', 'utf8').split('\r\n');
-    FarmersFateCards = fs.readFileSync('./FarmersFate.txt', 'utf8').split('\r\n');
-    OperatingExpenseCards = fs.readFileSync('./OperatingExpense.txt', 'utf8').split('\r\n');
+    OTBCards = fs.readFileSync('./OTB.txt', 'utf8').split('\n');
+    FarmersFateCards = fs.readFileSync('./FarmersFate.txt', 'utf8').split('\n');
+    OperatingExpenseCards = fs.readFileSync('./OperatingExpense.txt', 'utf8').split('\n');
 } catch (err) {
     console.error(err);
 }
@@ -23,7 +23,7 @@ const FF_HALF_WHEAT_INDEX = 9;
 const gameBoardSquares = [
     {
         "index": 0,
-        "Date": "XMAS VACTACTION",
+        "Date": "XMAS VACATION",
         "Harvest": null,
         "Text": "COLLECT $1000 Christmas bonus. Collect years wage of $5000 as you pass."
     },
@@ -127,7 +127,7 @@ const gameBoardSquares = [
         "index": 17,
         "Date": "May 1",
         "Harvest": null,
-        "Text": "The whole Valley is grean. Collect $500"
+        "Text": "The whole Valley is green. Collect $500"
     },
     {
         "index": 18,
@@ -193,7 +193,7 @@ const gameBoardSquares = [
         "index": 28,
         "Date": "July 3",
         "Harvest": "Second-Hay-Cutting",
-        "Text": "It's a cooker! 114 deggrees in the shape. Wipe your brow and go to Harvest Moon after getting Hay check."
+        "Text": "It's a cooker! 114 degrees in the shade. Wipe your brow and go to Harvest Moon after getting Hay check."
     },
     {
         "index": 29,
@@ -323,7 +323,7 @@ module.exports = {
     movePlayerTo,
     checkPositionForDrawingCard,
     checkPositionForBalances,
-    checkNewYear,
+    performNewYearCleanSlate,
     collectAmount,
     payAmount,
     drawOTB,
@@ -446,10 +446,8 @@ const avatarPaths = [
     "icons/sam.png"
 ];
 
-
-
 const MAX_POSITION = 48;
-const MAX_DEBT = 50000;
+const MAX_DEBT = 100000;
 const OVERDRAFT_FEE = 1000;
 
 const HAY_VALUE_PER_ACRE = 2000;
@@ -478,46 +476,14 @@ const OTB_ITEM_MAP = ['Hay', 'Grain', 'Cows', 'Fruit', 'Tractor', 'Harvester',
 function performBuy(state, playerID, item, downPayment) {
 
     const player = state.players[playerID];
-    console.log('buy');
-
-    // wrong time of year
-    if (!isBuyingSquare(player.Position)) {
-        return 0;
-    }
-
-    // invalid item
-    if (!item in PURCHASE_PRICES) {
-        return 0;
-    }
-
-    // insufficient funds
-    if (player.Cash < downPayment) {
-        return 0;
-    }
-
-    // did not put 20% down
-    const itemPrice = PURCHASE_PRICES[item];
-    const minimumDownPayment = 0.2 * itemPrice;
-    if (downPayment < minimumDownPayment) {
-        return 0;
-    }
-
-
-    // too much debt
-    let loanAmount = itemPrice - downPayment;
-    if (loanAmount + player.Debt > MAX_DEBT) {
-        return 0;
-    }
+    console.log('buy 0');
 
     // don't have the OTB
     if (!player.OTB[item]) {
-        return 0;
+        return [false, 'You do not have an OTB for this item'];
     }
 
-    // player cannot have more than 20 cattle on their farm
-    if (player.Livestock.Farm >= 20) {
-        return 0;
-    }
+    console.log('buy 1');
 
     // only one player can lease these properties
     let ahtanumRidgeTaken = false;
@@ -535,9 +501,58 @@ function performBuy(state, playerID, item, downPayment) {
         item === 'RattlesnakeRidge' && rattlesnakeRidgeTaken ||
         item === 'Cascades' && cascadesTaken ||
         item === 'ToppenishRidge' && toppennishRidgeTaken) {
-        return 0;
+        return [false, 'This property is already leased.'];
     }
 
+    console.log('buy 2');
+
+
+    // wrong time of year
+    if (!isBuyingSquare(player.Position)) {
+        return [false, 'You can only buy between Christmas Vacation and Spring Planting'];
+    }
+
+    console.log('buy 3');
+
+    // invalid item
+    if (!item in PURCHASE_PRICES) {
+        return [false, 'Unknown item: ' + item];
+    }
+
+    console.log('buy 4');
+
+    // insufficient funds
+    if (player.Cash < downPayment) {
+        return [false, `Your down payment ($${downPayment}) is larger than your cash balance ($${player.Cash})`];
+    }
+
+    console.log('buy 5');
+
+    // did not put 20% down
+    const itemPrice = PURCHASE_PRICES[item];
+    const minimumDownPayment = 0.2 * itemPrice;
+    if (downPayment < minimumDownPayment) {
+        return [false, `Must make minimum 20% down payment ($${minimumDownPayment})`];
+    }
+
+    console.log('buy 6');
+
+    // too much debt
+    let loanAmount = itemPrice - downPayment;
+    if (loanAmount + player.Debt > MAX_DEBT) {
+        return [false, `This purchase would put your debt total over the ${MAX_DEBT} threshold. You must make a down payment of at least $${itemPrice - (MAX_DEBT-player.Debt)}`];
+    }
+
+    console.log('buy 7');
+
+    // player cannot have more than 20 cattle on their farm
+    if (item === 'Cows' && player.Livestock.Farm >= 20) {
+        return [false, 'Your farm can only hold 20 cows. Lease additional land for more cattle.'];
+    }
+
+    console.log('buy 8');
+
+    
     // if the player tries to pay too much
     if (downPayment > itemPrice) {
         downPayment = itemPrice;
@@ -570,7 +585,7 @@ function performBuy(state, playerID, item, downPayment) {
     // update player net worth
     calculateNetWorth(state, playerID);
 
-    return 1;
+    return [true, null];
 }
 
 // player can choose to payoff debt
@@ -616,52 +631,65 @@ function createGameState(avatarIDs) {
     };
 }
 
-function checkNewYear(state, playerID, oldPosition) {
+
+
+/* there are different ways a player can advance to a previous date
+    1. naturally rolls and crosses xmas vacation (handled in movePlayer())  -> new year
+    2. hurts back and goes to Jan 2                                         -> not new year
+    3. draws a farmer's fate card and moves to Jan2                         -> depends
+    4. harvests wheat and moves to Feb 4                                    -> new year
+    5. draws a farmer's fate card and goes to xmas vacation                 -> new year
+
+    We really need to break this down into cases, which is handled in server.js logic
+*/
+
+function performNewYearCleanSlate(state, playerID) {
 
     const player = state.players[playerID];
 
-    // new year, get $5000
-    if (player.Position < oldPosition) {
-
-        // add Farmer's Fate cards back to the deck
-        if (player.IRS) {
-            state.FarmersFateDeck[FF_IRS_INDEX]++;
-        }
-        if (player.Grain.HalfWheat) {
-            state.FarmersFateDeck[FF_HALF_WHEAT_INDEX]++;
-        }
-
-        player.Cash += 5000;
-        player.Year++;
-        player.Hay.DoubleHay = false;
-        player.Grain.DoubleCorn = false;
-        player.Grain.HalfWheat = false;
-        player.IRS = false;
-
-        player.CompletedHarvests = {
-            "1stHay": false,
-            "2ndHay": false,
-            "3rdHay": false,
-            "4thHay": false,
-            "Wheat": false,
-            "Corn": false,
-            "Cherry": false,
-            "Apple": false,
-            "Livestock": false,
-        }
-
-        return true;
+    // add Farmer's Fate cards back to the deck
+    if (player.IRS) {
+        state.FarmersFateDeck[FF_IRS_INDEX]++;
     }
-    return false;
-}
+    if (player.Grain.HalfWheat) {
+        state.FarmersFateDeck[FF_HALF_WHEAT_INDEX]++;
+    }
 
+    player.Cash += 5000;
+    player.Year++;
+    player.Hay.DoubleHay = false;
+    player.Grain.DoubleCorn = false;
+    player.Grain.HalfWheat = false;
+    player.IRS = false;
+
+    player.CompletedHarvests = {
+        "1stHay": false,
+        "2ndHay": false,
+        "3rdHay": false,
+        "4thHay": false,
+        "Wheat": false,
+        "Corn": false,
+        "Cherry": false,
+        "Apple": false,
+        "Livestock": false,
+    }
+}
 
 // move the player to a new position
 function movePlayer(state, playerID, diceValue) {
     const player = state.players[playerID];
+    const oldPosition = player.Position;
+    
+    // update position
     player.Position += diceValue;
     player.Position %= (MAX_POSITION + 1);
     player.shouldMove = false;
+
+    // new year
+    if (player.Position < oldPosition) {
+        performNewYearCleanSlate(state, playerID);
+    }
+
 }
 
 // move the player to a specific position
@@ -676,10 +704,10 @@ function shouldChangePosition(state, playerID) {
     const position = player.Position;
 
     switch (position) {
-        case 7: return [true, 14];  // Feb 3 -> Spring Planting
-        case 11: return [true, 2];  // Mar 3 -> Jan 2
-        case 28: return [true, 36]; // July 3 -> Harvest Moon
-        case 30: return [true, 8];  // Aug 1 -> Feb 4
+        case 7: return [true, 14];  // Feb 3 -> Spring Planting (move forward)
+        case 11: return [true, 2];  // Mar 3 -> Jan 2           (move backwards, not a new year)
+        case 28: return [true, 36]; // July 3 -> Harvest Moon   (move forward)
+        case 30: return [true, 8];  // Aug 1 -> Feb 4           (move forward + new year)
         case 34: {
             if (player.Tractors) {
                 return [true, 45]; // Sep 1 -> Nov 3
@@ -775,7 +803,7 @@ function performSellAsset(state, playerID, item) {
         case 'Grain': hasItem = player.Grain.Acres >= 10; break;
         case 'Fruit': hasItem = player.Fruit.Acres >= 5; break;
         case 'Tractor': hasItem = player.Tractors >= 1; break;
-        case 'Harvester': hasItem = player.Harvester >= 1; break;
+        case 'Harvester': hasItem = player.Harvesters >= 1; break;
 
         /* livestock */
         case 'Cows': hasItem = player.Livestock.Farm >= 10; break;
@@ -799,7 +827,7 @@ function performSellAsset(state, playerID, item) {
         case 'Grain': player.Grain.Acres -= 10; break;
         case 'Fruit': player.Fruit.Acres -= 5; break;
         case 'Tractor': player.Tractors--; break;
-        case 'Harvester': player.Harvester--; break;
+        case 'Harvester': player.Harvesters--; break;
 
         /* livestock */
         case 'Cows': player.Livestock.Farm -= 10; player.Livestock.Total -= 10; break;
@@ -916,17 +944,21 @@ function checkPositionForBalances(state, playerID) {
 
 // returns the type of card that is drawn from the deck
 function drawRandomCardFromDeck(deck) {
+
+    console.log('drawRandomCard')
     const total = deck.reduce((a, b) => a + b, 0);
     if (total === 0) {
         return null;
     }
 
+    console.log('drawRandomCard 1')
     const val = Math.floor(Math.random() * total + 1);
 
     let accumulated = 0;
     for (let i = 0; i < deck.length; i++) {
         accumulated += deck[i];
         if (val <= accumulated) {
+            console.log(i)
             return i;
         }
     }
@@ -936,9 +968,16 @@ function drawOTB(state, playerID) {
     const player = state.players[playerID];
     const id = drawRandomCardFromDeck(state.OTBDeck);
 
+    console.log('drawOTB')
+
+
     if (id === null) {
         return null;
     }
+
+    console.log('drawOTB 1')
+    console.log('id', id)
+    console.log(OTBCards[id])
 
     state.OTBDeck[id]--;
     player.OTB[OTB_ITEM_MAP[id]]++;
@@ -958,7 +997,8 @@ function drawFarmersFate(state, playerID) {
         id = drawRandomCardFromDeck(state.FarmersFateDeck);
     }
 
-    console.log(id)
+    console.log('id', id)
+    console.log(OTBCards)
 
     if (id === FF_IRS_INDEX) {
         player.IRS = true;
@@ -972,7 +1012,7 @@ function drawFarmersFate(state, playerID) {
 }
 
 function drawOperatingExpense(state, playerID) {
-    const id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
+    let id = drawRandomCardFromDeck(state.OperatingExpenseDeck);
 
     // if the draw stack is empty, reshuffle
     if (id === null) {
@@ -1138,10 +1178,10 @@ function performHarvest(state, playerID, diceValue) {
 
 
     if (!shouldPlayerHarvest(state, playerID)) {
-        return 0;
+        return null;
     }
 
-    let harvestSummary = [];
+    const harvestSummary = [];
 
     const typeOfHarvest = typeOfHarvestSquare(position);
     let payout = 0;
@@ -1239,7 +1279,7 @@ function performHarvest(state, playerID, diceValue) {
     }
     else if (typeOfHarvest === 'Livestock') {
         payout = calculateLivestockHarvest(player.Livestock.Total, diceValue);
-        harvestSummary.push([`${player.Livestock.Total} Head, Rolled ${diceValue}`, payout]);
+        harvestSummary.push([`${player.Livestock.Total} Cows, Rolled ${diceValue}`, payout]);
 
         if (position === 37) {
             harvestSummary.push([`Market Collapse`, -payout / 2]);

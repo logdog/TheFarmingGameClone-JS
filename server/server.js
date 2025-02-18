@@ -4,7 +4,7 @@ const {
     movePlayerTo,
     checkPositionForDrawingCard,
     checkPositionForBalances,
-    checkNewYear,
+    performNewYearCleanSlate,
     collectAmount,
     payAmount,
     drawOTB,
@@ -35,7 +35,8 @@ const { Server } = require("socket.io");
 
 const io = new Server(server, {
     cors: {
-        origin: "http://127.0.0.1:3000"
+        //origin: "http://127.0.0.1:3000"
+	origin: "http://192.168.1.*:3000"
     }
 });
 
@@ -181,8 +182,16 @@ io.on('connection', client => {
 
         // initialize the game
         states[roomCode] = createGameState(Object.values(avatars[roomCode]));
-        io.to(roomCode).emit('startGame', JSON.stringify(states[roomCode]));
-        io.to(roomCode).emit('gameState', JSON.stringify(states[roomCode]));
+        const state = states[roomCode];
+
+        // give 2 OTB cards to each player
+        for(let i=0; i<state.players.length; i++) {
+            drawOTB(state, i);
+            drawOTB(state, i);
+        }
+
+        io.to(roomCode).emit('startGame', JSON.stringify(state));
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
     /* Gameplay */
@@ -209,19 +218,14 @@ io.on('connection', client => {
         player.shouldMove = false;
 
         // wait 1 second before revealing the answer
-        setTimeout(function () {
-            const oldPosition = state.players[playerID].Position;
-            movePlayer(state, playerID, positionalDiceValue);
-            movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
-        }, 1000);
+        setTimeout(finishRollPositionDice, 1000, roomCode, state, playerID, positionalDiceValue);
+        function finishRollPositionDice (roomCode, state, playerID, positionalDiceValue) {
+            movePlayer(state, playerID, positionalDiceValue); // also pay player $5000, return FF cards, etc
+            movePlayerAftermath(roomCode, state, playerID);
+        }
     }
 
-    function movePlayerAftermath(roomCode, state, playerID, oldPosition, newYearAllowed) {
-
-        // pay player for passing christmas vacation
-        if (newYearAllowed) {
-            checkNewYear(state, playerID, oldPosition);
-        }
+    function movePlayerAftermath(roomCode, state, playerID) {
 
         // check if we should double hay/corn for the year
         checkPositionForDoubleYield(state, playerID);
@@ -262,7 +266,10 @@ io.on('connection', client => {
             return;
         }
 
+        // check that the player should harvest first
         const player = state.players[playerID];
+        player.shouldHarvest = shouldPlayerHarvest(state, playerID);
+        
         if (state.turn !== playerID || !player.shouldHarvest) {
             return;
         }
@@ -271,10 +278,15 @@ io.on('connection', client => {
         let harvestDiceValue = Math.floor(Math.random() * 6) + 1;
         io.to(roomCode).emit('rollHarvestDiceAnimation', harvestDiceValue);
 
-        setTimeout(finishRollHarvestDice, 1000);
-        function finishRollHarvestDice() {
+        setTimeout(finishRollHarvestDice, 1000, roomCode, state, playerID, harvestDiceValue);
+        function finishRollHarvestDice(roomCode, state, playerID, harvestDiceValue) {
             // harvest 
             const harvestSummary = performHarvest(state, playerID, harvestDiceValue);
+
+            // 
+            if (harvestSummary === null) {
+                return;
+            }
             
             // draw operating expense card
             const [cardText, charge] = drawOperatingExpense(state, playerID);
@@ -292,7 +304,7 @@ io.on('connection', client => {
             console.log(harvestSummary);
             console.log('will send harvestsummary')
             io.to(roomCode).emit('harvestSummary', JSON.stringify(harvestSummary));
-            io.to(roomCode).emit('drawOperatingExpense', cardText);
+            io.to(roomCode).emit('drawOperatingExpense', JSON.stringify(cardText));
             io.to(roomCode).emit('gameState', JSON.stringify(state));
 
             // should the player move because the square says so?
@@ -323,8 +335,9 @@ io.on('connection', client => {
 
         io.to(roomCode).emit('rollMtStHelensDiceAnimation', mtStHelensDiceValue);
 
-        setTimeout(finishRollMtStHelensDice, 1000);
-        function finishRollMtStHelensDice() {
+        setTimeout(finishRollMtStHelensDice, 1000, roomCode, state, playerID, mtStHelensDiceValue);
+
+        function finishRollMtStHelensDice(roomCode, state, playerID, mtStHelensDiceValue) {
 
             console.log('finishRollMtStHelensDice')
             const player = state.players[playerID];
@@ -355,8 +368,13 @@ io.on('connection', client => {
         if (shouldMove) {
             const oldPosition = state.players[playerID].Position;
             movePlayerTo(state, playerID, newPosition);
-            // do not allow player to collect $5000 if they hurt their back
-            movePlayerAftermath(roomCode, state, playerID, oldPosition, oldPosition !== 11);
+
+            // only August 1 will put the player in a new year
+            if (oldPosition === 30) {
+                performNewYearCleanSlate(state, playerID);
+            }
+
+            movePlayerAftermath(roomCode, state, playerID);
         }
         else {
             // draw a farmer's fate or OTB card
@@ -372,16 +390,19 @@ io.on('connection', client => {
         if (cardDrawType === DRAW_OTB) {
             const cardText = drawOTB(state, playerID);
 
+            console.log('card text otb:')
+            console.log(cardText)
+
             // the deck could be empty
             if (cardText === null) {
                 return;
             }
 
-            io.to(roomCode).emit('drawOTB', cardText);
+            io.to(roomCode).emit('drawOTB', JSON.stringify(cardText));
         }
         else if (cardDrawType === DRAW_FARMERS_FATE) {
             const [cardText, cardIndex] = drawFarmersFate(state, playerID);
-            io.to(roomCode).emit('drawFarmersFate', cardText);
+            io.to(roomCode).emit('drawFarmersFate', JSON.stringify(cardText));
 
             // now handle the action
             const player = state.players[playerID];
@@ -398,14 +419,20 @@ io.on('connection', client => {
                     // Go to christmas. Collect your $6000
                     const oldPosition = player.Position;
                     movePlayerTo(state, playerID, 0);
-                    movePlayerAftermath(roomCode, state, playerID, oldPosition, true);
+                    performNewYearCleanSlate(state, playerID);
+                    movePlayerAftermath(roomCode, state, playerID);
                     break;
                 }
                 case 2: {
                     // Go to 2nd week of January. Do not collect $5000
                     const oldPosition = player.Position;
                     movePlayerTo(state, playerID, 2);
-                    movePlayerAftermath(roomCode, state, playerID, oldPosition, false);
+
+                    // this is a new year (drought year), but immediately lose the $5000
+                    performNewYearCleanSlate(state, playerID);
+                    payAmount(state, playerID, 5000);
+
+                    movePlayerAftermath(roomCode, state, playerID);
                     break;
                 }
                 case 3: {
@@ -560,9 +587,14 @@ io.on('connection', client => {
             return;
         }
 
-        const buyCode = performBuy(state, playerID, item, downPayment);
-        // TODO: handle invalid buys
-        io.to(roomCode).emit('gameState', JSON.stringify(state));
+        const [success, msg] = performBuy(state, playerID, item, downPayment);
+
+        if (success) {
+            io.to(roomCode).emit('gameState', JSON.stringify(state));
+        }
+        else {
+            client.emit('errorBuy', msg);
+        }
     }
 
     function handlePaybackDebt(downPayment) {
@@ -599,7 +631,6 @@ io.on('connection', client => {
         const player = state.players[playerID];
         const success = performLoan(state, playerID, loanAmount);
         if (success) {
-            console.log('asdfasdf')
             player.shouldHarvest = shouldPlayerHarvest(state, playerID);
             io.to(roomCode).emit('gameState', JSON.stringify(state));
         }
@@ -642,6 +673,9 @@ io.on('connection', client => {
         const player = state.players[playerID];
         player.shouldMove = false;
 
+        drawOTB(state, playerID);
+        drawOTB(state, playerID);
+        
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 

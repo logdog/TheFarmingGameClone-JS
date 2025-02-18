@@ -28,6 +28,8 @@ socket.on('drawOperatingExpense', handleDrawOperatingExpense);
 socket.on('requirePayment', handleRequirePayment);
 socket.on('harvestSummary', handleHarvestSummary);
 
+socket.on('errorBuy', handleErrorBuy);
+
 // SET UP THE ROOM
 const screen1 = $('#screen-1');
 const newGameButton = $('#new-game-btn');
@@ -99,15 +101,15 @@ function createPlayerTotal(player, isYou) {
     <tr>
         <td rowspan="6" colspan="2" class="player-profile-icon" style="background-image: url(${player.Path})"></td>
         <td>Net Worth</td>
-        <td class="right">$${player.NetWorth}</td>
+        <td class="right">$${new Intl.NumberFormat().format(player.NetWorth)}</td>
     </tr>
     <tr>
         <td>Cash</td>
-        <td class="right">$${player.Cash}</td>
+        <td class="right">$${new Intl.NumberFormat().format(player.Cash)}</td>
     </tr>
     <tr>
         <td>Debt</td>
-        <td class="right">$${player.Debt}</td>
+        <td class="right">$${new Intl.NumberFormat().format(player.Debt)}</td>
     </tr>
     <tr>
         <td>Tractors</td>
@@ -847,7 +849,7 @@ function handleHarvestSummary(summaryArray) {
 
 function handleDrawOperatingExpense(card) {
     const container = $('#harvest-container');
-    container.append(createOperatingExpenseCard(card));
+    container.append(createOperatingExpenseCard(JSON.parse(card)));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
     // functional close button
@@ -864,7 +866,9 @@ function handleDrawOperatingExpense(card) {
 
 function handleDrawOTB(card) {
     const container = $('#OTB-FF-container');
-    container.append(createOTBCard(card));
+    console.log('handleDrawOTB')
+    console.log(card)
+    container.append(createOTBCard(JSON.parse(card)));
     container.children().last().css('border-color', lastState.players[lastState.turn].Color);
 
     // functional close button
@@ -876,7 +880,6 @@ function handleDrawOTB(card) {
             $(this).parent().remove();
         }
     });
-
 }
 
 function handleDrawFarmersFate(card) {
@@ -902,4 +905,8 @@ function handleRequirePayment() {
     sellWrapper.css('display', 'block');
     buyTab.removeClass('selected');
     sellTab.addClass('selected');
+}
+
+function handleErrorBuy(msg) {
+    alert(msg)
 }
