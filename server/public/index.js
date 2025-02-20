@@ -168,10 +168,12 @@ function createPlayerTotal(player, isYou) {
 }
 
 // tells us who we are
-let myPlayerID = null;
+let myplayerID = null;
 let numPlayersReady = null;
 let totalPlayers = 1;
 let lastState = null;
+
+// TODO: update all of the values above on a player reconnect
 
 let shiftKeyDown = false;
 
@@ -187,15 +189,17 @@ function keyClick() {
 
 function paintGame(state) {
 
-    if (myPlayerID === null) {
+    console.log("paintGame()")
+
+    if (myplayerID === null) {
         return;
     }
 
-    const me = state.players[myPlayerID];
+    const me = state.players[myplayerID];
     const myColor = me.Color;
 
     for (let i = 0; i < state.players.length; i++) {
-        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i], myPlayerID === i));
+        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i], myplayerID === i));
     }
 
     // player totals
@@ -214,7 +218,7 @@ function paintGame(state) {
     }
 
     // shop: buy
-    console.log(me.OTB);
+    // console.log(me.OTB);
     buyHayButton.removeClass('no-OTB');
     buyGrainButton.removeClass('no-OTB');
     buyCowsButton.removeClass('no-OTB');
@@ -312,7 +316,7 @@ function paintGame(state) {
 
     if (state.MtStHelens.happening) {
         console.log('paint game mt st helens')
-        if (state.MtStHelens.turn === myPlayerID) {
+        if (state.MtStHelens.turn === myplayerID) {
             console.log('spinning mt st helens')
             let hasRolled = false;
             $('#mtsthelens-dice-container').addClass('spinning-dice').click(rollMtStHelensDice);
@@ -333,11 +337,12 @@ function paintGame(state) {
         return;
     }
 
-
-    if (state.turn === myPlayerID && me.shouldMove) {
+    console.log("state.turn: ", state.turn, "myplayerID: ", myplayerID, "me.shouldMove", me.shouldMove);
+    if (state.turn === myplayerID && me.shouldMove) {
 
         let hasRolled = false;
         $('#position-dice-container').addClass('spinning-dice').click(rollPositionDice);
+        console.log('added spinning dice class to #position-dice-container')
 
         // do cool animation, press space bar or click to roll
         $(document).keydown(function (e) {
@@ -353,10 +358,11 @@ function paintGame(state) {
             socket.emit('rollPositionDice');
         }
     }
-    else if (state.turn === myPlayerID && me.shouldHarvest) {
+    else if (state.turn === myplayerID && me.shouldHarvest) {
 
         let hasRolled = false;
         $('#harvest-dice-container').addClass('spinning-dice').click(rollHarvestDice);
+        console.log('added spinning dice class to #harvest-dice-container')
 
         $(document).keydown(function (e) {
             if (e.code === 'Space' && !hasRolled) {
@@ -370,7 +376,8 @@ function paintGame(state) {
             socket.emit('rollHarvestDice');
         }
     }
-    else if (state.turn === myPlayerID) {
+    else if (state.turn === myplayerID) {
+        console.log("it is my turn: display the endTurn button")
         $("#roll-dice-div").append(`<button id="roll-dice-btn">End Your Turn</button>`);
         $('#roll-dice-btn').click(function () {
             socket.emit('endTurn');
@@ -589,6 +596,23 @@ function init() {
     $("#harvest-dice-container").html(createDice());
     $("#mtsthelens-dice-container").html(createDice());
 
+    // TODO: check if the player has had a turn update in the last idk, 5 minutes? 
+
+    // check if the player is trying to reconnect.
+    // if so, send a message to the server indicating these values
+    myplayerID = parseInt(localStorage.getItem("playerID"));
+    const roomCode = localStorage.getItem("roomCode");
+    if (myplayerID != null && roomCode != null) {
+
+        if (confirm(`It looks like you were disconnected. 
+Would you like to resume your previous game? 
+Room Code: ${roomCode}, Player ID: ${myplayerID}`)) {
+                
+            console.log("emitting playerReconnect");
+            socket.emit("playerReconnect", { playerID: myplayerID, roomCode: roomCode } );
+        }
+    }
+
     // create new game
     newGameButton.click(function () {
         socket.emit('newGame');
@@ -625,19 +649,27 @@ function updateStartButton() {
 }
 
 function handleRoomCode(msg) {
-    // console.log('handle create room')
-    // console.log(msg)
+    console.log('handle create room')
+    console.log(msg)
 
     // turn off the first screen and show the room code
     screen1.css('display', 'none');
     screen2Code.html(msg);
     screen2.css('display', 'flex');
     screen3.css('display', 'flex');
+
+    // save the player's room code in case they get disconnected
+    localStorage.setItem("roomCode", msg);
+
 }
 
 function handleInit(number) {
-    // console.log('handleInit')
-    myPlayerID = number;
+    console.log('handleInit');
+    console.log('Setting myplayerID to: ', number);
+    myplayerID = number;
+
+    // save the player's ID in case they get disconnected
+    localStorage.setItem("playerID", myplayerID);
 }
 
 function handleMorePlayersJoined(numPlayers) {
@@ -658,7 +690,7 @@ function handleTakenAvatars(avatars) {
     $(`.avatarProfile`).removeClass('otherSelection');
 
     for (const playerID in avatars) {
-        if (playerID == myPlayerID) {
+        if (playerID == myplayerID) {
             $(`#avatar${avatars[playerID]}`).addClass('mySelection');
         } else {
             $(`#avatar${avatars[playerID]}`).addClass('otherSelection');
@@ -717,11 +749,13 @@ function handleStartGame(state) {
 
 
     // select us
-    $(`#player-tab-${myPlayerID}`).addClass('selected').css('background-color', lastState.players[myPlayerID].Color);
-    if (lastState.players[myPlayerID].Color === 'White') {
-        $(`#player-tab-${myPlayerID}`).css('color', 'Black');
+    console.log(lastState);
+
+    $(`#player-tab-${myplayerID}`).addClass('selected').css('background-color', lastState.players[myplayerID].Color);
+    if (lastState.players[myplayerID].Color === 'White') {
+        $(`#player-tab-${myplayerID}`).css('color', 'Black');
     }
-    $(`#player-grid-${myPlayerID}`).addClass('visible');
+    $(`#player-grid-${myplayerID}`).addClass('visible');
 
 
     // display 
@@ -737,21 +771,24 @@ function handleStartGame(state) {
 }
 
 function handleGameState(state) {
-
     console.log('handleGameState')
     state = JSON.parse(state);
     requestAnimationFrame(() => {
         paintGame(state);
         lastState = state;
     });
+
+    // make note of the last time a state change occurred
+    // which returns a time in ms since the 1970 epoch
+    localStorage.setItem("lastStateChange", Date.now());
 }
 
 function handleGameOver(msg) {
-    if (msg === myPlayerID) {
+    if (msg === myplayerID) {
         gameOverSpan.innerHTML = 'You Win!';
         gameOverSpan.classList = 'winner';
     }
-    else if (msg !== myPlayerID) {
+    else if (msg !== myplayerID) {
         gameOverSpan.innerHTML = 'You Lose';
         gameOverSpan.classList = 'loser';
     }
@@ -772,6 +809,8 @@ function handleRollPositionDiceAnimation(diceValue) {
 
     // close the previous cards
     $('.card-container').empty();
+
+    console.log("diceValue: ", diceValue)
 
     const diceContainer = $('#position-dice-container');
     const oldClass = diceContainer.attr('class');

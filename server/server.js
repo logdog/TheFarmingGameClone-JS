@@ -50,6 +50,8 @@ server.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
+// client ID example: 2Mc9jLvguPSRK4UgAAAB
+// room code example: yjpFZ
 
 // room code: game state
 const states = {};
@@ -71,6 +73,8 @@ const roomCodes = [];
 
 io.on('connection', client => {
 
+    client.on('playerReconnect', handlePlayerReconnect);
+
     client.on('newGame', handleNewGame);
     client.on('joinGame', handleJoinGame);
     client.on('avatarSelection', handleAvatarSelection);
@@ -87,7 +91,46 @@ io.on('connection', client => {
     client.on('sell', handleSell);
     client.on('bankrupt', handleBankrupt);
 
+    // disconnection
+    client.on('disconnect', handleDisconnect);
 
+    function handlePlayerReconnect(playerData) {
+        console.log('handlePlayerReconnect()');
+
+        const roomCode = playerData.roomCode;
+        const playerID = playerData.playerID;
+
+        // ensure that this room code exists
+        if (!roomCodes.includes(roomCode)) {
+            return;
+        }
+
+        const state = states[roomCode];
+
+        // ensure that the player exists
+        if (playerID >= state.players.length) {
+            return;
+        }
+
+        // add the player back to the room
+        client.join(roomCode);
+
+        // update pointers 
+        clientRooms[client.id] = roomCode;
+        playerIDs[client.id] = playerID;
+        roomClientIDs[roomCode].push(client.id);
+
+        // console.log('sending startGame...');
+        // io.to(roomCode)
+        // console.log('sending gameState...');
+        // io.to(roomCode)
+
+        console.log("sending message to client...");
+        // io.to(roomCode).emit('handleInit', playerID);
+        io.to(roomCode).emit('startGame', JSON.stringify(state));
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
+        // client.emit('gameState', JSON.stringify(state));
+    }
 
     function handleNewGame() {
         console.log('handleNewGame()')
@@ -214,6 +257,7 @@ io.on('connection', client => {
 
         // roll the positional dice
         let positionalDiceValue = Math.floor(Math.random() * 6) + 1;
+        console.log("we rolled a ", positionalDiceValue);
         io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
         player.shouldMove = false;
 
@@ -679,7 +723,16 @@ io.on('connection', client => {
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
+    function handleDisconnect() {
+        console.log("handleDisconnect()");
+        console.log(client.id);
 
+        // clean up from the disconnection
+        const roomCode = clientRooms[client.id];
 
+        delete clientRooms[client.id];
+        
+        
+    }
 
 });
