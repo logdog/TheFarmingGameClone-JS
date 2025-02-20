@@ -48,7 +48,7 @@ function boardTemplate() {
     master_str += endDiv();
     master_str += `<div id="board-image">
         <div id="dice-container">
-            <div id="position-dice-container" class="show-0"></div>
+            <div id="position-dice-container" class=""></div>
             <div id="harvest-dice-container"></div>
             <div id="mtsthelens-dice-container"></div>
         </div>

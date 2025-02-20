@@ -305,28 +305,32 @@ function paintGame(state) {
     }
 
     // roll the dice button
-    $('#position-dice-container').removeClass('spinning-dice').off('click');
-    $('#harvest-dice-container').removeClass('spinning-dice').off('click');
-    $('#mtsthelens-dice-container').removeClass('spinning-dice').off('click');
+    $('#position-dice-container').off('click');
+    $('#harvest-dice-container').off('click');
+    $('#mtsthelens-dice-container').off('click');
     $("#roll-dice-div").empty();
 
     if (state.MtStHelens.happening) {
         console.log('paint game mt st helens')
         if (state.MtStHelens.turn === myPlayerID) {
-            console.log('spinning mt st helens')
-            let hasRolled = false;
-            $('#mtsthelens-dice-container').addClass('spinning-dice').click(rollMtStHelensDice);
+            console.log('spinning mt st helens');
 
-            // do cool animation, press space bar or click to roll
+            // make the dice spin
+            const diceContainer = $('#mtsthelens-dice-container');
+            diceContainer.css('animation', 'spinning 1s linear infinite');
+
+            // press space bar or click to roll
+            let hasRolled = false;
+            diceContainer.click(rollMtStHelensDice);
             $(document).keydown(function (e) {
                 if (e.code === 'Space' && !hasRolled) {
-                    hasRolled = true;
                     rollMtStHelensDice();
                 }
             });
 
             function rollMtStHelensDice() {
-                $('#mtsthelens-dice-container').removeClass('spinning-dice').off('click');
+                hasRolled = true;
+                diceContainer.off('click');
                 socket.emit('rollMtStHelensDice');
             }
         }
@@ -336,49 +340,60 @@ function paintGame(state) {
 
     if (state.turn === myPlayerID && me.shouldMove) {
 
+        // make the dice spin
+        const diceContainer = $('#position-dice-container');
+        diceContainer.css('animation', 'spinning 1s linear infinite');
+        
+        // press space bar or click to roll
         let hasRolled = false;
-        $('#position-dice-container').addClass('spinning-dice').click(rollPositionDice);
-
-        // do cool animation, press space bar or click to roll
+        diceContainer.click(rollPositionDice);
         $(document).keydown(function (e) {
             if (e.code === 'Space' && !hasRolled) {
-                hasRolled = true;
                 rollPositionDice();
             }
         });
 
         function rollPositionDice() {
-            $('#position-dice-container').removeClass('spinning-dice').off('click');
-
+            hasRolled = true;
+            diceContainer.off('click');
             socket.emit('rollPositionDice');
         }
     }
     else if (state.turn === myPlayerID && me.shouldHarvest) {
 
+        // make the dice spin
+        const diceContainer = $('#harvest-dice-container');
+        diceContainer.css('animation', 'spinning 1s linear infinite');
+        
+        // press space bar or click to roll
         let hasRolled = false;
-        $('#harvest-dice-container').addClass('spinning-dice').click(rollHarvestDice);
-
+        diceContainer.click(rollHarvestDice);
         $(document).keydown(function (e) {
             if (e.code === 'Space' && !hasRolled) {
-                hasRolled = true;
                 rollHarvestDice();
             }
         });
 
         function rollHarvestDice() {
-            $('#harvest-dice-container').removeClass('spinning-dice').off('click');
+            hasRolled = true;
+            diceContainer.off('click');
             socket.emit('rollHarvestDice');
         }
+
     }
     else if (state.turn === myPlayerID) {
+        console.log("You have already moved and harvested. End your turn by clicking the button.");
         $("#roll-dice-div").append(`<button id="roll-dice-btn">End Your Turn</button>`);
         $('#roll-dice-btn').click(function () {
             socket.emit('endTurn');
             $(this).remove();
         });
     }
-
-
+    else {
+        console.log("it must not be your turn!");
+        console.log("state: ", state);
+        console.log("myPlayerID: ", myPlayerID);
+    }
 }
 
 function initShopButtons() {
@@ -732,8 +747,6 @@ function handleStartGame(state) {
 
     // paint game
     paintGame(state);
-
-
 }
 
 function handleGameState(state) {
@@ -773,46 +786,21 @@ function handleRollPositionDiceAnimation(diceValue) {
     // close the previous cards
     $('.card-container').empty();
 
+    // roll the dice to the correct value
     const diceContainer = $('#position-dice-container');
-    const oldClass = diceContainer.attr('class');
-    diceContainer.removeClass();
-
-    if (oldClass && oldClass.slice(-1) === 'a') {
-        diceContainer.addClass(`show-${diceValue}b`);
-    }
-    else {
-        diceContainer.addClass(`show-${diceValue}a`);
-    }
+    diceContainer.css('animation', `rotate-to-${diceValue} 1s linear forwards`);
 }
 
 function handleRollHarvestDiceAnimation(diceValue) {
 
     const diceContainer = $('#harvest-dice-container');
-    const oldClass = diceContainer.attr('class');
-    diceContainer.removeClass();
-
-    if (oldClass && oldClass.slice(-1) === 'a') {
-        diceContainer.addClass(`show-${diceValue}b`);
-    }
-    else {
-        diceContainer.addClass(`show-${diceValue}a`);
-    }
+    diceContainer.css('animation', `rotate-to-${diceValue} 1s linear forwards`);
 }
 
 function handleRollMtStHelensDiceAnimation(diceValue) {
 
     const diceContainer = $('#mtsthelens-dice-container');
-    const oldClass = diceContainer.attr('class');
-    diceContainer.removeClass();
-
-    console.log('handleRollMtStHelensDiceAnimation')
-
-    if (oldClass && oldClass.slice(-1) === 'a') {
-        diceContainer.addClass(`show-${diceValue}b`);
-    }
-    else {
-        diceContainer.addClass(`show-${diceValue}a`);
-    }
+    diceContainer.css('animation', `rotate-to-${diceValue} 1s linear forwards`);
 }
 
 function handlePositionCard(card) {
