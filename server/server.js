@@ -50,6 +50,8 @@ server.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
+// client ID example: 2Mc9jLvguPSRK4UgAAAB
+// room code example: yjpFZ
 
 // room code: game state
 const states = {};
@@ -71,6 +73,9 @@ const roomCodes = [];
 
 io.on('connection', client => {
 
+    client.on('checkIfPlayerCanRejoinGame', handleCheckIfPlayerCanRejoinGame);
+    client.on('rejoinGame', handleRejoinGame);
+
     client.on('newGame', handleNewGame);
     client.on('joinGame', handleJoinGame);
     client.on('avatarSelection', handleAvatarSelection);
@@ -87,7 +92,53 @@ io.on('connection', client => {
     client.on('sell', handleSell);
     client.on('bankrupt', handleBankrupt);
 
+    // disconnection
+    client.on('disconnect', handleDisconnect);
 
+    function handleCheckIfPlayerCanRejoinGame(playerData) {
+        console.log('handleCheckIfPlayerCanRejoinGame()');
+
+        const roomCode = playerData.roomCode;
+        const playerID = playerData.playerID;
+
+        // ensure the room still exists
+        if (!roomCodes.includes(roomCode)) {
+            client.emit('checkIfPlayerCanRejoinGameResponse', {canRejoin: false});
+            return;
+        }
+        
+        // ensure the player ID makes sense
+        const state = states[roomCode];
+        if (state && state.players && playerID >= state.players.length) {
+            client.emit('checkIfPlayerCanRejoinGameResponse', {canRejoin: false});
+            return;
+        }
+
+        // tell the player they are good to go! 
+        client.emit('checkIfPlayerCanRejoinGameResponse', {canRejoin: true});
+    }
+
+    function handleRejoinGame(playerData) {
+        console.log('handleRejoinGame()');
+        
+        // we are trusting that the player has already verified that
+        // they are allowed to rejoin the game via handleCheckIfPlayerCanRejoinGame
+        const roomCode = playerData.roomCode;
+        const playerID = playerData.playerID;
+        const state = states[roomCode];
+
+        // add the player back to the room
+        client.join(roomCode);
+
+        // update pointers 
+        clientRooms[client.id] = roomCode;
+        playerIDs[client.id] = playerID;
+        roomClientIDs[roomCode].push(client.id);
+
+        // get the player rolling again!
+        io.to(roomCode).emit('startGame', JSON.stringify(state));
+        io.to(roomCode).emit('gameState', JSON.stringify(state));
+    }
 
     function handleNewGame() {
         console.log('handleNewGame()')
@@ -214,6 +265,7 @@ io.on('connection', client => {
 
         // roll the positional dice
         let positionalDiceValue = Math.floor(Math.random() * 6) + 1;
+        console.log("we rolled a ", positionalDiceValue);
         io.to(roomCode).emit('rollPositionDiceAnimation', positionalDiceValue);
         player.shouldMove = false;
 
@@ -679,7 +731,16 @@ io.on('connection', client => {
         io.to(roomCode).emit('gameState', JSON.stringify(state));
     }
 
+    function handleDisconnect() {
+        console.log("handleDisconnect()");
+        console.log(client.id);
 
+        // clean up from the disconnection
+        const roomCode = clientRooms[client.id];
 
+        delete clientRooms[client.id];
+        
+        
+    }
 
 });

@@ -4,6 +4,19 @@ $(document).ready(function () {
     init();
 });
 
+// some callbacks for the shiftKey
+let shiftKeyDown = false;
+$(document).on('keydown', function (e) {
+    if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
+        shiftKeyDown = true;
+    }
+});
+$(document).on('keyup', function (e) {
+    if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
+        shiftKeyDown = false;
+    }
+});
+
 // SOCKET IO connections
 //const socket = io('http://localhost:3000');
 const socket = io();
@@ -173,7 +186,7 @@ let numPlayersReady = null;
 let totalPlayers = 1;
 let lastState = null;
 
-let shiftKeyDown = false;
+// TODO: update all of the values above on a player reconnect
 
 function keyDown(e) {
     // console.log('key down', e.key)
@@ -186,6 +199,8 @@ function keyClick() {
 }
 
 function paintGame(state) {
+
+    console.log("paintGame()")
 
     if (myPlayerID === null) {
         return;
@@ -214,7 +229,7 @@ function paintGame(state) {
     }
 
     // shop: buy
-    console.log(me.OTB);
+    // console.log(me.OTB);
     buyHayButton.removeClass('no-OTB');
     buyGrainButton.removeClass('no-OTB');
     buyCowsButton.removeClass('no-OTB');
@@ -337,13 +352,13 @@ function paintGame(state) {
         return;
     }
 
-
+    console.log("state.turn: ", state.turn, "myPlayerID: ", myPlayerID, "me.shouldMove", me.shouldMove);
     if (state.turn === myPlayerID && me.shouldMove) {
 
         // make the dice spin
         const diceContainer = $('#position-dice-container');
         diceContainer.css('animation', 'spinning 1s linear infinite');
-        
+
         // press space bar or click to roll
         let hasRolled = false;
         diceContainer.click(rollPositionDice);
@@ -364,7 +379,7 @@ function paintGame(state) {
         // make the dice spin
         const diceContainer = $('#harvest-dice-container');
         diceContainer.css('animation', 'spinning 1s linear infinite');
-        
+
         // press space bar or click to roll
         let hasRolled = false;
         diceContainer.click(rollHarvestDice);
@@ -592,8 +607,9 @@ function initAvatarSelection() {
     });
 }
 
-function init() {
+async function init() {
 
+    screen1.css('display', 'none');
     screen2.css('display', 'none');
     screen3.css('display', 'none');
 
@@ -604,7 +620,50 @@ function init() {
     $("#harvest-dice-container").html(createDice());
     $("#mtsthelens-dice-container").html(createDice());
 
-    // create new game
+    // check if the player has had a turn update in the last idk, 5 minute?
+    lastStateChangeTime_ms = parseInt(localStorage.getItem("lastStateChange"));
+    myPlayerID = parseInt(localStorage.getItem("playerID"));
+    const roomCode = localStorage.getItem("roomCode");
+
+    if (lastStateChangeTime_ms != NaN && Date.now() - lastStateChangeTime_ms <= 5 * 60 * 1000 &&
+        myPlayerID != NaN && roomCode != null) {
+        // check with the server that a game with this room code is still active
+
+        socket.emit("checkIfPlayerCanRejoinGame", { playerID: myPlayerID, roomCode: roomCode });
+
+        // at this point, we should probably wait for a response from the server, indicating 
+        // whether or not the player could rejoin the game.
+        let response = null;
+        try {
+            response = await new Promise((resolve, reject) => {
+                socket.on("checkIfPlayerCanRejoinGameResponse", (response) => {
+                    resolve(response);
+                });
+                setTimeout(() => {reject("No response from server"); }, 5000);
+            });
+        }
+        catch (err) {
+            console.log("[playerReconnectReponse]:", err);
+        }
+
+        // process the response
+        if (response != null && response.canRejoin) {
+            const choice = confirm(`It looks like you were disconnected from the game. Would you like to rejoin?                
+Room Code: ${roomCode}, Player ID: ${myPlayerID}` );
+            if (choice) {
+                console.log("rejoining game");
+                socket.emit("rejoinGame", { playerID: myPlayerID, roomCode: roomCode });
+                // TODO? verify that the player successfully rejoins the game so that
+                // they do not get stuck waiting forever. Will only fix if it becomes an issue.
+                return;
+            }
+        }
+        
+    }
+
+    // the player did not want to rejoin the game
+    screen1.css('display', 'flex');
+
     newGameButton.click(function () {
         socket.emit('newGame');
         console.log('newGame');
@@ -615,18 +674,6 @@ function init() {
         console.log('sending', code)
         socket.emit('joinGame', code);
         screen2Code.html(code);
-    });
-
-    $(document).on('keydown', function (e) {
-        if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
-            shiftKeyDown = true;
-        }
-    });
-
-    $(document).on('keyup', function (e) {
-        if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
-            shiftKeyDown = false;
-        }
     });
 }
 
@@ -640,19 +687,27 @@ function updateStartButton() {
 }
 
 function handleRoomCode(msg) {
-    // console.log('handle create room')
-    // console.log(msg)
+    console.log('handle create room')
+    console.log(msg)
 
     // turn off the first screen and show the room code
     screen1.css('display', 'none');
     screen2Code.html(msg);
     screen2.css('display', 'flex');
     screen3.css('display', 'flex');
+
+    // save the player's room code in case they get disconnected
+    localStorage.setItem("roomCode", msg);
+
 }
 
 function handleInit(number) {
-    // console.log('handleInit')
+    console.log('handleInit');
+    console.log('Setting myPlayerID to: ', number);
     myPlayerID = number;
+
+    // save the player's ID in case they get disconnected
+    localStorage.setItem("playerID", myPlayerID);
 }
 
 function handleMorePlayersJoined(numPlayers) {
@@ -732,6 +787,8 @@ function handleStartGame(state) {
 
 
     // select us
+    console.log(lastState);
+
     $(`#player-tab-${myPlayerID}`).addClass('selected').css('background-color', lastState.players[myPlayerID].Color);
     if (lastState.players[myPlayerID].Color === 'White') {
         $(`#player-tab-${myPlayerID}`).css('color', 'Black');
@@ -750,13 +807,16 @@ function handleStartGame(state) {
 }
 
 function handleGameState(state) {
-
     console.log('handleGameState')
     state = JSON.parse(state);
     requestAnimationFrame(() => {
         paintGame(state);
         lastState = state;
     });
+
+    // make note of the last time a state change occurred
+    // which returns a time in ms since the 1970 epoch
+    localStorage.setItem("lastStateChange", Date.now());
 }
 
 function handleGameOver(msg) {
@@ -785,6 +845,8 @@ function handleRollPositionDiceAnimation(diceValue) {
 
     // close the previous cards
     $('.card-container').empty();
+
+    console.log("diceValue: ", diceValue)
 
     // roll the dice to the correct value
     const diceContainer = $('#position-dice-container');
