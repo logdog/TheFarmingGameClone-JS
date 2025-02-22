@@ -530,7 +530,6 @@ h1 {
     height: 100px;
     margin: 25px;
     transform-style: preserve-3d;
-    transition: transform 1s;
 }
 
 .face {
@@ -633,58 +632,9 @@ h1 {
     left: 80%;
 }
 
-/* Add this property to rotate the dice */
-.show-1a {
-    transform: rotateX(10turn) rotateY(10turn) rotateZ(10turn);
-}
-
-.show-2a {
-    transform: rotateX(10.25turn) rotateY(10turn) rotateZ(10turn);
-}
-
-.show-3a {
-    transform: rotateX(10turn) rotateY(9.75turn) rotateZ(10turn);
-}
-
-.show-4a {
-    transform: rotateX(10turn) rotateY(10.25turn) rotateZ(10turn);
-}
-
-.show-5a {
-    transform: rotateX(9.75turn) rotateY(10turn) rotateZ(10turn);
-}
-
-.show-6a {
-    transform: rotateX(10.5turn) rotateY(10turn) rotateZ(10turn);
-}
-
-/* show a -> show b -> show a ... to keep good rotations */
-.show-1b {
-    transform: rotateX(-10turn) rotateY(-10turn) rotateZ(-10turn);
-}
-
-.show-2b {
-    transform: rotateX(-9.75turn) rotateY(-10turn) rotateZ(-10turn);
-}
-
-.show-3b {
-    transform: rotateX(-10turn) rotateY(-10.25turn) rotateZ(-10turn);
-}
-
-.show-4b {
-    transform: rotateX(-10turn) rotateY(-9.75turn) rotateZ(-10turn);
-}
-
-.show-5b {
-    transform: rotateX(-10.25turn) rotateY(-10turn) rotateZ(-10turn);
-}
-
-.show-6b {
-    transform: rotateX(-10.5turn) rotateY(-10turn) rotateZ(-10turn);
-}
 
 /* dice spinning animation */
-@keyframes rotating {
+@keyframes spinning {
     from {
         transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
     }
@@ -694,12 +644,67 @@ h1 {
     }
 }
 
-.spinning-dice {
-    animation-name: rotating;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-duration: 1s;
+/* rotate to a specific face */
+@keyframes rotate-to-1 {
+    from {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
+    }
+
+    to {
+        transform: rotateX(10turn) rotateY(10turn) rotateZ(10turn);
+    }
 }
+
+@keyframes rotate-to-2 {
+    from {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
+    }
+
+    to {
+        transform: rotateX(10.25turn) rotateY(10turn) rotateZ(10turn);
+    }
+}
+
+@keyframes rotate-to-3 {
+    from {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
+    }
+
+    to {
+        transform: rotateX(10turn) rotateY(9.75turn) rotateZ(10turn);
+    }
+}
+
+@keyframes rotate-to-4 {
+    from {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
+    }
+
+    to {
+        transform: rotateX(10turn) rotateY(10.25turn) rotateZ(10turn);
+    }
+}
+
+@keyframes rotate-to-5 {
+    from {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
+    }
+
+    to {
+        transform: rotateX(9.75turn) rotateY(10turn) rotateZ(10turn);
+    }
+}
+
+@keyframes rotate-to-6 {
+    from {
+        transform: rotateX(80deg) rotateY(180deg) rotateZ(1turn);
+    }
+
+    to {
+        transform: rotateX(10.5turn) rotateY(10turn) rotateZ(10turn);
+    }
+}
+
 
 /* Control Panel */
 #controls-wrapper {
