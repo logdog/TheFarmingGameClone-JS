@@ -73,7 +73,8 @@ const roomCodes = [];
 
 io.on('connection', client => {
 
-    client.on('playerReconnect', handlePlayerReconnect);
+    client.on('checkIfPlayerCanRejoinGame', handleCheckIfPlayerCanRejoinGame);
+    client.on('rejoinGame', handleRejoinGame);
 
     client.on('newGame', handleNewGame);
     client.on('joinGame', handleJoinGame);
@@ -94,23 +95,37 @@ io.on('connection', client => {
     // disconnection
     client.on('disconnect', handleDisconnect);
 
-    function handlePlayerReconnect(playerData) {
-        console.log('handlePlayerReconnect()');
+    function handleCheckIfPlayerCanRejoinGame(playerData) {
+        console.log('handleCheckIfPlayerCanRejoinGame()');
 
         const roomCode = playerData.roomCode;
         const playerID = playerData.playerID;
 
-        // ensure that this room code exists
+        // ensure the room still exists
         if (!roomCodes.includes(roomCode)) {
+            client.emit('checkIfPlayerCanRejoinGameResponse', {canRejoin: false});
             return;
         }
-
+        
+        // ensure the player ID makes sense
         const state = states[roomCode];
-
-        // ensure that the player exists
-        if (playerID >= state.players.length) {
+        if (state && state.players && playerID >= state.players.length) {
+            client.emit('checkIfPlayerCanRejoinGameResponse', {canRejoin: false});
             return;
         }
+
+        // tell the player they are good to go! 
+        client.emit('checkIfPlayerCanRejoinGameResponse', {canRejoin: true});
+    }
+
+    function handleRejoinGame(playerData) {
+        console.log('handleRejoinGame()');
+        
+        // we are trusting that the player has already verified that
+        // they are allowed to rejoin the game via handleCheckIfPlayerCanRejoinGame
+        const roomCode = playerData.roomCode;
+        const playerID = playerData.playerID;
+        const state = states[roomCode];
 
         // add the player back to the room
         client.join(roomCode);
@@ -120,16 +135,9 @@ io.on('connection', client => {
         playerIDs[client.id] = playerID;
         roomClientIDs[roomCode].push(client.id);
 
-        // console.log('sending startGame...');
-        // io.to(roomCode)
-        // console.log('sending gameState...');
-        // io.to(roomCode)
-
-        console.log("sending message to client...");
-        // io.to(roomCode).emit('handleInit', playerID);
+        // get the player rolling again!
         io.to(roomCode).emit('startGame', JSON.stringify(state));
         io.to(roomCode).emit('gameState', JSON.stringify(state));
-        // client.emit('gameState', JSON.stringify(state));
     }
 
     function handleNewGame() {

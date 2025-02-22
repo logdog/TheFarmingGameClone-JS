@@ -4,6 +4,19 @@ $(document).ready(function () {
     init();
 });
 
+// some callbacks for the shiftKey
+let shiftKeyDown = false;
+$(document).on('keydown', function (e) {
+    if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
+        shiftKeyDown = true;
+    }
+});
+$(document).on('keyup', function (e) {
+    if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
+        shiftKeyDown = false;
+    }
+});
+
 // SOCKET IO connections
 //const socket = io('http://localhost:3000');
 const socket = io();
@@ -168,14 +181,12 @@ function createPlayerTotal(player, isYou) {
 }
 
 // tells us who we are
-let myplayerID = null;
+let myPlayerID = null;
 let numPlayersReady = null;
 let totalPlayers = 1;
 let lastState = null;
 
 // TODO: update all of the values above on a player reconnect
-
-let shiftKeyDown = false;
 
 function keyDown(e) {
     // console.log('key down', e.key)
@@ -191,15 +202,15 @@ function paintGame(state) {
 
     console.log("paintGame()")
 
-    if (myplayerID === null) {
+    if (myPlayerID === null) {
         return;
     }
 
-    const me = state.players[myplayerID];
+    const me = state.players[myPlayerID];
     const myColor = me.Color;
 
     for (let i = 0; i < state.players.length; i++) {
-        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i], myplayerID === i));
+        $(`#player-grid-${i}`).html(createPlayerTotal(state.players[i], myPlayerID === i));
     }
 
     // player totals
@@ -341,13 +352,13 @@ function paintGame(state) {
         return;
     }
 
-    console.log("state.turn: ", state.turn, "myplayerID: ", myplayerID, "me.shouldMove", me.shouldMove);
-    if (state.turn === myplayerID && me.shouldMove) {
+    console.log("state.turn: ", state.turn, "myPlayerID: ", myPlayerID, "me.shouldMove", me.shouldMove);
+    if (state.turn === myPlayerID && me.shouldMove) {
 
         // make the dice spin
         const diceContainer = $('#position-dice-container');
         diceContainer.css('animation', 'spinning 1s linear infinite');
-        
+
         // press space bar or click to roll
         let hasRolled = false;
         diceContainer.click(rollPositionDice);
@@ -363,12 +374,12 @@ function paintGame(state) {
             socket.emit('rollPositionDice');
         }
     }
-    else if (state.turn === myplayerID && me.shouldHarvest) {
+    else if (state.turn === myPlayerID && me.shouldHarvest) {
 
         // make the dice spin
         const diceContainer = $('#harvest-dice-container');
         diceContainer.css('animation', 'spinning 1s linear infinite');
-        
+
         // press space bar or click to roll
         let hasRolled = false;
         diceContainer.click(rollHarvestDice);
@@ -596,8 +607,9 @@ function initAvatarSelection() {
     });
 }
 
-function init() {
+async function init() {
 
+    screen1.css('display', 'none');
     screen2.css('display', 'none');
     screen3.css('display', 'none');
 
@@ -608,24 +620,50 @@ function init() {
     $("#harvest-dice-container").html(createDice());
     $("#mtsthelens-dice-container").html(createDice());
 
-    // TODO: check if the player has had a turn update in the last idk, 5 minutes? 
-
-    // check if the player is trying to reconnect.
-    // if so, send a message to the server indicating these values
-    myplayerID = parseInt(localStorage.getItem("playerID"));
+    // check if the player has had a turn update in the last idk, 5 minute?
+    lastStateChangeTime_ms = parseInt(localStorage.getItem("lastStateChange"));
+    myPlayerID = parseInt(localStorage.getItem("playerID"));
     const roomCode = localStorage.getItem("roomCode");
-    if (myplayerID != null && roomCode != null) {
 
-        if (confirm(`It looks like you were disconnected. 
-Would you like to resume your previous game? 
-Room Code: ${roomCode}, Player ID: ${myplayerID}`)) {
-                
-            console.log("emitting playerReconnect");
-            socket.emit("playerReconnect", { playerID: myplayerID, roomCode: roomCode } );
+    if (lastStateChangeTime_ms != NaN && Date.now() - lastStateChangeTime_ms <= 5 * 60 * 1000 &&
+        myPlayerID != NaN && roomCode != null) {
+        // check with the server that a game with this room code is still active
+
+        socket.emit("checkIfPlayerCanRejoinGame", { playerID: myPlayerID, roomCode: roomCode });
+
+        // at this point, we should probably wait for a response from the server, indicating 
+        // whether or not the player could rejoin the game.
+        let response = null;
+        try {
+            response = await new Promise((resolve, reject) => {
+                socket.on("checkIfPlayerCanRejoinGameResponse", (response) => {
+                    resolve(response);
+                });
+                setTimeout(() => {reject("No response from server"); }, 5000);
+            });
         }
+        catch (err) {
+            console.log("[playerReconnectReponse]:", err);
+        }
+
+        // process the response
+        if (response != null && response.canRejoin) {
+            const choice = confirm(`It looks like you were disconnected from the game. Would you like to rejoin?                
+Room Code: ${roomCode}, Player ID: ${myPlayerID}` );
+            if (choice) {
+                console.log("rejoining game");
+                socket.emit("rejoinGame", { playerID: myPlayerID, roomCode: roomCode });
+                // TODO? verify that the player successfully rejoins the game so that
+                // they do not get stuck waiting forever. Will only fix if it becomes an issue.
+                return;
+            }
+        }
+        
     }
 
-    // create new game
+    // the player did not want to rejoin the game
+    screen1.css('display', 'flex');
+
     newGameButton.click(function () {
         socket.emit('newGame');
         console.log('newGame');
@@ -636,18 +674,6 @@ Room Code: ${roomCode}, Player ID: ${myplayerID}`)) {
         console.log('sending', code)
         socket.emit('joinGame', code);
         screen2Code.html(code);
-    });
-
-    $(document).on('keydown', function (e) {
-        if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
-            shiftKeyDown = true;
-        }
-    });
-
-    $(document).on('keyup', function (e) {
-        if (e.code == 'ShiftLeft' || e.code == 'ShiftRight') {
-            shiftKeyDown = false;
-        }
     });
 }
 
@@ -677,11 +703,11 @@ function handleRoomCode(msg) {
 
 function handleInit(number) {
     console.log('handleInit');
-    console.log('Setting myplayerID to: ', number);
-    myplayerID = number;
+    console.log('Setting myPlayerID to: ', number);
+    myPlayerID = number;
 
     // save the player's ID in case they get disconnected
-    localStorage.setItem("playerID", myplayerID);
+    localStorage.setItem("playerID", myPlayerID);
 }
 
 function handleMorePlayersJoined(numPlayers) {
@@ -702,7 +728,7 @@ function handleTakenAvatars(avatars) {
     $(`.avatarProfile`).removeClass('otherSelection');
 
     for (const playerID in avatars) {
-        if (playerID == myplayerID) {
+        if (playerID == myPlayerID) {
             $(`#avatar${avatars[playerID]}`).addClass('mySelection');
         } else {
             $(`#avatar${avatars[playerID]}`).addClass('otherSelection');
@@ -763,11 +789,11 @@ function handleStartGame(state) {
     // select us
     console.log(lastState);
 
-    $(`#player-tab-${myplayerID}`).addClass('selected').css('background-color', lastState.players[myplayerID].Color);
-    if (lastState.players[myplayerID].Color === 'White') {
-        $(`#player-tab-${myplayerID}`).css('color', 'Black');
+    $(`#player-tab-${myPlayerID}`).addClass('selected').css('background-color', lastState.players[myPlayerID].Color);
+    if (lastState.players[myPlayerID].Color === 'White') {
+        $(`#player-tab-${myPlayerID}`).css('color', 'Black');
     }
-    $(`#player-grid-${myplayerID}`).addClass('visible');
+    $(`#player-grid-${myPlayerID}`).addClass('visible');
 
 
     // display 
@@ -794,11 +820,11 @@ function handleGameState(state) {
 }
 
 function handleGameOver(msg) {
-    if (msg === myplayerID) {
+    if (msg === myPlayerID) {
         gameOverSpan.innerHTML = 'You Win!';
         gameOverSpan.classList = 'winner';
     }
-    else if (msg !== myplayerID) {
+    else if (msg !== myPlayerID) {
         gameOverSpan.innerHTML = 'You Lose';
         gameOverSpan.classList = 'loser';
     }
