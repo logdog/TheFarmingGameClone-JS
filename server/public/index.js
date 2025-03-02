@@ -68,6 +68,7 @@ const buyRattlesnakeRidgeButton = $('#Buy-Rattlesnake');
 const buyCascadesButton = $('#Buy-Cascades');
 const buyToppenishRidgeButton = $('#Buy-Toppenish');
 const paybackDebtButton = $('#Btn-Payback-Debt');
+const paybackAllDebtButton = $('#Btn-Payback-All-Debt');
 
 const sellHayButton = $('#Sell-Hay');
 const sellGrainButton = $('#Sell-Grain');
@@ -468,6 +469,32 @@ function initShopButtons() {
 
     paybackDebtButton.click(function () {
         console.log('payback debt');
+
+
+        const cash = lastState.players[myPlayerID].Cash;
+        if (cash < downPaymentInput.val()) {
+            alert(`You do not have enough cash ($${cash}) to pay off this loan ($${downPaymentInput.val()}).`);
+            return;
+        }
+
+        socket.emit('paybackDebt', downPaymentInput.val());
+    });
+
+    paybackAllDebtButton.click(function () {
+        console.log('payback all debt');
+        const debt = lastState.players[myPlayerID].Debt;
+        
+        if (debt < 0) { 
+            return;
+        }
+
+        const cash = lastState.players[myPlayerID].Cash;
+        if (cash < debt) {
+            alert(`You do not have enough cash ($${cash}) to pay off your total debt ($${debt}).`);
+            return;
+        }
+
+        downPaymentInput.val(debt);
         socket.emit('paybackDebt', downPaymentInput.val());
     });
 

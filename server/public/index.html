@@ -94,7 +94,7 @@
                         <li><span>All purchases must be made between Christmas Vacation and Spring Planting.</span></li>
                         <li><span>All purchases require a 20% minimum down payment.</span></li>
                         <li><span>Total debt cannot exceed $100,000</span></li>
-                        <li><span>Down Payment: <input id="down-payment" type="number" value="4000"> </span></li>
+                        <li><span>Down Payment: <input id="down-payment" type="number" value="4000" step="1000"> </span></li>
                     </ul>
                     <div class="shop-grid">
                         <div class="shop-item">
@@ -164,12 +164,17 @@
                                 <span>Payback Debt</span>
                             </button>
                         </div>
+                        <div class="shop-item">
+                            <button id="Btn-Payback-All-Debt">
+                                <span>Payback All Debt</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="sell-wrapper" style="display: none;">
                     <ul>
                         <li><span>Total debt cannot exceed $100,000</span></li>
-                        <li><span>Loan Amount: <input id="loan-amount" type="number" value="4000"> </span></li>
+                        <li><span>Loan Amount: <input id="loan-amount" type="number" value="1000" step="1000"> </span></li>
                     </ul>
                     <div class="shop-grid">
                         <div class="shop-item">
